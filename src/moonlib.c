@@ -365,7 +365,7 @@ int moonL_newclass(
     return 1;
 }
 
-void moonL_openlib(lua_State *L) {
+void luaopen_moonlib(lua_State *L) {
     lua_newtable(L);
     luaL_dostring(L, "return require('moonscript.base')");
     lua_pop(L, 1);
