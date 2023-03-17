@@ -20,7 +20,7 @@ static int moonL_getreg(lua_State *L) {
         lua_insert(L, -2);
         type = lua_gettable(L, -2);
         lua_remove(L, -2);
-    }
+    } else lua_pushnil(L);
     return type;
 }
 
@@ -45,9 +45,8 @@ static int moonL_uvget(lua_State *L) {
         lua_getiuservalue(L, 1, 1) == LUA_TTABLE) {
         lua_insert(L, 2);
         lua_gettable(L, 2);
-        return 1;
-    }
-    return 0;
+    } else lua_pushnil(L);
+    return 1;
 }
 
 static int moonL_uvset(lua_State *L) {
