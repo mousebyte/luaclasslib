@@ -185,6 +185,25 @@ int moonL_registerclass(lua_State *L, int index) {
     return 0;
 }
 
+/**
+ * @brief Construct an instance of a Moonscript class.
+ *
+ * @param L The Lua state.
+ * @param nargs The number of arguments on the stack to pass to the constructor.
+ * @param name The name of the Moonscript class.
+ *
+ * @return 1 if the object was successfully constructed, and 0 otherwise.
+ */
+int moonL_construct(lua_State *L, int nargs, const char *name) {
+    if (moonL_getclass(L, name) == LUA_TTABLE) {
+        lua_insert(L, -nargs);
+        lua_call(L, nargs, 1);
+        return 1;
+    }
+    lua_pop(L, 1);
+    return 0;
+}
+
 // default class __call
 static int default_class_call(lua_State *L) {
     // create the object

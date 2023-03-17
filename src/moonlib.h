@@ -21,6 +21,7 @@ void          moonL_checkclass(lua_State *, int, const char *);
 int           moonL_getclass(lua_State *, const char *);
 moonL_UClass *moonL_getuclass(lua_State *, int);
 int           moonL_registerclass(lua_State *, int);
+int           moonL_construct(lua_State *, int, const char *);
 int           moonL_newclass(
               lua_State *,
               const char *,
