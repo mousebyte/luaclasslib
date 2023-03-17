@@ -1,7 +1,7 @@
 #include <lauxlib.h>
 #include <lua.h>
 #include <lualib.h>
-#include <moonlib.h>
+#include <moonaux.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -66,7 +66,7 @@ int luaopen_mystruct(lua_State *L) {
 int main() {
     lua_State *L = luaL_newstate();
     luaL_openlibs(L);
-    luaopen_moonlib(L);
+    luaopen_moonaux(L);
     moonL_dofile(L, "test2.moon");
     lua_pushstring(L, "hello");
     lua_call(L, 1, 1);

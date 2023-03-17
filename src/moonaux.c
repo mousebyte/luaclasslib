@@ -1,5 +1,5 @@
 #include <lua.h>
-#include <moonlib.h>
+#include <moonaux.h>
 #include <string.h>
 
 #define MOONLIB_REGISTRY_KEY "moonscript.lib"

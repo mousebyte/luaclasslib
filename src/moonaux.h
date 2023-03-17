@@ -28,4 +28,4 @@ int           moonL_newclass(
               const char *,
               const luaL_Reg *,
               moonL_UClass *);
-void luaopen_moonlib(lua_State *);
+void luaopen_moonaux(lua_State *);
