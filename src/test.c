@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 void error(lua_State *L, const char *fmt, ...) {
     va_list argp;
     va_start(argp, fmt);
@@ -65,7 +66,7 @@ int luaopen_mystruct(lua_State *L) {
 int main() {
     lua_State *L = luaL_newstate();
     luaL_openlibs(L);
-    moonL_openlib(L);
+    luaopen_moonlib(L);
     moonL_dofile(L, "test2.moon");
     lua_pushstring(L, "hello");
     lua_call(L, 1, 1);
