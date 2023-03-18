@@ -204,6 +204,39 @@ int moonL_construct(lua_State *L, int nargs, const char *name) {
     return 0;
 }
 
+int moonL_deferindex(lua_State *L) {
+    lua_pushvalue(L, lua_upvalueindex(1));
+    int ret = LUA_TNIL;
+    switch (lua_type(L, -1)) {
+        case LUA_TTABLE:
+            lua_pushvalue(L, 2);
+            ret = lua_gettable(L, -2);
+            break;
+        case LUA_TFUNCTION:
+            lua_pushvalue(L, 1);
+            lua_pushvalue(L, 2);
+            lua_call(L, 2, 1);
+            ret = lua_type(L, -1);
+            break;
+        default:
+            lua_pop(L, 1);
+            lua_pushnil(L);
+            break;
+    }
+    lua_remove(L, -2);
+    return ret;
+}
+
+void moonL_defernewindex(lua_State *L) {
+    lua_pushvalue(L, lua_upvalueindex(1));
+    if (lua_type(L, -1) == LUA_TFUNCTION) {
+        lua_pushvalue(L, 1);
+        lua_pushvalue(L, 2);
+        lua_pushvalue(L, 3);
+        lua_call(L, 3, 0);
+    }
+}
+
 // default class __call
 static int default_class_call(lua_State *L) {
     // create the object
@@ -243,8 +276,7 @@ static int default_class_index(lua_State *L) {
 // default __index for userdata classes
 static int default_udata_index(lua_State *L) {
     // check upvalue (base) for key
-    lua_pushvalue(L, 2);
-    if (lua_gettable(L, lua_upvalueindex(1)) == LUA_TNIL) {
+    if (moonL_deferindex(L) == LUA_TNIL) {
         lua_pop(L, 1);
         moonL_uvget(L);  // check user value for key
     }
@@ -381,6 +413,22 @@ int moonL_newclass(
     lua_pushvalue(L, class);
     moonL_setregfield(L, name);  // register class
     return 1;
+}
+
+int moonL_injectmethod(
+    lua_State    *L,
+    int           index,
+    const char   *method,
+    lua_CFunction f) {
+    if (f && moonL_isclass(L, index)) {
+        lua_getfield(L, index, "__base");  // grab base
+        lua_getfield(L, -1, method);       // grab method from base
+        lua_pushcclosure(L, f, 1);         // push into closure
+        lua_setfield(L, -1, method);       // overwrite method
+        lua_pop(L, 1);                     // pop base
+        return 1;
+    }
+    return 0;
 }
 
 void luaopen_moonlib(lua_State *L) {

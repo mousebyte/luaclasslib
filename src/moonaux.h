@@ -28,4 +28,8 @@ int           moonL_newclass(
               const char *,
               const luaL_Reg *,
               moonL_UClass *);
+int moonL_injectmethod(lua_State *, int, const char *, lua_CFunction);
+#define moonL_injectindex(L, i, f) moonL_injectmethod((L), (i), "__index", f)
+#define moonL_injectnewindex(L, i, f) \
+    moonL_injectmethod((L), (i), "__newindex", f)
 void luaopen_moonaux(lua_State *);
