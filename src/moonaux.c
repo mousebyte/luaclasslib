@@ -397,6 +397,8 @@ int moonL_newclass(
         lua_pushvalue(L, base);
         lua_pushcclosure(L, default_udata_index, 1);
         lua_setfield(L, base, "__index");  // set base __index
+        lua_pushcfunction(L, moonL_uvset);
+        lua_setfield(L, base, "__newindex");  // set base __newindex
         lua_pushcfunction(L, default_udata_gc);
         lua_setfield(L, base, "__gc");  // set base __gc
 
