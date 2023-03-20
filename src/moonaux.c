@@ -204,6 +204,22 @@ int moonL_construct(lua_State *L, int nargs, const char *name) {
     return 0;
 }
 
+int moonL_injectmethod(
+    lua_State    *L,
+    int           index,
+    const char   *method,
+    lua_CFunction f) {
+    if (f && moonL_isclass(L, index)) {
+        lua_getfield(L, index, "__base");  // grab base
+        lua_getfield(L, -1, method);       // grab method from base
+        lua_pushcclosure(L, f, 1);         // push into closure
+        lua_setfield(L, -1, method);       // overwrite method
+        lua_pop(L, 1);                     // pop base
+        return 1;
+    }
+    return 0;
+}
+
 int moonL_deferindex(lua_State *L) {
     lua_pushvalue(L, lua_upvalueindex(1));
     int ret = LUA_TNIL;
@@ -417,23 +433,7 @@ int moonL_newclass(
     return 1;
 }
 
-int moonL_injectmethod(
-    lua_State    *L,
-    int           index,
-    const char   *method,
-    lua_CFunction f) {
-    if (f && moonL_isclass(L, index)) {
-        lua_getfield(L, index, "__base");  // grab base
-        lua_getfield(L, -1, method);       // grab method from base
-        lua_pushcclosure(L, f, 1);         // push into closure
-        lua_setfield(L, -1, method);       // overwrite method
-        lua_pop(L, 1);                     // pop base
-        return 1;
-    }
-    return 0;
-}
-
-void luaopen_moonlib(lua_State *L) {
+void luaopen_moonaux(lua_State *L) {
     lua_newtable(L);
     luaL_dostring(L, "return require('moonscript.base')");
     lua_pop(L, 1);
