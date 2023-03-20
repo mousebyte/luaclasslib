@@ -13,7 +13,15 @@ typedef struct moonL_UClass {
     MOONL_UCLASS_HEADER
 } moonL_UClass;
 
-int           moonL_dofile(lua_State *, const char *);
+int                moonL_dofile(lua_State *, const char *);
+static inline void moonL_print(lua_State *L, int index) {
+    lua_pushvalue(L, index);
+    luaL_dostring(L, "return require('moon')");
+    lua_getfield(L, -2, "p");
+    lua_insert(L, -4);
+    lua_pop(L, 2);
+    lua_call(L, 1, 0);
+}
 void          moonL_mcall(lua_State *, const char *, int, int);
 int           moonL_pmcall(lua_State *, const char *, int, int, int);
 int           moonL_isobject(lua_State *, int);
