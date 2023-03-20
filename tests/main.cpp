@@ -120,4 +120,6 @@ TEST_CASE("C Classes") {
         lua_pushnumber(L, 3);
         moonL_mcall(L, "foo", 1, 1);
     }
+
+    lua_close(L);
 }
