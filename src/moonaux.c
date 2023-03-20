@@ -302,7 +302,7 @@ void moonL_defernewindex(lua_State *L) {
         lua_pushvalue(L, 2);
         lua_pushvalue(L, 3);
         lua_call(L, 3, 0);
-    }
+    } else lua_pop(L, 1);
 }
 
 // default class __call
