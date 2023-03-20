@@ -11,4 +11,6 @@ target_include_directories(moonaux PUBLIC src)
 target_link_libraries(moonaux ${LUA_LIBRARIES})
 target_include_directories(moonaux PRIVATE ${LUA_INCLUDE_DIR})
 target_link_libraries(tests moonaux)
-configure_file(Base.moon Base.moon COPYONLY)
+add_custom_command(TARGET tests POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_SOURCE_DIR}/tests/assets $<TARGET_FILE_DIR:tests>)
