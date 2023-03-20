@@ -257,8 +257,12 @@ void moonL_defernewindex(lua_State *L) {
 static int default_class_call(lua_State *L) {
     // create the object
     moonL_UClass *class = moonL_getuclass(L, 1);
-    if (class != NULL) class->alloc(L);
-    else lua_newtable(L);
+    if (!class) lua_newtable(L);
+    else {
+        class->alloc(L);
+        lua_newtable(L);
+        lua_setiuservalue(L, -2, 1);
+    }
     if (lua_getfield(L, 1, "__base") != LUA_TTABLE) return 0;  // get base
     lua_setmetatable(L, -2);            // set object metatable to class base
     lua_pushvalue(L, -1);               // push a copy of object for call
