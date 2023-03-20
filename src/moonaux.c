@@ -65,6 +65,38 @@ int moonL_dofile(lua_State *L, const char *name) {
     lua_pushstring(L, name);
     return lua_pcall(L, 1, LUA_MULTRET, 0);
 }
+
+/**
+ * @brief Call a method of an object, passing the object as the first argument.
+ *
+ * @param L The Lua state.
+ * @param nargs The number of arguments.
+ * @param nresults The number of results.
+ */
+void moonL_mcall(lua_State *L, int nargs, int nresults) {
+    lua_pushvalue(L, -nargs - 1);
+    lua_insert(L, -nargs);
+    lua_call(L, nargs + 1, nresults);
+}
+
+/**
+ * @brief Call a method of an object in protected mode, passing the object as
+ * the first argument.
+ *
+ * @param L The Lua state.
+ * @param nargs The number of arguments.
+ * @param nresults The number of results.
+ * @param msgh The stack index of the message handler, or 0 if none is to be
+ * used.
+ *
+ * @return The pcall status code.
+ */
+int moonL_pmcall(lua_State *L, int nargs, int nresults, int msgh) {
+    lua_pushvalue(L, -nargs - 1);
+    lua_insert(L, -nargs);
+    return lua_pcall(L, nargs + 1, nresults, msgh);
+}
+
 /**
  * @brief Checks if the value at the given index is an instance of a Moonscript
  * class.

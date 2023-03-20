@@ -14,6 +14,8 @@ typedef struct moonL_UClass {
 } moonL_UClass;
 
 int           moonL_dofile(lua_State *, const char *);
+void          moonL_mcall(lua_State *, int, int);
+int           moonL_pmcall(lua_State *, int, int, int);
 int           moonL_isobject(lua_State *, int);
 int           moonL_isclass(lua_State *, int);
 int           moonL_isinstance(lua_State *, int, const char *);
