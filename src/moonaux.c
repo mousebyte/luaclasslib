@@ -124,7 +124,24 @@ int moonL_isinstance(lua_State *L, int index, const char *name) {
             } else return 1;
         }
     }
+
     return 0;
+}
+
+/**
+ * @brief Checks if the function argument *arg* is an instance of the userdata
+ * class named *name* and returns the userdata's memory-block address.
+ *
+ * @param L The Lua state.
+ * @param arg The arg to check.
+ * @param name The name of the class.
+ *
+ * @return A pointer to the userdata.
+ */
+void *moonL_checkuclass(lua_State *L, int arg, const char *name) {
+    if (!lua_isuserdata(L, arg) || !moonL_isinstance(L, arg, name))
+        luaL_error(L, "Value is not an instance of class %s", name);
+    return lua_touserdata(L, arg);
 }
 
 /**

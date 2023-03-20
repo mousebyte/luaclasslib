@@ -17,6 +17,7 @@ int           moonL_dofile(lua_State *, const char *);
 int           moonL_isobject(lua_State *, int);
 int           moonL_isclass(lua_State *, int);
 int           moonL_isinstance(lua_State *, int, const char *);
+void         *moonL_checkuclass(lua_State *, int, const char *);
 int           moonL_getclass(lua_State *, const char *);
 moonL_UClass *moonL_getuclass(lua_State *, int);
 int           moonL_registerclass(lua_State *, int);
