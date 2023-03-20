@@ -118,7 +118,7 @@ int moonL_isinstance(lua_State *L, int index, const char *name) {
             if (strcmp(name, lua_tostring(L, -1)) != 0) {
                 lua_pop(L, 1);  // pop name
                 if (lua_getfield(L, -1, "__parent") == LUA_TNIL) {
-                    lua_pop(L, 1);  // pop parent class
+                    lua_pop(L, 1);  // pop nil
                     break;
                 } else lua_remove(L, -2);  // remove previous class
             } else {
@@ -227,6 +227,17 @@ int moonL_construct(lua_State *L, int nargs, const char *name) {
     return 0;
 }
 
+/**
+ * @brief Replaces a class method with a closure of the given C function *f*,
+ * with the previous method as its only upvalue.
+ *
+ * @param L The Lua state.
+ * @param index The index of the class object.
+ * @param method The method to replace.
+ * @param f The C function to replace the method with.
+ *
+ * @return 1 if the operation was successful, and 0 otherwise.
+ */
 int moonL_injectmethod(
     lua_State    *L,
     int           index,
@@ -243,6 +254,14 @@ int moonL_injectmethod(
     return 0;
 }
 
+/**
+ * @brief When called from an injected index function, calls (or indexes) the
+ * original index and pushes the result onto the stack.
+ *
+ * @param L The Lua state.
+ *
+ * @return The type of the value pushed onto the stack.
+ */
 int moonL_deferindex(lua_State *L) {
     lua_pushvalue(L, lua_upvalueindex(1));
     int ret = LUA_TNIL;
@@ -266,6 +285,12 @@ int moonL_deferindex(lua_State *L) {
     return ret;
 }
 
+/**
+ * @brief When called from an injected newindex function, calls the original
+ * newindex if it exists.
+ *
+ * @param L The Lua state.
+ */
 void moonL_defernewindex(lua_State *L) {
     lua_pushvalue(L, lua_upvalueindex(1));
     if (lua_type(L, -1) == LUA_TFUNCTION) {
