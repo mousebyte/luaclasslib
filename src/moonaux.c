@@ -216,7 +216,7 @@ moonL_UClass *moonL_getuclass(lua_State *L, int index) {
         lua_pushvalue(L, index);
         if (moonL_getreg(L) == LUA_TLIGHTUSERDATA)
             ret = (moonL_UClass *)lua_touserdata(L, -1);
-        lua_pop(L, 2);
+        lua_pop(L, 1);
     }
     return ret;
 }
@@ -264,9 +264,8 @@ int moonL_registerclass(lua_State *L, int index) {
  */
 int moonL_construct(lua_State *L, int nargs, const char *name) {
     if (moonL_getclass(L, name) == LUA_TTABLE) {
-        lua_pushvalue(L, -1);          // push a copy of class
-        lua_rotate(L, -nargs - 2, 2);  // rotate args to top of stack
-        lua_call(L, nargs + 1, 1);     // call the first class table
+        lua_insert(L, -nargs - 1);  // insert class before args
+        lua_call(L, nargs, 1);
         return 1;
     }
     lua_pop(L, 1);
@@ -357,10 +356,10 @@ static int default_class_call(lua_State *L) {
         lua_newtable(L);
         lua_setiuservalue(L, -2, 1);
     }
-    if (lua_getfield(L, 1, "__base") != LUA_TTABLE) return 0;  // get base
+    if (lua_getfield(L, 1, "__base") != LUA_TTABLE) return 0;
     lua_setmetatable(L, -2);            // set object metatable to class base
     lua_pushvalue(L, -1);               // push a copy of object for call
-    lua_rotate(L, 3, 2);                // rotate objects before other args
+    lua_rotate(L, 2, 2);                // rotate objects before other args
     lua_getfield(L, 1, "__init");       // get init
     lua_insert(L, 3);                   // insert before args
     lua_call(L, lua_gettop(L) - 3, 0);  // call init
@@ -524,19 +523,19 @@ int moonL_newclass(
         lua_setfield(L, base, "__index");  // set base __index to self
     }
 
-    lua_remove(L, base);  // remove base from stack
-
     lua_pushvalue(L, class);
     moonL_setregfield(L, name);  // register class
+    lua_remove(L, base);         // remove base from stack
     return 1;
 }
 
 void luaopen_moonaux(lua_State *L) {
     lua_newtable(L);
-    luaL_dostring(L, "return require('moonscript.base')");
-    lua_pop(L, 1);
-    lua_setfield(L, LUA_REGISTRYINDEX, "moonscript.base");
     lua_setfield(L, LUA_REGISTRYINDEX, MOONLIB_REGISTRY_KEY);
+    luaL_dostring(L, "return require('moonscript')");
+    lua_pop(L, 1);
+    luaL_dostring(L, "return require('moonscript.base')");
+    lua_setfield(L, LUA_REGISTRYINDEX, "moonscript.base");
     lua_register(L, "uvget", moonL_uvget);
     lua_register(L, "uvset", moonL_uvset);
 }
