@@ -1,0 +1,6 @@
+class Base
+    squeak: (n)=>
+        @n = n
+        "n is now #{n}, squeak!"
+    new: (s)=>
+        @str = s
