@@ -534,7 +534,6 @@ void luaopen_moonaux(lua_State *L) {
     lua_setfield(L, LUA_REGISTRYINDEX, MOONLIB_REGISTRY_KEY);
     luaL_dostring(L, "return require('moonscript')");
     lua_pop(L, 1);
-    luaL_dostring(L, "return require('moonscript.base')");
     lua_setfield(L, LUA_REGISTRYINDEX, "moonscript.base");
     lua_register(L, "uvget", moonL_uvget);
     lua_register(L, "uvset", moonL_uvset);
