@@ -70,12 +70,14 @@ int moonL_dofile(lua_State *L, const char *name) {
  * @brief Call a method of an object, passing the object as the first argument.
  *
  * @param L The Lua state.
+ * @param method The name of the method to call.
  * @param nargs The number of arguments.
  * @param nresults The number of results.
  */
-void moonL_mcall(lua_State *L, int nargs, int nresults) {
-    lua_pushvalue(L, -nargs - 1);
-    lua_insert(L, -nargs);
+void moonL_mcall(lua_State *L, const char *method, int nargs, int nresults) {
+    lua_getfield(L, -nargs - 1, method);  // get the method
+    lua_pushvalue(L, -nargs - 2);         // push a copy of the object
+    lua_rotate(L, -nargs - 2, 2);         // rotate args to top
     lua_call(L, nargs + 1, nresults);
 }
 
@@ -84,6 +86,7 @@ void moonL_mcall(lua_State *L, int nargs, int nresults) {
  * the first argument.
  *
  * @param L The Lua state.
+ * @param method The name of the method to call.
  * @param nargs The number of arguments.
  * @param nresults The number of results.
  * @param msgh The stack index of the message handler, or 0 if none is to be
@@ -91,9 +94,15 @@ void moonL_mcall(lua_State *L, int nargs, int nresults) {
  *
  * @return The pcall status code.
  */
-int moonL_pmcall(lua_State *L, int nargs, int nresults, int msgh) {
-    lua_pushvalue(L, -nargs - 1);
-    lua_insert(L, -nargs);
+int moonL_pmcall(
+    lua_State  *L,
+    const char *method,
+    int         nargs,
+    int         nresults,
+    int         msgh) {
+    lua_getfield(L, -nargs - 1, method);  // get the method
+    lua_pushvalue(L, -nargs - 2);         // push a copy of the object
+    lua_rotate(L, -nargs - 2, 2);         // rotate args to top
     return lua_pcall(L, nargs + 1, nresults, msgh);
 }
 
@@ -255,9 +264,9 @@ int moonL_registerclass(lua_State *L, int index) {
  */
 int moonL_construct(lua_State *L, int nargs, const char *name) {
     if (moonL_getclass(L, name) == LUA_TTABLE) {
-        lua_pushvalue(L, -1);            // push a copy of class
-        lua_rotate(L, -(nargs + 2), 2);  // rotate args to top of stack
-        lua_call(L, nargs + 1, 1);       // call the first class table
+        lua_pushvalue(L, -1);          // push a copy of class
+        lua_rotate(L, -nargs - 2, 2);  // rotate args to top of stack
+        lua_call(L, nargs + 1, 1);     // call the first class table
         return 1;
     }
     lua_pop(L, 1);
