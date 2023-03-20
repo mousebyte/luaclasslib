@@ -182,7 +182,7 @@ moonL_UClass *moonL_getuclass(lua_State *L, int index) {
 
 /**
  * @brief Adds the Moonscript class at the given stack index to the moonlib
- * registry.
+ * registry, along with its parents, if not present already.
  *
  * @param L The Lua state.
  * @param index The stack index of the class.
@@ -191,18 +191,22 @@ moonL_UClass *moonL_getuclass(lua_State *L, int index) {
  */
 int moonL_registerclass(lua_State *L, int index) {
     if (!moonL_isclass(L, index)) return 0;
-    lua_pushvalue(L, index);                             // push the class
-    if (lua_getfield(L, -1, "__name") == LUA_TSTRING) {  // get name
+    lua_pushvalue(L, index);                                // push the class
+    while (lua_getfield(L, -1, "__name") == LUA_TSTRING) {  // get name
         const char *name = lua_tostring(L, -1);
         if (moonL_getregfield(L, name) == LUA_TNIL) {  // class not registered
             lua_pop(L, 1);
-            lua_insert(L, -2);           // put class in front of name
+            lua_pushvalue(L, -2);        // push class
             moonL_setregfield(L, name);  // register class
             lua_pop(L, 1);               // pop name
+            if (lua_getfield(L, -1, "__parent") == LUA_TNIL) {
+                lua_pop(L, 2);  // pop nil and class
+                return 1;
+            } else lua_remove(L, -2);  // parent found, remove previous class
+        } else {
+            lua_pop(L, 2);  // class registered, pop name and class
             return 1;
         }
-        lua_pop(L, 3);
-        return 1;
     }
     lua_pop(L, 2);
     return 0;
