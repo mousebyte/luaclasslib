@@ -223,8 +223,9 @@ int moonL_registerclass(lua_State *L, int index) {
  */
 int moonL_construct(lua_State *L, int nargs, const char *name) {
     if (moonL_getclass(L, name) == LUA_TTABLE) {
-        lua_insert(L, -nargs);
-        lua_call(L, nargs, 1);
+        lua_pushvalue(L, -1);            // push a copy of class
+        lua_rotate(L, -(nargs + 2), 2);  // rotate args to top of stack
+        lua_call(L, nargs + 1, 1);       // call the first class table
         return 1;
     }
     lua_pop(L, 1);
