@@ -103,11 +103,11 @@ int moonL_isclass(lua_State *L, int index) {
 }
 
 /**
- * @brief Checks if the function argument *arg* is an instance of the class
+ * @brief Checks if the value at the given index is an instance of the class
  * named *name*.
  *
  * @param L The Lua state.
- * @param arg The arg to check.
+ * @param arg The stack index to check.
  * @param name The name of the class.
  *
  * @return 1 if the value is an instance of *name*, and 0 otherwise.
@@ -116,15 +116,19 @@ int moonL_isinstance(lua_State *L, int index, const char *name) {
     if (lua_getfield(L, index, "__class") == LUA_TTABLE) {
         while (lua_getfield(L, -1, "__name") == LUA_TSTRING) {
             if (strcmp(name, lua_tostring(L, -1)) != 0) {
-                lua_pop(L, 1);
+                lua_pop(L, 1);  // pop name
                 if (lua_getfield(L, -1, "__parent") == LUA_TNIL) {
-                    lua_pop(L, 2);
+                    lua_pop(L, 1);  // pop parent class
                     break;
-                } else lua_remove(L, -2);
-            } else return 1;
+                } else lua_remove(L, -2);  // remove previous class
+            } else {
+                lua_pop(L, 2);  // pop name and class
+                return 1;
+            }
         }
+        lua_pop(L, 1);  // pop name
     }
-
+    lua_pop(L, 1);  // pop class
     return 0;
 }
 
