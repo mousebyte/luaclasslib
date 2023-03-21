@@ -1,7 +1,7 @@
 #include <lauxlib.h>
 #include <lua.h>
 
-typedef void *(*moonL_Constructor)(lua_State *);
+typedef void (*moonL_Constructor)(lua_State *);
 typedef void (*moonL_Destructor)(void *);
 
 #define MOONL_UCLASS_HEADER  \
