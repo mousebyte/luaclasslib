@@ -355,6 +355,62 @@ void moonL_defernewindex(lua_State *L) {
     } else lua_pop(L, 1);
 }
 
+/**
+ * @brief Pushes onto the stack the value of a field at the given depth up the
+ * heirarchy. If *depth* is greater than the number of parents above the target
+ * object, pushes nil.
+ *
+ * @param L The Lua state.
+ * @param index The index of the object in the stack.
+ * @param depth The parent depth.
+ * @param name The name of the field.
+ *
+ * @return The type of the value pushed onto the stack.
+ */
+int moonL_getparentfield(lua_State *L, int index, int depth, const char *name) {
+    if (depth < 1 || !moonL_isobject(L, index)) {
+        lua_pushnil(L);
+        return LUA_TNIL;
+    }
+
+    moonL_pushclass(L, index);  // push its class
+    while (depth > 0) {         // walk the heirarchy
+        if (lua_getfield(L, -1, "__parent") == LUA_TNIL) {
+            lua_remove(L, -2);  // remove previous class
+            return LUA_TNIL;
+        }
+        depth--;
+        lua_remove(L, -2);  // remove previous class
+    }
+
+    int ret = lua_getfield(L, -1, name);
+    lua_remove(L, -2);  // remove class
+    return ret;
+}
+
+/**
+ * @brief Calls a parent class method, passing all values on the stack as
+ * arguments. Leaves the stack in its previous state. Should only be used in C
+ * class methods, in which the first stack index is the object on which the
+ * method was invoked.
+ *
+ * @param L The Lua state.
+ * @param name The name of the method.
+ * @param nresults The number of results to return.
+ */
+void moonL_super(lua_State *L, const char *name, int nresults) {
+    if (moonL_getparentfield(L, 1, 1, name) != LUA_TFUNCTION) {
+        lua_pop(L, 1);
+        return;
+    }
+
+    int nargs = lua_gettop(L) - 1;
+    luaL_checkstack(L, nargs, "Too many arguments for super invocation.");
+    for (int i = 1; i <= nargs; i++)  // push a copy of the whole stack
+        lua_pushvalue(L, i);
+    lua_call(L, nargs, nresults);
+}
+
 // default class __call
 static int default_class_call(lua_State *L) {
     // create the object

@@ -13,44 +13,50 @@ typedef struct moonL_UClass {
     MOONL_UCLASS_HEADER
 } moonL_UClass;
 
-int           moonL_dofile(lua_State *, const char *);
+int moonL_dofile(lua_State *, const char *);
 
-void          moonL_print(lua_State *, int);
+void moonL_print(lua_State *, int);
 
-void          moonL_mcall(lua_State *, const char *, int, int);
+void moonL_mcall(lua_State *, const char *, int, int);
 
-int           moonL_pmcall(lua_State *, const char *, int, int, int);
+int moonL_pmcall(lua_State *, const char *, int, int, int);
 
-int           moonL_isobject(lua_State *, int);
+int moonL_isobject(lua_State *, int);
 
-int           moonL_isclass(lua_State *, int);
+int moonL_isclass(lua_State *, int);
 
-int           moonL_isinstance(lua_State *, int, const char *);
+int moonL_isinstance(lua_State *, int, const char *);
 
-void         *moonL_checkuclass(lua_State *, int, const char *);
+void *moonL_checkuclass(lua_State *, int, const char *);
 
-int           moonL_getclass(lua_State *, const char *);
+int moonL_getclass(lua_State *, const char *);
 
 moonL_UClass *moonL_getuclass(lua_State *, int);
 
-int           moonL_registerclass(lua_State *, int);
+int moonL_registerclass(lua_State *, int);
 
-int           moonL_construct(lua_State *, int, const char *);
+int moonL_construct(lua_State *, int, const char *);
 
-int           moonL_injectmethod(lua_State *, int, const char *, lua_CFunction);
+int moonL_injectmethod(lua_State *, int, const char *, lua_CFunction);
 
-int           moonL_deferindex(lua_State *);
+int moonL_deferindex(lua_State *);
 
-void          moonL_defernewindex(lua_State *);
+void moonL_defernewindex(lua_State *);
 
-int           moonL_newuclass(
-              lua_State *,
-              const char *,
-              const char *,
-              const luaL_Reg *,
-              moonL_UClass *);
+int moonL_getparentfield(lua_State *, int, int, const char *);
+
+void moonL_super(lua_State *L, const char *, int);
+
+int moonL_newuclass(
+    lua_State *,
+    const char *,
+    const char *,
+    const luaL_Reg *,
+    moonL_UClass *);
 
 void luaopen_moonaux(lua_State *);
+
+#define moonL_superinit(L) moonL_super((L), "__init", 0);
 
 #define moonL_newclass(L, name, parent, methods) \
     moonL_newuclass((L), (name), (parent), (methods), NULL);
