@@ -35,7 +35,7 @@ int           moonL_construct(lua_State *, int, const char *);
 int           moonL_injectmethod(lua_State *, int, const char *, lua_CFunction);
 int           moonL_deferindex(lua_State *);
 void          moonL_defernewindex(lua_State *);
-int           moonL_newclass(
+int           moonL_newuclass(
               lua_State *,
               const char *,
               const char *,
@@ -43,6 +43,8 @@ int           moonL_newclass(
               moonL_UClass *);
 void luaopen_moonaux(lua_State *);
 
+#define moonL_newclass(L, name, parent, methods) \
+    moonL_newuclass((L), (name), (parent), (methods), NULL);
 #define moonL_injectindex(L, i, f) moonL_injectmethod((L), (i), "__index", f)
 #define moonL_injectnewindex(L, i, f) \
     moonL_injectmethod((L), (i), "__newindex", f)

@@ -168,7 +168,7 @@ TEST_CASE("C Classes") {
     luaopen_moonaux(L);
 
     SUBCASE("Basic C Class") {
-        moonL_newclass(L, "CClass", NULL, CClass_funcs, NULL);
+        moonL_newclass(L, "CClass", NULL, CClass_funcs);
         REQUIRE(moonL_isclass(L, -1));
 
         lua_pushnumber(L, 7);
@@ -187,7 +187,7 @@ TEST_CASE("C Classes") {
         REQUIRE(moonL_registerclass(L, -1));
         lua_pop(L, -1);
 
-        moonL_newclass(L, "DCClass", "Base", DCClass_funcs, NULL);
+        moonL_newclass(L, "DCClass", "Base", DCClass_funcs);
         REQUIRE(moonL_isclass(L, -1));
 
         REQUIRE(lua_getfield(L, -1, "var") == LUA_TSTRING);
@@ -213,7 +213,7 @@ TEST_CASE("C Classes") {
     }
 
     SUBCASE("User Data Class") {
-        moonL_newclass(L, "UClass", NULL, UClass_funcs, &UClass);
+        moonL_newuclass(L, "UClass", NULL, UClass_funcs, &UClass);
         REQUIRE(moonL_isclass(L, -1));
 
         lua_pushnumber(L, 16);

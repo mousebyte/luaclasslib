@@ -433,7 +433,7 @@ static int default_udata_gc(lua_State *L) {
  * @return 1 if the class was successfully created and registered, and 0
  * otherwise.
  */
-int moonL_newclass(
+int moonL_newuclass(
     lua_State      *L,
     const char     *name,
     const char     *parent,
