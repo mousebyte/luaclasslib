@@ -66,6 +66,15 @@ int moonL_dofile(lua_State *L, const char *name) {
     return lua_pcall(L, 1, LUA_MULTRET, 0);
 }
 
+void moonL_print(lua_State *L, int index) {
+    lua_pushvalue(L, index);
+    luaL_dostring(L, "return require('moon')");
+    lua_getfield(L, -2, "p");
+    lua_insert(L, -4);
+    lua_pop(L, 2);
+    lua_call(L, 1, 0);
+}
+
 /**
  * @brief Call a method of an object, passing the object as the first argument.
  *
