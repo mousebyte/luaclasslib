@@ -298,11 +298,14 @@ int moonL_injectmethod(
     const char   *method,
     lua_CFunction f) {
     if (f && moonL_isclass(L, index)) {
-        lua_getfield(L, index, "__base");  // grab base
-        lua_getfield(L, -1, method);       // grab method from base
-        lua_pushcclosure(L, f, 1);         // push into closure
-        lua_setfield(L, -1, method);       // overwrite method
-        lua_pop(L, 1);                     // pop base
+        lua_pushstring(L, "__base");
+        lua_rawget(L, index);       // grab base
+        lua_pushstring(L, method);  // key for rawset
+        lua_pushstring(L, method);  // key for rawget
+        lua_rawget(L, -3);          // grab method from base
+        lua_pushcclosure(L, f, 1);  // push into closure
+        lua_rawset(L, -3);          // overwrite method
+        lua_pop(L, 1);              // pop base
         return 1;
     }
     return 0;
