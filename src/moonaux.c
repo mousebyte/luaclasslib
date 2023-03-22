@@ -262,6 +262,26 @@ int moonL_registerclass(lua_State *L, int index) {
     return 0;
 }
 
+// default class __call
+static int default_class_call(lua_State *L) {
+    // create the object
+    moonL_UClass *class = moonL_getuclass(L, 1);
+    if (!class) lua_newtable(L);
+    else {
+        class->alloc(L);
+        lua_newtable(L);
+        lua_setiuservalue(L, -2, 1);
+    }
+    if (lua_getfield(L, 1, "__base") != LUA_TTABLE) return 0;
+    lua_setmetatable(L, -2);            // set object metatable to class base
+    lua_pushvalue(L, -1);               // push a copy of object for call
+    lua_rotate(L, 2, 2);                // rotate objects before other args
+    lua_getfield(L, 1, "__init");       // get init
+    lua_insert(L, 3);                   // insert before args
+    lua_call(L, lua_gettop(L) - 3, 0);  // call init
+    return 1;
+}
+
 /**
  * @brief Construct an instance of a Moonscript class.
  *
@@ -273,8 +293,10 @@ int moonL_registerclass(lua_State *L, int index) {
  */
 int moonL_construct(lua_State *L, int nargs, const char *name) {
     if (moonL_getclass(L, name) == LUA_TTABLE) {
-        lua_insert(L, -nargs - 1);  // insert class before args
-        lua_call(L, nargs, 1);
+        lua_pushcfunction(L, default_class_call);
+        lua_insert(L, -nargs - 2);
+        lua_insert(L, -nargs - 1);
+        lua_call(L, nargs + 1, 1);
         return 1;
     }
     lua_pop(L, 1);
@@ -414,26 +436,6 @@ void moonL_super(lua_State *L, const char *name, int nresults) {
     lua_call(L, nargs, nresults);
 }
 
-// default class __call
-static int default_class_call(lua_State *L) {
-    // create the object
-    moonL_UClass *class = moonL_getuclass(L, 1);
-    if (!class) lua_newtable(L);
-    else {
-        class->alloc(L);
-        lua_newtable(L);
-        lua_setiuservalue(L, -2, 1);
-    }
-    if (lua_getfield(L, 1, "__base") != LUA_TTABLE) return 0;
-    lua_setmetatable(L, -2);            // set object metatable to class base
-    lua_pushvalue(L, -1);               // push a copy of object for call
-    lua_rotate(L, 2, 2);                // rotate objects before other args
-    lua_getfield(L, 1, "__init");       // get init
-    lua_insert(L, 3);                   // insert before args
-    lua_call(L, lua_gettop(L) - 3, 0);  // call init
-    return 1;
-}
-
 // default class __init
 static int default_init(lua_State *L) {
     return 0;
@@ -561,9 +563,11 @@ int moonL_newuclass(
         lua_setfield(L, base, "__index");  // set base __index to self
     }
 
-    lua_pushvalue(L, base);                      // push base
-    lua_pushcclosure(L, default_class_call, 1);  // wrap it in a closure
-    lua_setfield(L, class_mt, "__call");         // set meta __call
+    // handle constructor
+    if (!uclass || uclass->user_ctor) {
+        lua_pushcfunction(L, default_class_call);
+        lua_setfield(L, class_mt, "__call");  // set meta __call
+    }
 
     // handle inheritance
     if (parent == NULL) {                      // no parent

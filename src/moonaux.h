@@ -7,7 +7,8 @@ typedef void (*moonL_Destructor)(void *);
 #define MOONL_UCLASS_HEADER  \
     const char       *name;  \
     moonL_Constructor alloc; \
-    moonL_Destructor  gc;
+    moonL_Destructor  gc;    \
+    int               user_ctor;
 
 typedef struct moonL_UClass {
     MOONL_UCLASS_HEADER
