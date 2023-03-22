@@ -294,9 +294,9 @@ static int default_class_call(lua_State *L) {
 int moonL_construct(lua_State *L, int nargs, const char *name) {
     if (moonL_getclass(L, name) == LUA_TTABLE) {
         lua_pushcfunction(L, default_class_call);
-        lua_insert(L, -nargs - 2);
-        lua_insert(L, -nargs - 1);
-        lua_call(L, nargs + 1, 1);
+        lua_insert(L, -nargs - 2);  // insert ctor before args
+        lua_insert(L, -nargs - 1);  // insert class after ctor
+        lua_call(L, nargs + 1, 1);  // call ctor
         return 1;
     }
     lua_pop(L, 1);
@@ -342,25 +342,25 @@ int moonL_injectmethod(
  * @return The type of the value pushed onto the stack.
  */
 int moonL_deferindex(lua_State *L) {
-    lua_pushvalue(L, lua_upvalueindex(1));
+    lua_pushvalue(L, lua_upvalueindex(1));  // grab original __index
     int ret = LUA_TNIL;
     switch (lua_type(L, -1)) {
-        case LUA_TTABLE:
+        case LUA_TTABLE:  // grab value from table
             lua_pushvalue(L, 2);
             ret = lua_gettable(L, -2);
             break;
-        case LUA_TFUNCTION:
+        case LUA_TFUNCTION:  // grab value from function
             lua_pushvalue(L, 1);
             lua_pushvalue(L, 2);
             lua_call(L, 2, 1);
             ret = lua_type(L, -1);
             break;
-        default:
+        default:  // if it's anything else, push nil
             lua_pop(L, 1);
             lua_pushnil(L);
             break;
     }
-    lua_remove(L, -2);
+    lua_remove(L, -2);  // remove original __index
     return ret;
 }
 
@@ -371,8 +371,9 @@ int moonL_deferindex(lua_State *L) {
  * @param L The Lua state.
  */
 void moonL_defernewindex(lua_State *L) {
-    lua_pushvalue(L, lua_upvalueindex(1));
+    lua_pushvalue(L, lua_upvalueindex(1));  // grab original __newindex
     if (lua_type(L, -1) == LUA_TFUNCTION) {
+        // push copies of all the args and call it
         lua_pushvalue(L, 1);
         lua_pushvalue(L, 2);
         lua_pushvalue(L, 3);
@@ -589,8 +590,8 @@ int moonL_newuclass(
             lua_call(L, 2, 0);        // call inherited
         } else lua_pop(L, 2);         // else pop nil and parent
     } else {                          // else parent not registered
-        lua_pop(L, 3);
-        return 0;  // clear stack and return 0
+        lua_pop(L, 3);                // clean up and return
+        return 0;
     }
 
     lua_setmetatable(L, class);  // set class metatable
