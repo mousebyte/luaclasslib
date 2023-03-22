@@ -507,9 +507,13 @@ int moonL_newuclass(
     if (moonL_getregfield(L, name) != LUA_TNIL) return 0;
     lua_pop(L, 1);
 
-    lua_newtable(L);  // make base table
-    int base = lua_gettop(L);
+    lua_newtable(L);               // base table
     luaL_setfuncs(L, methods, 0);  // load in methods
+    lua_newtable(L);               // class table
+    lua_newtable(L);               // class metatable
+    int class_mt       = lua_gettop(L);
+    int class          = class_mt - 1;
+    int base           = class - 1;
 
     // find init function
     lua_CFunction init = default_init;
@@ -527,8 +531,6 @@ int moonL_newuclass(
         lua_pop(L, 1);  // otherwise pop the value, leaving the key
     }
 
-    lua_newtable(L);  // make class table
-    int class = lua_gettop(L);
     lua_pushcfunction(L, init);
     lua_setfield(L, class, "__init");  // set class __init
     lua_pushvalue(L, base);
@@ -539,8 +541,23 @@ int moonL_newuclass(
     lua_pushvalue(L, class);
     lua_setfield(L, base, "__class");  // set base __class
 
-    lua_newtable(L);  // make class metatable
-    int class_mt = lua_gettop(L);
+    if (uclass) {
+        lua_pushvalue(L, base);
+        lua_pushcclosure(L, default_udata_index, 1);
+        lua_setfield(L, base, "__index");  // set base __index
+        lua_pushcfunction(L, moonL_uvset);
+        lua_setfield(L, base, "__newindex");  // set base __newindex
+        lua_pushcfunction(L, default_udata_gc);
+        lua_setfield(L, base, "__gc");  // set base __gc
+
+        lua_pushvalue(L, class);
+        lua_pushlightuserdata(L, uclass);
+        moonL_setreg(L);  // register uclass
+    } else {
+        lua_pushvalue(L, base);
+        lua_setfield(L, base, "__index");  // set base __index to self
+    }
+
     lua_pushvalue(L, base);                      // push base
     lua_pushcclosure(L, default_class_call, 1);  // wrap it in a closure
     lua_setfield(L, class_mt, "__call");         // set meta __call
@@ -563,30 +580,13 @@ int moonL_newuclass(
             lua_insert(L, -2);        // put inherited behind parent
             lua_pushvalue(L, class);  // push our (derived) class
             lua_call(L, 2, 0);        // call inherited
-        } else lua_pop(L, 1);         // else pop the nil
+        } else lua_pop(L, 2);         // else pop nil and parent
     } else {                          // else parent not registered
         lua_pop(L, 3);
         return 0;  // clear stack and return 0
     }
 
     lua_setmetatable(L, class);  // set class metatable
-
-    if (uclass) {
-        lua_pushvalue(L, base);
-        lua_pushcclosure(L, default_udata_index, 1);
-        lua_setfield(L, base, "__index");  // set base __index
-        lua_pushcfunction(L, moonL_uvset);
-        lua_setfield(L, base, "__newindex");  // set base __newindex
-        lua_pushcfunction(L, default_udata_gc);
-        lua_setfield(L, base, "__gc");  // set base __gc
-
-        lua_pushvalue(L, class);
-        lua_pushlightuserdata(L, uclass);
-        moonL_setreg(L);  // register uclass
-    } else {
-        lua_pushvalue(L, base);
-        lua_setfield(L, base, "__index");  // set base __index to self
-    }
 
     lua_pushvalue(L, class);
     moonL_setregfield(L, name);  // register class
