@@ -319,6 +319,7 @@ int moonL_injectmethod(
     int           index,
     const char   *method,
     lua_CFunction f) {
+    index = lua_absindex(L, index);
     if (f && moonL_isclass(L, index)) {
         lua_pushstring(L, "__base");
         lua_rawget(L, index);       // grab base
@@ -371,14 +372,17 @@ int moonL_deferindex(lua_State *L) {
  * @param L The Lua state.
  */
 void moonL_defernewindex(lua_State *L) {
-    lua_pushvalue(L, lua_upvalueindex(1));  // grab original __newindex
-    if (lua_type(L, -1) == LUA_TFUNCTION) {
-        // push copies of all the args and call it
-        lua_pushvalue(L, 1);
-        lua_pushvalue(L, 2);
-        lua_pushvalue(L, 3);
-        lua_call(L, 3, 0);
-    } else lua_pop(L, 1);
+    if (lua_type(L, lua_upvalueindex(1)) != LUA_TFUNCTION) {
+        luaL_getmetafield(L, 1, "__class");
+        if (moonL_getuclass(L, -1)) lua_pushcfunction(L, moonL_uvset);
+        else lua_getglobal(L, "rawset");
+        lua_remove(L, -2);
+    } else lua_pushvalue(L, lua_upvalueindex(1));  // grab original __newindex
+    // push copies of all the args and call it
+    lua_pushvalue(L, 1);
+    lua_pushvalue(L, 2);
+    lua_pushvalue(L, 3);
+    lua_call(L, 3, 0);
 }
 
 /**
