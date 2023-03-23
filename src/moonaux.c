@@ -509,7 +509,8 @@ int moonL_newuclass(
     const char     *name,
     const char     *parent,
     const luaL_Reg *methods,
-    moonL_UClass   *uclass) {
+    moonL_UClass   *uclass,
+    int             userCtor) {
     if (moonL_getregfield(L, name) != LUA_TNIL) return 0;
     lua_pop(L, 1);
 
@@ -565,7 +566,7 @@ int moonL_newuclass(
     }
 
     // handle constructor
-    if (!uclass || uclass->user_ctor) {
+    if (userCtor) {
         lua_pushcfunction(L, default_class_call);
         lua_setfield(L, class_mt, "__call");  // set meta __call
     }

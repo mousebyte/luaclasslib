@@ -21,8 +21,7 @@ void BasicClass_gc(void *p) {
     }
 }
 
-static moonL_UClass BasicClass {
-    "BasicClass", BasicClass_alloc, BasicClass_gc, 1};
+static moonL_UClass BasicClass {"BasicClass", BasicClass_alloc, BasicClass_gc};
 
 int BasicClass_init(lua_State *L) {
     moonL_superinit(L);
@@ -92,7 +91,7 @@ void FileClass_gc(void *p) {
     }
 }
 
-static moonL_UClass FileClass {"FileClass", FileClass_alloc, FileClass_gc, 1};
+static moonL_UClass FileClass {"FileClass", FileClass_alloc, FileClass_gc};
 
 int FileClass_init(lua_State *L) {
     lua_pushvalue(L, 2);
@@ -151,8 +150,7 @@ void DFileClass_gc(void *p) {
     }
 }
 
-static moonL_UClass DFileClass {
-    "DFileClass", DFileClass_alloc, DFileClass_gc, 0};
+static moonL_UClass DFileClass {"DFileClass", DFileClass_alloc, DFileClass_gc};
 
 int DFileClass_init(lua_State *L) {
     moonL_superinit(L);
@@ -193,7 +191,7 @@ TEST_CASE("User Data Classes") {
     luaopen_moonaux(L);
 
     SUBCASE("Basic User Data Class") {
-        moonL_newuclass(L, "FileClass", NULL, FileClass_funcs, &FileClass);
+        moonL_newuclass(L, "FileClass", NULL, FileClass_funcs, &FileClass, 1);
         REQUIRE(moonL_isclass(L, -1));
         lua_pop(L, 1);
 
@@ -228,7 +226,7 @@ TEST_CASE("User Data Classes") {
             lua_pop(L, 1);
 
             moonL_newuclass(
-                L, "BasicClass", "Base", BasicClass_funcs, &BasicClass);
+                L, "BasicClass", "Base", BasicClass_funcs, &BasicClass, 1);
             REQUIRE(moonL_isclass(L, -1));
 
             REQUIRE(lua_getfield(L, -1, "var") == LUA_TSTRING);
@@ -257,12 +255,13 @@ TEST_CASE("User Data Classes") {
         }
 
         SUBCASE("From User Data Class") {
-            moonL_newuclass(L, "FileClass", NULL, FileClass_funcs, &FileClass);
+            moonL_newuclass(
+                L, "FileClass", NULL, FileClass_funcs, &FileClass, 1);
             REQUIRE(moonL_isclass(L, -1));
             lua_pop(L, 1);
 
             moonL_newuclass(
-                L, "DFileClass", "FileClass", DFileClass_funcs, &DFileClass);
+                L, "DFileClass", "FileClass", DFileClass_funcs, &DFileClass, 1);
             REQUIRE(moonL_isclass(L, -1));
             lua_pop(L, 1);
 

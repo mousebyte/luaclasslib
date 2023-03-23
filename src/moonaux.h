@@ -7,8 +7,7 @@ typedef void (*moonL_Destructor)(void *);
 #define MOONL_UCLASS_HEADER  \
     const char       *name;  \
     moonL_Constructor alloc; \
-    moonL_Destructor  gc;    \
-    int               user_ctor;
+    moonL_Destructor  gc;
 
 typedef struct moonL_UClass {
     MOONL_UCLASS_HEADER
@@ -53,14 +52,15 @@ int moonL_newuclass(
     const char *,
     const char *,
     const luaL_Reg *,
-    moonL_UClass *);
+    moonL_UClass *,
+    int);
 
 void luaopen_moonaux(lua_State *);
 
 #define moonL_superinit(L) moonL_super((L), "__init", 0);
 
 #define moonL_newclass(L, name, parent, methods) \
-    moonL_newuclass((L), (name), (parent), (methods), NULL);
+    moonL_newuclass((L), (name), (parent), (methods), NULL, 1);
 
 #define moonL_injectindex(L, i, f) moonL_injectmethod((L), (i), "__index", (f))
 
