@@ -10,7 +10,7 @@ typedef struct UClass_Data {
 } UClass_Data;
 
 void UClass_populate_fields(UClass_Data *data, size_t len, const char *str) {
-    data->name = (char *)malloc(sizeof(char) * len);
+    data->name = (char *)malloc(len + 1);
     data->file = fopen(str, "r");
     strcpy(data->name, str);
 }
