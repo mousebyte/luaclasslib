@@ -580,21 +580,21 @@ int moonL_newuclass(
         lua_setfield(L, class_mt, "__index");         // set meta __index
         lua_getfield(L, -1, "__base");                // get parent __base
         lua_setmetatable(L, base);  // set base metatable to parent base
-        lua_pushvalue(L, -1);
         lua_setfield(L, class, "__parent");  // set class __parent to parent
+    } else {                                 // else parent not registered
+        lua_pop(L, 3);                       // clean up and return
+        return 0;
+    }
 
-        // check parent for __inherited
+    lua_setmetatable(L, class);  // set class metatable
+
+    if (lua_getfield(L, -1, "__parent") != LUA_TNIL) {
         if (lua_getfield(L, -1, "__inherited") != LUA_TNIL) {
             lua_insert(L, -2);        // put inherited behind parent
             lua_pushvalue(L, class);  // push our (derived) class
             lua_call(L, 2, 0);        // call inherited
         } else lua_pop(L, 2);         // else pop nil and parent
-    } else {                          // else parent not registered
-        lua_pop(L, 3);                // clean up and return
-        return 0;
-    }
-
-    lua_setmetatable(L, class);  // set class metatable
+    } else lua_pop(L, 1);             // else pop nil
 
     lua_pushvalue(L, class);
     moonL_setregfield(L, name);  // register class
