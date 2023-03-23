@@ -5,7 +5,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 include(FindLua)
 add_library(moonaux src/moonaux.c)
-add_executable(tests tests/main.cpp)
+add_executable(tests tests/main.cpp tests/cclass.cpp tests/userdataclass.cpp)
 target_compile_features(tests PRIVATE cxx_std_17)
 target_include_directories(moonaux PUBLIC src)
 target_link_libraries(moonaux ${LUA_LIBRARIES})
