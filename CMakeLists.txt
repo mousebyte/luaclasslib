@@ -15,3 +15,5 @@ file(GLOB asset_files ${CMAKE_SOURCE_DIR}/tests/assets/*)
 add_custom_target(assets COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${asset_files} $<TARGET_FILE_DIR:tests>)
 add_dependencies(tests assets)
+target_compile_options(tests PUBLIC -fsanitize=address)
+target_link_options(tests PUBLIC -fsanitize=address)
