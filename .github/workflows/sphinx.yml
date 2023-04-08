@@ -32,7 +32,7 @@ jobs:
         run: cd docs && make html
       - uses: actions/upload-pages-artifact@v1.0.8
         with:
-          name: DocumentationHTML
+          name: github-pages
           path: docs/_build/html/
   deploy:
     # Add a dependency to the build job
