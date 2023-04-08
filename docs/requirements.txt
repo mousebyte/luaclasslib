@@ -1,3 +1,0 @@
-docutils
-breathe
-sphinx-rtd-theme
