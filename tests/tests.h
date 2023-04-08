@@ -1,8 +1,9 @@
 #include "doctest.h"
 extern "C" {
 #include <lauxlib.h>
+#include <luaclasslib.h>
 #include <lualib.h>
-#include <moonaux.h>
+#include <moonauxlib.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

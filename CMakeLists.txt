@@ -1,17 +1,17 @@
 cmake_minimum_required(VERSION 3.25)
 
-project(moonlib C CXX)
+project(luaclasslib C CXX)
 set(ENABLE_ASAN false CACHE BOOL "Enable address sanitizer for tests target.")
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 include(FindLua)
-add_library(moonaux src/moonaux.c)
+add_library(luaclass src/luaclasslib.c)
 add_executable(tests tests/main.cpp tests/cclass.cpp tests/userdataclass.cpp tests/methodinjection.cpp)
 target_compile_features(tests PRIVATE cxx_std_17)
-target_include_directories(moonaux PUBLIC src)
-target_link_libraries(moonaux ${LUA_LIBRARIES})
-target_include_directories(moonaux PRIVATE ${LUA_INCLUDE_DIR})
-target_link_libraries(tests moonaux)
+target_include_directories(luaclass PUBLIC src)
+target_link_libraries(luaclass ${LUA_LIBRARIES})
+target_include_directories(luaclass PRIVATE ${LUA_INCLUDE_DIR})
+target_link_libraries(tests luaclass)
 file(GLOB asset_files ${CMAKE_SOURCE_DIR}/tests/assets/*)
 add_custom_target(assets COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${asset_files} $<TARGET_FILE_DIR:tests>)

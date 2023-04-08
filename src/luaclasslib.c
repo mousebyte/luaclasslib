@@ -1,5 +1,5 @@
 #include <lua.h>
-#include <moonaux.h>
+#include <luaclasslib.h>
 #include <string.h>
 
 #define CLASSLIB_REGISTRY_KEY "luaclass.lib"
@@ -56,23 +56,6 @@ static int luaC_uvset(lua_State *L) {
         lua_settable(L, 2);
     }
     return 0;
-}
-
-int moonL_dofile(lua_State *L, const char *name) {
-    lua_getfield(L, LUA_REGISTRYINDEX, "moonscript.base");
-    lua_getfield(L, -1, "dofile");
-    lua_remove(L, -2);
-    lua_pushstring(L, name);
-    return lua_pcall(L, 1, LUA_MULTRET, 0);
-}
-
-void moonL_print(lua_State *L, int index) {
-    lua_pushvalue(L, index);
-    luaL_dostring(L, "return require('moon')");
-    lua_getfield(L, -2, "p");
-    lua_insert(L, -4);
-    lua_pop(L, 2);
-    lua_call(L, 1, 0);
 }
 
 void luaC_mcall(lua_State *L, const char *method, int nargs, int nresults) {

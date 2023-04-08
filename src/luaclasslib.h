@@ -34,10 +34,6 @@ typedef struct {
     LUAC_CLASS_HEADER
 } luaC_Class;
 
-int moonL_dofile(lua_State *L, const char *file);
-
-void moonL_print(lua_State *L, int index);
-
 /**
  * @brief Call a method of an object, passing the object as the first argument.
  *
