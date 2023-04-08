@@ -1,5 +1,8 @@
 /// @file moonaux.h
 
+#ifndef LUACLASSLIB_H
+#define LUACLASSLIB_H
+
 #include <lauxlib.h>
 #include <lua.h>
 
@@ -294,3 +297,5 @@ void luaopen_class(lua_State *L);
  * @param index The index of the object on the stack.
  */
 #define luaC_pushclass(L, index) lua_getfield((L), (index), "__class")
+
+#endif
