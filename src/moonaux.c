@@ -2,11 +2,11 @@
 #include <moonaux.h>
 #include <string.h>
 
-#define MOONLIB_REGISTRY_KEY "luaclass.lib"
+#define CLASSLIB_REGISTRY_KEY "luaclass.lib"
 
 static void luaC_setreg(lua_State *L) {
     if (lua_gettop(L) >= 2) {
-        lua_getfield(L, LUA_REGISTRYINDEX, MOONLIB_REGISTRY_KEY);
+        luaL_getsubtable(L, LUA_REGISTRYINDEX, CLASSLIB_REGISTRY_KEY);
         lua_insert(L, -3);
         lua_settable(L, -3);
         lua_pop(L, 1);
@@ -16,7 +16,7 @@ static void luaC_setreg(lua_State *L) {
 static int luaC_getreg(lua_State *L) {
     int type = LUA_TNIL;
     if (lua_gettop(L) >= 1) {
-        lua_getfield(L, LUA_REGISTRYINDEX, MOONLIB_REGISTRY_KEY);
+        luaL_getsubtable(L, LUA_REGISTRYINDEX, CLASSLIB_REGISTRY_KEY);
         lua_insert(L, -2);
         type = lua_gettable(L, -2);
         lua_remove(L, -2);
@@ -26,7 +26,7 @@ static int luaC_getreg(lua_State *L) {
 
 static void luaC_setregfield(lua_State *L, const char *key) {
     if (lua_gettop(L) >= 1) {
-        lua_getfield(L, LUA_REGISTRYINDEX, MOONLIB_REGISTRY_KEY);
+        luaL_getsubtable(L, LUA_REGISTRYINDEX, CLASSLIB_REGISTRY_KEY);
         lua_insert(L, -2);
         lua_setfield(L, -2, key);
         lua_pop(L, 1);
@@ -34,7 +34,7 @@ static void luaC_setregfield(lua_State *L, const char *key) {
 }
 
 static int luaC_getregfield(lua_State *L, const char *key) {
-    lua_getfield(L, LUA_REGISTRYINDEX, MOONLIB_REGISTRY_KEY);
+    luaL_getsubtable(L, LUA_REGISTRYINDEX, CLASSLIB_REGISTRY_KEY);
     int type = lua_getfield(L, -1, key);
     lua_remove(L, -2);
     return type;
@@ -455,8 +455,6 @@ int luaC_newuclass(
 }
 
 void luaopen_moonaux(lua_State *L) {
-    lua_newtable(L);
-    lua_setfield(L, LUA_REGISTRYINDEX, MOONLIB_REGISTRY_KEY);
     luaL_dostring(L, "return require('moonscript')");
     lua_pop(L, 1);
     lua_setfield(L, LUA_REGISTRYINDEX, "moonscript.base");
