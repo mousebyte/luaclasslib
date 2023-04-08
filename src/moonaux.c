@@ -2,9 +2,9 @@
 #include <moonaux.h>
 #include <string.h>
 
-#define MOONLIB_REGISTRY_KEY "moonscript.lib"
+#define MOONLIB_REGISTRY_KEY "luaclass.lib"
 
-static void moonL_setreg(lua_State *L) {
+static void luaC_setreg(lua_State *L) {
     if (lua_gettop(L) >= 2) {
         lua_getfield(L, LUA_REGISTRYINDEX, MOONLIB_REGISTRY_KEY);
         lua_insert(L, -3);
@@ -13,7 +13,7 @@ static void moonL_setreg(lua_State *L) {
     }
 }
 
-static int moonL_getreg(lua_State *L) {
+static int luaC_getreg(lua_State *L) {
     int type = LUA_TNIL;
     if (lua_gettop(L) >= 1) {
         lua_getfield(L, LUA_REGISTRYINDEX, MOONLIB_REGISTRY_KEY);
@@ -24,7 +24,7 @@ static int moonL_getreg(lua_State *L) {
     return type;
 }
 
-static void moonL_setregfield(lua_State *L, const char *key) {
+static void luaC_setregfield(lua_State *L, const char *key) {
     if (lua_gettop(L) >= 1) {
         lua_getfield(L, LUA_REGISTRYINDEX, MOONLIB_REGISTRY_KEY);
         lua_insert(L, -2);
@@ -33,14 +33,14 @@ static void moonL_setregfield(lua_State *L, const char *key) {
     }
 }
 
-static int moonL_getregfield(lua_State *L, const char *key) {
+static int luaC_getregfield(lua_State *L, const char *key) {
     lua_getfield(L, LUA_REGISTRYINDEX, MOONLIB_REGISTRY_KEY);
     int type = lua_getfield(L, -1, key);
     lua_remove(L, -2);
     return type;
 }
 
-static int moonL_uvget(lua_State *L) {
+static int luaC_uvget(lua_State *L) {
     if (lua_type(L, 1) == LUA_TUSERDATA &&
         lua_getiuservalue(L, 1, 1) == LUA_TTABLE) {
         lua_insert(L, 2);
@@ -49,7 +49,7 @@ static int moonL_uvget(lua_State *L) {
     return 1;
 }
 
-static int moonL_uvset(lua_State *L) {
+static int luaC_uvset(lua_State *L) {
     if (lua_type(L, 1) == LUA_TUSERDATA &&
         lua_getiuservalue(L, 1, 1) == LUA_TTABLE) {
         lua_insert(L, 2);
@@ -75,14 +75,14 @@ void moonL_print(lua_State *L, int index) {
     lua_call(L, 1, 0);
 }
 
-void moonL_mcall(lua_State *L, const char *method, int nargs, int nresults) {
+void luaC_mcall(lua_State *L, const char *method, int nargs, int nresults) {
     lua_getfield(L, -nargs - 1, method);  // get the method
     lua_pushvalue(L, -nargs - 2);         // push a copy of the object
     lua_rotate(L, -nargs - 2, 2);         // rotate args to top
     lua_call(L, nargs + 1, nresults);
 }
 
-int moonL_pmcall(
+int luaC_pmcall(
     lua_State  *L,
     const char *method,
     int         nargs,
@@ -94,7 +94,7 @@ int moonL_pmcall(
     return lua_pcall(L, nargs + 1, nresults, msgh);
 }
 
-int moonL_isobject(lua_State *L, int index) {
+int luaC_isobject(lua_State *L, int index) {
     int top = lua_gettop(L);
     int ret = lua_getmetatable(L, index) &&
               (lua_getfield(L, -1, "__class") == LUA_TTABLE) &&
@@ -104,7 +104,7 @@ int moonL_isobject(lua_State *L, int index) {
     return ret;
 }
 
-int moonL_isclass(lua_State *L, int index) {
+int luaC_isclass(lua_State *L, int index) {
     int top = lua_gettop(L);
     lua_pushvalue(L, index);
     int ret = (lua_getfield(L, -1, "__base") == LUA_TTABLE) &&
@@ -114,7 +114,7 @@ int moonL_isclass(lua_State *L, int index) {
     return ret;
 }
 
-int moonL_isinstance(lua_State *L, int index, const char *name) {
+int luaC_isinstance(lua_State *L, int index, const char *name) {
     if (lua_getfield(L, index, "__class") == LUA_TTABLE) {
         while (lua_getfield(L, -1, "__name") == LUA_TSTRING) {
             if (strcmp(name, lua_tostring(L, -1)) != 0) {
@@ -134,37 +134,37 @@ int moonL_isinstance(lua_State *L, int index, const char *name) {
     return 0;
 }
 
-void *moonL_checkuclass(lua_State *L, int arg, const char *name) {
-    if (!lua_isuserdata(L, arg) || !moonL_isinstance(L, arg, name))
+void *luaC_checkuclass(lua_State *L, int arg, const char *name) {
+    if (!lua_isuserdata(L, arg) || !luaC_isinstance(L, arg, name))
         luaL_error(L, "Value is not an instance of class %s", name);
     return lua_touserdata(L, arg);
 }
 
-int moonL_getclass(lua_State *L, const char *name) {
-    return moonL_getregfield(L, name);
+int luaC_getclass(lua_State *L, const char *name) {
+    return luaC_getregfield(L, name);
 }
 
-moonL_UClass *moonL_getuclass(lua_State *L, int index) {
-    moonL_UClass *ret = NULL;
-    if (moonL_isclass(L, index)) {
+luaC_Class *luaC_getuclass(lua_State *L, int index) {
+    luaC_Class *ret = NULL;
+    if (luaC_isclass(L, index)) {
         lua_pushvalue(L, index);
-        if (moonL_getreg(L) == LUA_TLIGHTUSERDATA)
-            ret = (moonL_UClass *)lua_touserdata(L, -1);
+        if (luaC_getreg(L) == LUA_TLIGHTUSERDATA)
+            ret = (luaC_Class *)lua_touserdata(L, -1);
         lua_pop(L, 1);
     }
     return ret;
 }
 
-int moonL_registerclass(lua_State *L, int index) {
-    if (!moonL_isclass(L, index)) return 0;
+int luaC_registerclass(lua_State *L, int index) {
+    if (!luaC_isclass(L, index)) return 0;
     lua_pushvalue(L, index);                                // push the class
     while (lua_getfield(L, -1, "__name") == LUA_TSTRING) {  // get name
         const char *name = lua_tostring(L, -1);
-        if (moonL_getregfield(L, name) == LUA_TNIL) {  // class not registered
+        if (luaC_getregfield(L, name) == LUA_TNIL) {  // class not registered
             lua_pop(L, 1);
-            lua_pushvalue(L, -2);        // push class
-            moonL_setregfield(L, name);  // register class
-            lua_pop(L, 1);               // pop name
+            lua_pushvalue(L, -2);       // push class
+            luaC_setregfield(L, name);  // register class
+            lua_pop(L, 1);              // pop name
             if (lua_getfield(L, -1, "__parent") == LUA_TNIL) {
                 lua_pop(L, 2);  // pop nil and class
                 return 1;
@@ -181,7 +181,7 @@ int moonL_registerclass(lua_State *L, int index) {
 // default class __call
 static int default_class_call(lua_State *L) {
     // create the object
-    moonL_UClass *class = moonL_getuclass(L, 1);
+    luaC_Class *class = luaC_getuclass(L, 1);
     if (!class) lua_newtable(L);
     else {
         class->alloc(L);
@@ -198,8 +198,8 @@ static int default_class_call(lua_State *L) {
     return 1;
 }
 
-int moonL_construct(lua_State *L, int nargs, const char *name) {
-    if (moonL_getclass(L, name) == LUA_TTABLE) {
+int luaC_construct(lua_State *L, int nargs, const char *name) {
+    if (luaC_getclass(L, name) == LUA_TTABLE) {
         lua_pushcfunction(L, default_class_call);
         lua_insert(L, -nargs - 2);  // insert ctor before args
         lua_insert(L, -nargs - 1);  // insert class after ctor
@@ -210,13 +210,13 @@ int moonL_construct(lua_State *L, int nargs, const char *name) {
     return 0;
 }
 
-int moonL_injectmethod(
+int luaC_injectmethod(
     lua_State    *L,
     int           index,
     const char   *method,
     lua_CFunction f) {
     index = lua_absindex(L, index);
-    if (f && moonL_isclass(L, index)) {
+    if (f && luaC_isclass(L, index)) {
         lua_pushstring(L, "__base");
         lua_rawget(L, index);       // grab base
         lua_pushstring(L, method);  // key for rawset
@@ -230,7 +230,7 @@ int moonL_injectmethod(
     return 0;
 }
 
-int moonL_deferindex(lua_State *L) {
+int luaC_deferindex(lua_State *L) {
     lua_pushvalue(L, lua_upvalueindex(1));  // grab original __index
     int ret = LUA_TNIL;
     switch (lua_type(L, -1)) {
@@ -253,10 +253,10 @@ int moonL_deferindex(lua_State *L) {
     return ret;
 }
 
-void moonL_defernewindex(lua_State *L) {
+void luaC_defernewindex(lua_State *L) {
     if (lua_type(L, lua_upvalueindex(1)) != LUA_TFUNCTION) {
         luaL_getmetafield(L, 1, "__class");
-        if (moonL_getuclass(L, -1)) lua_pushcfunction(L, moonL_uvset);
+        if (luaC_getuclass(L, -1)) lua_pushcfunction(L, luaC_uvset);
         else lua_getglobal(L, "rawset");
         lua_remove(L, -2);
     } else lua_pushvalue(L, lua_upvalueindex(1));  // grab original __newindex
@@ -267,14 +267,14 @@ void moonL_defernewindex(lua_State *L) {
     lua_call(L, 3, 0);
 }
 
-int moonL_getparentfield(lua_State *L, int index, int depth, const char *name) {
-    if (depth < 1 || !moonL_isobject(L, index)) {
+int luaC_getparentfield(lua_State *L, int index, int depth, const char *name) {
+    if (depth < 1 || !luaC_isobject(L, index)) {
         lua_pushnil(L);
         return LUA_TNIL;
     }
 
-    moonL_pushclass(L, index);  // push its class
-    while (depth > 0) {         // walk the heirarchy
+    luaC_pushclass(L, index);  // push its class
+    while (depth > 0) {        // walk the heirarchy
         if (lua_getfield(L, -1, "__parent") == LUA_TNIL) {
             lua_remove(L, -2);  // remove previous class
             return LUA_TNIL;
@@ -288,8 +288,8 @@ int moonL_getparentfield(lua_State *L, int index, int depth, const char *name) {
     return ret;
 }
 
-void moonL_super(lua_State *L, const char *name, int nresults) {
-    if (moonL_getparentfield(L, 1, 1, name) != LUA_TFUNCTION) {
+void luaC_super(lua_State *L, const char *name, int nresults) {
+    if (luaC_getparentfield(L, 1, 1, name) != LUA_TFUNCTION) {
         lua_pop(L, 1);
         return;
     }
@@ -324,9 +324,9 @@ static int default_class_index(lua_State *L) {
 // default __index for userdata classes
 static int default_udata_index(lua_State *L) {
     // check upvalue (base) for key
-    if (moonL_deferindex(L) == LUA_TNIL) {
+    if (luaC_deferindex(L) == LUA_TNIL) {
         lua_pop(L, 1);
-        moonL_uvget(L);  // check user value for key
+        luaC_uvget(L);  // check user value for key
     }
     return 1;
 }
@@ -337,11 +337,10 @@ static int index_invalid(lua_State *L) {
 }
 
 static int default_udata_gc(lua_State *L) {
-    if (lua_type(L, 1) == LUA_TUSERDATA &&
-        moonL_pushclass(L, 1) == LUA_TTABLE) {
+    if (lua_type(L, 1) == LUA_TUSERDATA && luaC_pushclass(L, 1) == LUA_TTABLE) {
         // loop through the class and all its parents and call their finalizers
         do {
-            moonL_UClass *class = moonL_getuclass(L, -1);
+            luaC_Class *class = luaC_getuclass(L, -1);
             if (class && class->gc) class->gc(lua_touserdata(L, 1));
         } while (lua_getfield(L, -1, "__parent") != LUA_TNIL);
     }
@@ -356,14 +355,14 @@ static int default_udata_gc(lua_State *L) {
     return 0;
 }
 
-int moonL_newuclass(
+int luaC_newuclass(
     lua_State      *L,
     const char     *name,
     const char     *parent,
     const luaL_Reg *methods,
-    moonL_UClass   *uclass,
+    luaC_Class     *uclass,
     int             userCtor) {
-    if (moonL_getregfield(L, name) != LUA_TNIL) return 0;
+    if (luaC_getregfield(L, name) != LUA_TNIL) return 0;
     lua_pop(L, 1);
 
     lua_newtable(L);               // base table
@@ -404,14 +403,14 @@ int moonL_newuclass(
         lua_pushvalue(L, base);
         lua_pushcclosure(L, default_udata_index, 1);
         lua_setfield(L, base, "__index");  // set base __index
-        lua_pushcfunction(L, moonL_uvset);
+        lua_pushcfunction(L, luaC_uvset);
         lua_setfield(L, base, "__newindex");  // set base __newindex
         lua_pushcfunction(L, default_udata_gc);
         lua_setfield(L, base, "__gc");  // set base __gc
 
         lua_pushvalue(L, class);
         lua_pushlightuserdata(L, uclass);
-        moonL_setreg(L);  // register uclass
+        luaC_setreg(L);  // register uclass
     } else {
         lua_pushvalue(L, base);
         lua_setfield(L, base, "__index");  // set base __index to self
@@ -427,8 +426,8 @@ int moonL_newuclass(
     if (parent == NULL) {                      // no parent
         lua_pushvalue(L, base);                // push base
         lua_setfield(L, class_mt, "__index");  // set meta __index to base
-    } else if (moonL_getregfield(L, parent) == LUA_TTABLE) {  // else get parent
-        lua_pushvalue(L, base);                               // push base
+    } else if (luaC_getregfield(L, parent) == LUA_TTABLE) {  // else get parent
+        lua_pushvalue(L, base);                              // push base
         lua_pushcclosure(L, default_class_index, 1);  // wrap it in a closure
         lua_setfield(L, class_mt, "__index");         // set meta __index
         lua_getfield(L, -1, "__base");                // get parent __base
@@ -450,8 +449,8 @@ int moonL_newuclass(
     } else lua_pop(L, 1);             // else pop nil
 
     lua_pushvalue(L, class);
-    moonL_setregfield(L, name);  // register class
-    lua_remove(L, base);         // remove base from stack
+    luaC_setregfield(L, name);  // register class
+    lua_remove(L, base);        // remove base from stack
     return 1;
 }
 
@@ -461,6 +460,6 @@ void luaopen_moonaux(lua_State *L) {
     luaL_dostring(L, "return require('moonscript')");
     lua_pop(L, 1);
     lua_setfield(L, LUA_REGISTRYINDEX, "moonscript.base");
-    lua_register(L, "uvget", moonL_uvget);
-    lua_register(L, "uvset", moonL_uvset);
+    lua_register(L, "uvget", luaC_uvget);
+    lua_register(L, "uvset", luaC_uvset);
 }

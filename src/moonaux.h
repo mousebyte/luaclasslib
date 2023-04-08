@@ -9,7 +9,7 @@
  *
  * @param L The Lua state.
  */
-typedef void (*moonL_Constructor)(lua_State *L);
+typedef void (*luaC_Constructor)(lua_State *L);
 
 /**
  * @brief A user data class destructor. Implementations of this function should
@@ -18,21 +18,21 @@ typedef void (*moonL_Constructor)(lua_State *L);
  *
  * @param p A pointer to the user data to destruct.
  */
-typedef void (*moonL_Destructor)(void *p);
+typedef void (*luaC_Destructor)(void *p);
 
 /// Header for moonL_UClass objects.
 #define MOONL_UCLASS_HEADER            \
     /** The name of the class. */      \
-    const char       *name;            \
+    const char      *name;             \
     /** The class allocator */         \
-    moonL_Constructor alloc;           \
+    luaC_Constructor alloc;            \
     /** The class garbage collector */ \
-    moonL_Destructor  gc;
+    luaC_Destructor  gc;
 
 /// Contains information about a user data class.
 typedef struct {
     MOONL_UCLASS_HEADER
-} moonL_UClass;
+} luaC_Class;
 
 int moonL_dofile(lua_State *L, const char *file);
 
@@ -46,7 +46,7 @@ void moonL_print(lua_State *L, int index);
  * @param nargs The number of arguments.
  * @param nresults The number of results.
  */
-void moonL_mcall(lua_State *L, const char *method, int nargs, int nresults);
+void luaC_mcall(lua_State *L, const char *method, int nargs, int nresults);
 
 /**
  * @brief Call a method of an object in protected mode, passing the object as
@@ -61,7 +61,7 @@ void moonL_mcall(lua_State *L, const char *method, int nargs, int nresults);
  *
  * @return The pcall status code.
  */
-int moonL_pmcall(
+int luaC_pmcall(
     lua_State  *L,
     const char *method,
     int         nargs,
@@ -69,25 +69,24 @@ int moonL_pmcall(
     int         msgh);
 
 /**
- * @brief Checks if the value at the given index is an instance of a Moonscript
- * class.
+ * @brief Checks if the value at the given index is an instance of a class.
  *
  * @param L The Lua state.
  * @param index The stack index to check.
  *
- * @return 1 if the value is an instance of a Moonscript class, and 0 otherwise.
+ * @return 1 if the value is an instance of a class, and 0 otherwise.
  */
-int moonL_isobject(lua_State *L, int index);
+int luaC_isobject(lua_State *L, int index);
 
 /**
- * @brief Checks if the value at the given index is a Moonscript class.
+ * @brief Checks if the value at the given index is a class.
  *
  * @param L The Lua state.
  * @param index The stack index to check.
  *
- * @return 1 if the value is a Moonscript class, and 0 otherwise.
+ * @return 1 if the value is a class, and 0 otherwise.
  */
-int moonL_isclass(lua_State *L, int index);
+int luaC_isclass(lua_State *L, int index);
 
 /**
  * @brief Checks if the value at the given index is an instance of the class
@@ -99,7 +98,7 @@ int moonL_isclass(lua_State *L, int index);
  *
  * @return 1 if the value is an instance of *name*, and 0 otherwise.
  */
-int moonL_isinstance(lua_State *L, int arg, const char *name);
+int luaC_isinstance(lua_State *L, int arg, const char *name);
 
 /**
  * @brief Checks if the function argument *arg* is an instance of the userdata
@@ -111,7 +110,7 @@ int moonL_isinstance(lua_State *L, int arg, const char *name);
  *
  * @return A pointer to the userdata.
  */
-void *moonL_checkuclass(lua_State *L, int arg, const char *name);
+void *luaC_checkuclass(lua_State *L, int arg, const char *name);
 
 /**
  * @brief Pushes onto the stack the class registered under the given *name*.
@@ -121,21 +120,21 @@ void *moonL_checkuclass(lua_State *L, int arg, const char *name);
  *
  * @return The type of the pushed value.
  */
-int moonL_getclass(lua_State *L, const char *name);
+int luaC_getclass(lua_State *L, const char *name);
 
 /**
- * @brief Gets a pointer to the user data class associated with the Moonscript
- * class at the given stack index.
+ * @brief Gets a pointer to the user data class associated with the class at the
+ * given stack index.
  *
  * @param L The Lua state.
- * @param index The stack index of the Moonscript class.
+ * @param index The stack index of the class.
  *
  * @return A pointer to the user data class, or NULL if none was found.
  */
-moonL_UClass *moonL_getuclass(lua_State *L, int index);
+luaC_Class *luaC_getuclass(lua_State *L, int index);
 
 /**
- * @brief Adds the Moonscript class at the given stack index to the moonlib
+ * @brief Adds the class at the given stack index to the moonlib
  * registry, along with its parents, if not present already.
  *
  * @param L The Lua state.
@@ -143,18 +142,18 @@ moonL_UClass *moonL_getuclass(lua_State *L, int index);
  *
  * @return 1 if the class was successfully registered, and 0 otherwise.
  */
-int moonL_registerclass(lua_State *L, int index);
+int luaC_registerclass(lua_State *L, int index);
 
 /**
- * @brief Construct an instance of a Moonscript class.
+ * @brief Construct an instance of a class.
  *
  * @param L The Lua state.
  * @param nargs The number of arguments on the stack to pass to the constructor.
- * @param name The name of the Moonscript class.
+ * @param name The name of the class.
  *
  * @return 1 if the object was successfully constructed, and 0 otherwise.
  */
-int moonL_construct(lua_State *L, int nargs, const char *name);
+int luaC_construct(lua_State *L, int nargs, const char *name);
 
 /**
  * @brief Replaces a class method with a closure of the given C function *f*,
@@ -167,7 +166,7 @@ int moonL_construct(lua_State *L, int nargs, const char *name);
  *
  * @return 1 if the operation was successful, and 0 otherwise.
  */
-int moonL_injectmethod(
+int luaC_injectmethod(
     lua_State    *L,
     int           index,
     const char   *method,
@@ -181,7 +180,7 @@ int moonL_injectmethod(
  *
  * @return The type of the value pushed onto the stack.
  */
-int moonL_deferindex(lua_State *L);
+int luaC_deferindex(lua_State *L);
 
 /**
  * @brief When called from an injected newindex function, calls the original
@@ -189,7 +188,7 @@ int moonL_deferindex(lua_State *L);
  *
  * @param L The Lua state.
  */
-void moonL_defernewindex(lua_State *L);
+void luaC_defernewindex(lua_State *L);
 
 /**
  * @brief Pushes onto the stack the value of a field at the given depth up the
@@ -203,7 +202,7 @@ void moonL_defernewindex(lua_State *L);
  *
  * @return The type of the value pushed onto the stack.
  */
-int moonL_getparentfield(lua_State *L, int index, int depth, const char *name);
+int luaC_getparentfield(lua_State *L, int index, int depth, const char *name);
 
 /**
  * @brief Calls a parent class method, passing all values on the stack as
@@ -215,10 +214,10 @@ int moonL_getparentfield(lua_State *L, int index, int depth, const char *name);
  * @param name The name of the method.
  * @param nresults The number of results to return.
  */
-void moonL_super(lua_State *L, const char *name, int nresults);
+void luaC_super(lua_State *L, const char *name, int nresults);
 
 /**
- * @brief Creates and registers a new Moonscript class.
+ * @brief Creates and registers a new class.
  *
  * @param L The Lua state.
  * @param name The class name.
@@ -231,12 +230,12 @@ void moonL_super(lua_State *L, const char *name, int nresults);
  * @return 1 if the class was successfully created and registered, and 0
  * otherwise.
  */
-int moonL_newuclass(
+int luaC_newuclass(
     lua_State      *L,
     const char     *name,
     const char     *parent,
     const luaL_Reg *methods,
-    moonL_UClass   *uclass,
+    luaC_Class     *uclass,
     int             userCtor);
 
 void luaopen_moonaux(lua_State *);
@@ -246,7 +245,7 @@ void luaopen_moonaux(lua_State *);
  *
  * @param L The Lua state.
  */
-#define moonL_superinit(L) moonL_super((L), "__init", 0);
+#define luaC_superinit(L) luaC_super((L), "__init", 0);
 
 /**
  * @brief Creates and registers a new Lua class.
@@ -259,8 +258,8 @@ void luaopen_moonaux(lua_State *);
  * @return 1 if the class was successfully created and registered, and 0
  * otherwise.
  */
-#define moonL_newclass(L, name, parent, methods) \
-    moonL_newuclass((L), (name), (parent), (methods), NULL, 1);
+#define luaC_newclass(L, name, parent, methods) \
+    luaC_newuclass((L), (name), (parent), (methods), NULL, 1);
 
 /**
  * @brief Replaces the index method of a class with a closure of the given C
@@ -272,7 +271,7 @@ void luaopen_moonaux(lua_State *);
  *
  * @return 1 if the operation was successful, and 0 otherwise.
  */
-#define moonL_injectindex(L, i, f) moonL_injectmethod((L), (i), "__index", (f))
+#define luaC_injectindex(L, i, f) luaC_injectmethod((L), (i), "__index", (f))
 
 /**
  * @brief Replaces the newindex method of a class with a closure of the given C
@@ -284,8 +283,8 @@ void luaopen_moonaux(lua_State *);
  *
  * @return 1 if the operation was successful, and 0 otherwise.
  */
-#define moonL_injectnewindex(L, i, f) \
-    moonL_injectmethod((L), (i), "__newindex", (f))
+#define luaC_injectnewindex(L, i, f) \
+    luaC_injectmethod((L), (i), "__newindex", (f))
 
 /**
  * @brief Pushes the class of the object at the given index onto the stack.
@@ -293,4 +292,4 @@ void luaopen_moonaux(lua_State *);
  * @param L The Lua state.
  * @param index The index of the object on the stack.
  */
-#define moonL_pushclass(L, index) lua_getfield((L), (index), "__class")
+#define luaC_pushclass(L, index) lua_getfield((L), (index), "__class")

@@ -11,7 +11,7 @@ int index_override(lua_State *L) {
             return 1;
         }
     }
-    moonL_deferindex(L);
+    luaC_deferindex(L);
     return 1;
 }
 
@@ -27,7 +27,7 @@ int newindex_override(lua_State *L) {
             return 0;
         }
     }
-    moonL_defernewindex(L);
+    luaC_defernewindex(L);
     return 0;
 }
 
@@ -52,7 +52,7 @@ TEST_CASE("Method Injection") {
 
     moonL_dofile(L, "Base.moon");
     REQUIRE(lua_type(L, -1) == LUA_TTABLE);
-    REQUIRE(moonL_isclass(L, -1));
+    REQUIRE(luaC_isclass(L, -1));
     lua_newtable(L);
     lua_newtable(L);
     lua_pushcfunction(L, get_n);
@@ -61,18 +61,18 @@ TEST_CASE("Method Injection") {
     lua_setfield(L, -2, "set");
     lua_setfield(L, -2, "n");
     lua_setfield(L, -2, "Properties");
-    moonL_injectnewindex(L, -1, newindex_override);
-    moonL_injectindex(L, -1, index_override);
-    REQUIRE(moonL_registerclass(L, -1));
+    luaC_injectnewindex(L, -1, newindex_override);
+    luaC_injectindex(L, -1, index_override);
+    REQUIRE(luaC_registerclass(L, -1));
     lua_pop(L, 1);
 
     lua_pushstring(L, "hello!");
-    moonL_construct(L, 1, "Base");
-    REQUIRE(moonL_isobject(L, -1));
-    REQUIRE(moonL_isinstance(L, -1, "Base"));
+    luaC_construct(L, 1, "Base");
+    REQUIRE(luaC_isobject(L, -1));
+    REQUIRE(luaC_isinstance(L, -1, "Base"));
 
     lua_pushnumber(L, 23);
-    moonL_pmcall(L, "squeak", 1, 1, 0);
+    luaC_pmcall(L, "squeak", 1, 1, 0);
     REQUIRE(lua_type(L, -1) == LUA_TSTRING);
     REQUIRE(String(lua_tostring(L, -1)) == "n is now 46.0, squeak!");
     lua_pop(L, 2);

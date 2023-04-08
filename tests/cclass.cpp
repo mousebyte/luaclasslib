@@ -32,28 +32,28 @@ TEST_CASE("C Classes") {
     luaopen_moonaux(L);
 
     SUBCASE("Basic C Class") {
-        moonL_newclass(L, "CClass", NULL, CClass_funcs);
-        REQUIRE(moonL_isclass(L, -1));
+        luaC_newclass(L, "CClass", NULL, CClass_funcs);
+        REQUIRE(luaC_isclass(L, -1));
         lua_pop(L, 1);
 
         lua_pushnumber(L, 7);
-        moonL_construct(L, 1, "CClass");
-        REQUIRE(moonL_isobject(L, -1));
-        REQUIRE(moonL_isinstance(L, -1, "CClass"));
+        luaC_construct(L, 1, "CClass");
+        REQUIRE(luaC_isobject(L, -1));
+        REQUIRE(luaC_isinstance(L, -1, "CClass"));
 
         lua_pushnumber(L, 3);
-        moonL_mcall(L, "foo", 1, 1);
+        luaC_mcall(L, "foo", 1, 1);
         REQUIRE(lua_tonumber(L, -1) == 21);
         lua_pop(L, 2);
     }
 
     SUBCASE("Derived C Class") {
         moonL_dofile(L, "Base.moon");
-        REQUIRE(moonL_registerclass(L, -1));
+        REQUIRE(luaC_registerclass(L, -1));
         lua_pop(L, 1);
 
-        moonL_newclass(L, "DCClass", "Base", DCClass_funcs);
-        REQUIRE(moonL_isclass(L, -1));
+        luaC_newclass(L, "DCClass", "Base", DCClass_funcs);
+        REQUIRE(luaC_isclass(L, -1));
 
         REQUIRE(lua_getfield(L, -1, "var") == LUA_TSTRING);
         REQUIRE(String(lua_tostring(L, -1)) == "Eek!");
@@ -61,17 +61,17 @@ TEST_CASE("C Classes") {
 
         lua_pushstring(L, "I have C functions!");
         lua_pushnumber(L, 12);
-        moonL_construct(L, 2, "DCClass");
-        REQUIRE(moonL_isobject(L, -1));
-        REQUIRE(moonL_isinstance(L, -1, "DCClass"));
+        luaC_construct(L, 2, "DCClass");
+        REQUIRE(luaC_isobject(L, -1));
+        REQUIRE(luaC_isinstance(L, -1, "DCClass"));
 
         lua_pushnumber(L, 2);
-        moonL_mcall(L, "foo", 1, 1);
+        luaC_mcall(L, "foo", 1, 1);
         REQUIRE(lua_tonumber(L, -1) == 24);
         lua_pop(L, 1);
 
         lua_pushnumber(L, 11.2);
-        moonL_mcall(L, "squeak", 1, 1);
+        luaC_mcall(L, "squeak", 1, 1);
         REQUIRE(lua_type(L, -1) == LUA_TSTRING);
         REQUIRE(String(lua_tostring(L, -1)) == "n is now 11.2, squeak!");
         lua_pop(L, 2);
