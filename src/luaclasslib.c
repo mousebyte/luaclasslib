@@ -71,6 +71,7 @@ int luaC_pmcall(
     int         nargs,
     int         nresults,
     int         msgh) {
+    msgh = lua_absindex(L, msgh);
     lua_getfield(L, -nargs - 1, method);  // get the method
     lua_pushvalue(L, -nargs - 2);         // push a copy of the object
     lua_rotate(L, -nargs - 2, 2);         // rotate args to top
