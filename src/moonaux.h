@@ -20,8 +20,8 @@ typedef void (*luaC_Constructor)(lua_State *L);
  */
 typedef void (*luaC_Destructor)(void *p);
 
-/// Header for moonL_UClass objects.
-#define MOONL_UCLASS_HEADER            \
+/// Header for luaC_Class objects.
+#define LUAC_CLASS_HEADER              \
     /** The name of the class. */      \
     const char      *name;             \
     /** The class allocator */         \
@@ -31,7 +31,7 @@ typedef void (*luaC_Destructor)(void *p);
 
 /// Contains information about a user data class.
 typedef struct {
-    MOONL_UCLASS_HEADER
+    LUAC_CLASS_HEADER
 } luaC_Class;
 
 int moonL_dofile(lua_State *L, const char *file);
