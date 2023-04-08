@@ -27,7 +27,7 @@ jobs:
       - uses: ammaraskar/sphinx-action@master
         with:
           docs-folder: "docs/"
-      - uses: actions/upload-pages-artifact
+      - uses: actions/upload-pages-artifact@v1.0.8
         with:
           name: DocumentationHTML
           path: docs/_build/html/
