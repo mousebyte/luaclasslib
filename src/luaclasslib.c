@@ -437,10 +437,7 @@ int luaC_newuclass(
     return 1;
 }
 
-void luaopen_moonaux(lua_State *L) {
-    luaL_dostring(L, "return require('moonscript')");
-    lua_pop(L, 1);
-    lua_setfield(L, LUA_REGISTRYINDEX, "moonscript.base");
+void luaopen_class(lua_State *L) {
     lua_register(L, "uvget", luaC_uvget);
     lua_register(L, "uvset", luaC_uvset);
 }

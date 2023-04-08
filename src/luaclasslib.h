@@ -234,7 +234,12 @@ int luaC_newuclass(
     luaC_Class     *uclass,
     int             userCtor);
 
-void luaopen_moonaux(lua_State *);
+/**
+ * @brief Loads the Lua class library user functions into the global namespace.
+ *
+ * @param L The Lua state.
+ */
+void luaopen_class(lua_State *L);
 
 /**
  * @brief Calls the init function of the parent class.
