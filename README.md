@@ -9,7 +9,7 @@ Extends the Lua C API to provide Moonscript-compatible class support, with or wi
 - Call methods on objects
 - Inject (override) class methods
 
-Full [documentation](https://mousebyte.github.io/moonlib/) is available on Github Pages.
+Full [documentation](https://mousebyte.github.io/LuaClassLib/) is available on Github Pages.
 
 ## Building
 
