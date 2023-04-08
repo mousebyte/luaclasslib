@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Moonlib's documentation!
-===================================
+Welcome to LuaClassLib's documentation!
+=======================================
 
 .. toctree::
    :maxdepth: 2
@@ -20,11 +20,13 @@ Indices and tables
 Introduction
 ============
 
-Moonlib provides closer integration of Moonscript classes with the Lua C API.
+LuaClassLib is a small C library providing Moonscript-compatible class support to C applications.
+It consists of two main components: luaclasslib.h, which provides class support functions independently of Moonscript,
+and moonauxlib.h, which requires Moonscript to be available.
 
-Moonaux
-=======
+LuaClassLib
+===========
 
-.. doxygenfile:: moonaux.h
-   :project: Moonlib
+.. doxygenfile:: luaclasslib.h
+   :project: LuaClassLib
    :sections: briefdescription innerclass public-attrib func define 

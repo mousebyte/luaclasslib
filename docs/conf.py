@@ -9,7 +9,7 @@ import subprocess, os
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'Moonlib'
+project = 'LuaClassLib'
 copyright = '2023, Abigail Teague'
 author = 'Abigail Teague'
 
@@ -50,7 +50,7 @@ html_theme_options = {
 html_static_path = ['_static']
 
 breathe_projects = {
-	"Moonlib": "_build/xml/"
+	"LuaClassLib": "_build/xml/"
 }
-breathe_default_project = "Moonlib"
+breathe_default_project = "LuaClassLib"
 breathe_default_members = ('members', 'undoc-members')
