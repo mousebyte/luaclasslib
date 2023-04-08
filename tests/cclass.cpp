@@ -29,7 +29,6 @@ TEST_CASE("C Classes") {
     using doctest::String;
     lua_State *L = luaL_newstate();
     luaL_openlibs(L);
-    luaopen_moonaux(L);
 
     SUBCASE("Basic C Class") {
         luaC_newclass(L, "CClass", NULL, CClass_funcs);

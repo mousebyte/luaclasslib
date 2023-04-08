@@ -48,7 +48,6 @@ TEST_CASE("Method Injection") {
     using doctest::String;
     lua_State *L = luaL_newstate();
     luaL_openlibs(L);
-    luaopen_moonaux(L);
 
     moonL_dofile(L, "Base.moon");
     REQUIRE(lua_type(L, -1) == LUA_TTABLE);

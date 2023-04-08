@@ -14,7 +14,6 @@ TEST_CASE("Basic Functionality") {
     using doctest::String;
     lua_State *L = luaL_newstate();
     luaL_openlibs(L);
-    luaopen_moonaux(L);
 
     SUBCASE("Registration") {
         moonL_dofile(L, "Derived.moon");

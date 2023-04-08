@@ -188,7 +188,6 @@ TEST_CASE("User Data Classes") {
     using doctest::String;
     lua_State *L = luaL_newstate();
     luaL_openlibs(L);
-    luaopen_moonaux(L);
 
     SUBCASE("Basic User Data Class") {
         luaC_newuclass(L, "FileClass", NULL, FileClass_funcs, &FileClass, 1);
