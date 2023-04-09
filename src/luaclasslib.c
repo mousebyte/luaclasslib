@@ -40,21 +40,53 @@ static int luaC_getregfield(lua_State *L, const char *key) {
     return type;
 }
 
-static int luaC_uvget(lua_State *L) {
-    if (lua_type(L, 1) == LUA_TUSERDATA &&
-        lua_getiuservalue(L, 1, 1) == LUA_TTABLE) {
-        lua_insert(L, 2);
-        lua_gettable(L, 2);
-    } else lua_pushnil(L);
+int luaC_uvget(lua_State *L, int idx, int uv) {
+    int ret = LUA_TNIL;
+    if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
+        lua_insert(L, -2);          // put uv behind key
+        ret = lua_gettable(L, -2);  // get the value
+    } else lua_pushnil(L);          // otherwise push nil
+    lua_remove(L, -2);              // remove the uv
+    return ret;
+}
+
+int luaC_uvset(lua_State *L, int idx, int uv) {
+    if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
+        lua_insert(L, -3);    // put uv before key and value
+        lua_settable(L, -3);  // set the value
+        return 1;
+    }
+    lua_pop(L, 3);  // otherwise pop uv, key, and value
+    return 0;
+}
+
+int luaC_getuvfield(lua_State *L, int idx, int uv, const char *k) {
+    int ret = LUA_TNIL;
+    if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
+        ret = lua_getfield(L, -1, k);  // get value if uv is table
+    } else lua_pushnil(L);             // otherwise push nil
+    lua_remove(L, -2);                 // remove the uv
+    return ret;
+}
+
+int luaC_setuvfield(lua_State *L, int idx, int uv, const char *k) {
+    if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
+        lua_insert(L, -2);       // put uv behind value
+        lua_setfield(L, -2, k);  // set the value
+        lua_pop(L, 1);           // pop the uv
+        return 1;
+    }
+    lua_pop(L, 2);  // otherwise pop uv and value
+    return 0;
+}
+
+static int classlib_uvget(lua_State *L) {
+    luaC_uvget(L, 1, lua_isnumber(L, 2) ? lua_tonumber(L, 2) : 1);
     return 1;
 }
 
-static int luaC_uvset(lua_State *L) {
-    if (lua_type(L, 1) == LUA_TUSERDATA &&
-        lua_getiuservalue(L, 1, 1) == LUA_TTABLE) {
-        lua_insert(L, 2);
-        lua_settable(L, 2);
-    }
+static int classlib_uvset(lua_State *L) {
+    luaC_uvset(L, 1, lua_isnumber(L, 2) ? lua_tonumber(L, 2) : 1);
     return 0;
 }
 
@@ -240,7 +272,7 @@ int luaC_deferindex(lua_State *L) {
 void luaC_defernewindex(lua_State *L) {
     if (lua_type(L, lua_upvalueindex(1)) != LUA_TFUNCTION) {
         luaL_getmetafield(L, 1, "__class");
-        if (luaC_getuclass(L, -1)) lua_pushcfunction(L, luaC_uvset);
+        if (luaC_getuclass(L, -1)) lua_pushcfunction(L, classlib_uvset);
         else lua_getglobal(L, "rawset");
         lua_remove(L, -2);
     } else lua_pushvalue(L, lua_upvalueindex(1));  // grab original __newindex
@@ -310,7 +342,7 @@ static int default_udata_index(lua_State *L) {
     // check upvalue (base) for key
     if (luaC_deferindex(L) == LUA_TNIL) {
         lua_pop(L, 1);
-        luaC_uvget(L);  // check user value for key
+        classlib_uvget(L);  // check user value for key
     }
     return 1;
 }
@@ -387,7 +419,7 @@ int luaC_newuclass(
         lua_pushvalue(L, base);
         lua_pushcclosure(L, default_udata_index, 1);
         lua_setfield(L, base, "__index");  // set base __index
-        lua_pushcfunction(L, luaC_uvset);
+        lua_pushcfunction(L, classlib_uvset);
         lua_setfield(L, base, "__newindex");  // set base __newindex
         lua_pushcfunction(L, default_udata_gc);
         lua_setfield(L, base, "__gc");  // set base __gc
@@ -439,6 +471,6 @@ int luaC_newuclass(
 }
 
 void luaopen_class(lua_State *L) {
-    lua_register(L, "uvget", luaC_uvget);
-    lua_register(L, "uvset", luaC_uvset);
+    lua_register(L, "uvget", classlib_uvget);
+    lua_register(L, "uvset", classlib_uvset);
 }

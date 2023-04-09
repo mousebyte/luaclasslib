@@ -38,6 +38,59 @@ typedef struct {
 } luaC_Class;
 
 /**
+ * @brief Pushes onto the stack the value `t[k]` where `t` is the table stored
+ * in the given user value of the userdata at the given index, and `k` is the
+ * value at the top of the stack.
+ *
+ * @param L The Lua state.
+ * @param idx The index of the userdata.
+ * @param uv The user value to access.
+ *
+ * @return The type of the pushed value.
+ */
+int luaC_uvget(lua_State *L, int idx, int uv);
+
+/**
+ * @brief Does the equivalent to `t[k] = v`, where `t` is the table stored in
+ * the given user value of the userdata at the given index, `v` is the value on
+ * top of the stack, and `k` is the value just below the top.
+ *
+ * @param L The Lua state.
+ * @param idx The index of the userdata.
+ * @param uv The user value to access.
+ *
+ * @return 1 if the operation was successful, and 0 otherwise.
+ */
+int luaC_uvset(lua_State *L, int idx, int uv);
+
+/**
+ * @brief Pushes onto the stack the value `t[k]` where `t` is the table stored
+ * in the given user value of the userdata at the given index.
+ *
+ * @param L The Lua state.
+ * @param idx The index of the userdata.
+ * @param uv The user value to access.
+ * @param k The name of the field.
+ *
+ * @return The type of the pushed value.
+ */
+int luaC_getuvfield(lua_State *L, int idx, int uv, const char *k);
+
+/**
+ * @brief Does the equivalent to `t[k] = v`, where `t` is the table stored in
+ * the given user value of the userdata at the given index, and `v` is the value
+ * on top of the stack.
+ *
+ * @param L The Lua state.
+ * @param idx The index of the userdata.
+ * @param uv The user value to access.
+ * @param k The name of the field.
+ *
+ * @return 1 if the operation was successful, and 0 otherwise.
+ */
+int luaC_setuvfield(lua_State *L, int idx, int uv, const char *k);
+
+/**
  * @brief Call a method of an object, passing the object as the first argument.
  *
  * @param L The Lua state.
