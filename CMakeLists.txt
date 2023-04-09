@@ -48,6 +48,9 @@ if(LUACLASS_MAIN_PROJECT)
             FILE LuaClassTargets.cmake
             NAMESPACE LuaClass::
             DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/LuaClass)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/LuaClassConfig.cmake
+                  ${CMAKE_CURRENT_BINARY_DIR}/LuaClassConfigVersion.cmake
+            DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/LuaClass")
     export(TARGETS luaclass
            NAMESPACE LuaClass::
            FILE ${CMAKE_CURRENT_BINARY_DIR}/LuaClassTargets.cmake)
