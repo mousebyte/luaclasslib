@@ -40,46 +40,6 @@ static int luaC_getregfield(lua_State *L, const char *key) {
     return type;
 }
 
-int luaC_uvget(lua_State *L, int idx, int uv) {
-    int ret = LUA_TNIL;
-    if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
-        lua_insert(L, -2);          // put uv behind key
-        ret = lua_gettable(L, -2);  // get the value
-    } else lua_pushnil(L);          // otherwise push nil
-    lua_remove(L, -2);              // remove the uv
-    return ret;
-}
-
-int luaC_uvset(lua_State *L, int idx, int uv) {
-    if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
-        lua_insert(L, -3);    // put uv before key and value
-        lua_settable(L, -3);  // set the value
-        return 1;
-    }
-    lua_pop(L, 3);  // otherwise pop uv, key, and value
-    return 0;
-}
-
-int luaC_getuvfield(lua_State *L, int idx, int uv, const char *k) {
-    int ret = LUA_TNIL;
-    if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
-        ret = lua_getfield(L, -1, k);  // get value if uv is table
-    } else lua_pushnil(L);             // otherwise push nil
-    lua_remove(L, -2);                 // remove the uv
-    return ret;
-}
-
-int luaC_setuvfield(lua_State *L, int idx, int uv, const char *k) {
-    if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
-        lua_insert(L, -2);       // put uv behind value
-        lua_setfield(L, -2, k);  // set the value
-        lua_pop(L, 1);           // pop the uv
-        return 1;
-    }
-    lua_pop(L, 2);  // otherwise pop uv and value
-    return 0;
-}
-
 static int classlib_uvget(lua_State *L) {
     luaC_uvget(L, 1, lua_isnumber(L, 2) ? lua_tonumber(L, 2) : 1);
     return 1;
@@ -88,26 +48,6 @@ static int classlib_uvget(lua_State *L) {
 static int classlib_uvset(lua_State *L) {
     luaC_uvset(L, 1, lua_isnumber(L, 2) ? lua_tonumber(L, 2) : 1);
     return 0;
-}
-
-void luaC_mcall(lua_State *L, const char *method, int nargs, int nresults) {
-    lua_getfield(L, -nargs - 1, method);  // get the method
-    lua_pushvalue(L, -nargs - 2);         // push a copy of the object
-    lua_rotate(L, -nargs - 2, 2);         // rotate args to top
-    lua_call(L, nargs + 1, nresults);
-}
-
-int luaC_pmcall(
-    lua_State  *L,
-    const char *method,
-    int         nargs,
-    int         nresults,
-    int         msgh) {
-    msgh = lua_absindex(L, msgh);
-    lua_getfield(L, -nargs - 1, method);  // get the method
-    lua_pushvalue(L, -nargs - 2);         // push a copy of the object
-    lua_rotate(L, -nargs - 2, 2);         // rotate args to top
-    return lua_pcall(L, nargs + 1, nresults, msgh);
 }
 
 int luaC_isobject(lua_State *L, int index) {

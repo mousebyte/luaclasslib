@@ -40,6 +40,94 @@ typedef struct {
 /**
  * @brief Pushes onto the stack the value `t[k]` where `t` is the table stored
  * in the given user value of the userdata at the given index, and `k` is the
+ * value at the top of the stack. The access is raw (does not use the `__index`
+ * metavalue).
+ *
+ * @param L The Lua state.
+ * @param idx The index of the userdata.
+ * @param uv The user value to access.
+ *
+ * @return The type of the pushed value.
+ */
+static inline int luaC_uvrawget(lua_State *L, int idx, int uv) {
+    int ret = LUA_TNIL;
+    if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
+        lua_insert(L, -2);        // put uv behind key
+        ret = lua_rawget(L, -2);  // get the value
+    } else lua_pushnil(L);        // otherwise push nil
+    lua_remove(L, -2);            // remove the uv
+    return ret;
+}
+
+/**
+ * @brief Does the equivalent of `t[k] = v`, where `t` is the table stored in
+ * the given user value of the userdata at the given index, `v` is the value on
+ * top of the stack, and `k` is the value just below the top. The access is raw
+ * (does not use the `__index` * metavalue).
+ *
+ * @param L The Lua state.
+ * @param idx The index of the userdata.
+ * @param uv The user value to access.
+ *
+ * @return 1 if the operation was successful, and 0 otherwise.
+ */
+static inline int luaC_uvrawset(lua_State *L, int idx, int uv) {
+    if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
+        lua_insert(L, -3);  // put uv before key and value
+        lua_rawset(L, -3);  // set the value
+        return 1;
+    }
+    lua_pop(L, 3);  // otherwise pop uv, key, and value
+    return 0;
+}
+
+/**
+ * @brief Pushes onto the stack the value `t[k]` where `t` is the table stored
+ * in the given user value of the userdata at the given index, and `k` is the
+ * pointer `p` represented as a light userdata. The access is raw (does not use
+ * the `__index` * metavalue).
+ *
+ * @param L The Lua state.
+ * @param idx The index of the userdata.
+ * @param uv The user value to access.
+ *
+ * @return The type of the pushed value.
+ */
+static inline int luaC_uvrawgetp(lua_State *L, int idx, int uv, const void *p) {
+    int ret = LUA_TNIL;
+    if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
+        ret = lua_rawgetp(L, -1, p);  // get the value
+    } else lua_pushnil(L);            // otherwise push nil
+    lua_remove(L, -2);                // remove the uv
+    return ret;
+}
+
+/**
+ * @brief Does the equivalent of `t[k] = v`, where `t` is the table stored in
+ * the given user value of the userdata at the given index, `v` is the value on
+ * top of the stack, and `k` is the pointer `p` represented as a light userdata.
+ * The access is raw (does not use the `__index` * metavalue).
+ *
+ *
+ * @param L The Lua state.
+ * @param idx The index of the userdata.
+ * @param uv The user value to access.
+ *
+ * @return 1 if the operation was successful, and 0 otherwise.
+ */
+static inline int luaC_uvrawsetp(lua_State *L, int idx, int uv, const void *p) {
+    if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
+        lua_insert(L, -2);      // put uv before value
+        lua_rawsetp(L, -2, p);  // set the value
+        return 1;
+    }
+    lua_pop(L, 2);  // otherwise pop uv and value
+    return 0;
+}
+
+/**
+ * @brief Pushes onto the stack the value `t[k]` where `t` is the table stored
+ * in the given user value of the userdata at the given index, and `k` is the
  * value at the top of the stack.
  *
  * @param L The Lua state.
@@ -48,10 +136,18 @@ typedef struct {
  *
  * @return The type of the pushed value.
  */
-int luaC_uvget(lua_State *L, int idx, int uv);
+static inline int luaC_uvget(lua_State *L, int idx, int uv) {
+    int ret = LUA_TNIL;
+    if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
+        lua_insert(L, -2);          // put uv behind key
+        ret = lua_gettable(L, -2);  // get the value
+    } else lua_pushnil(L);          // otherwise push nil
+    lua_remove(L, -2);              // remove the uv
+    return ret;
+}
 
 /**
- * @brief Does the equivalent to `t[k] = v`, where `t` is the table stored in
+ * @brief Does the equivalent of `t[k] = v`, where `t` is the table stored in
  * the given user value of the userdata at the given index, `v` is the value on
  * top of the stack, and `k` is the value just below the top.
  *
@@ -61,7 +157,15 @@ int luaC_uvget(lua_State *L, int idx, int uv);
  *
  * @return 1 if the operation was successful, and 0 otherwise.
  */
-int luaC_uvset(lua_State *L, int idx, int uv);
+static inline int luaC_uvset(lua_State *L, int idx, int uv) {
+    if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
+        lua_insert(L, -3);    // put uv before key and value
+        lua_settable(L, -3);  // set the value
+        return 1;
+    }
+    lua_pop(L, 3);  // otherwise pop uv, key, and value
+    return 0;
+}
 
 /**
  * @brief Pushes onto the stack the value `t[k]` where `t` is the table stored
@@ -74,10 +178,18 @@ int luaC_uvset(lua_State *L, int idx, int uv);
  *
  * @return The type of the pushed value.
  */
-int luaC_getuvfield(lua_State *L, int idx, int uv, const char *k);
+static inline int
+luaC_getuvfield(lua_State *L, int idx, int uv, const char *k) {
+    int ret = LUA_TNIL;
+    if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
+        ret = lua_getfield(L, -1, k);  // get value if uv is table
+    } else lua_pushnil(L);             // otherwise push nil
+    lua_remove(L, -2);                 // remove the uv
+    return ret;
+}
 
 /**
- * @brief Does the equivalent to `t[k] = v`, where `t` is the table stored in
+ * @brief Does the equivalent of `t[k] = v`, where `t` is the table stored in
  * the given user value of the userdata at the given index, and `v` is the value
  * on top of the stack.
  *
@@ -88,7 +200,17 @@ int luaC_getuvfield(lua_State *L, int idx, int uv, const char *k);
  *
  * @return 1 if the operation was successful, and 0 otherwise.
  */
-int luaC_setuvfield(lua_State *L, int idx, int uv, const char *k);
+static inline int
+luaC_setuvfield(lua_State *L, int idx, int uv, const char *k) {
+    if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
+        lua_insert(L, -2);       // put uv behind value
+        lua_setfield(L, -2, k);  // set the value
+        lua_pop(L, 1);           // pop the uv
+        return 1;
+    }
+    lua_pop(L, 2);  // otherwise pop uv and value
+    return 0;
+}
 
 /**
  * @brief Call a method of an object, passing the object as the first argument.
@@ -98,7 +220,13 @@ int luaC_setuvfield(lua_State *L, int idx, int uv, const char *k);
  * @param nargs The number of arguments.
  * @param nresults The number of results.
  */
-void luaC_mcall(lua_State *L, const char *method, int nargs, int nresults);
+static inline void
+luaC_mcall(lua_State *L, const char *method, int nargs, int nresults) {
+    lua_getfield(L, -nargs - 1, method);  // get the method
+    lua_pushvalue(L, -nargs - 2);         // push a copy of the object
+    lua_rotate(L, -nargs - 2, 2);         // rotate args to top
+    lua_call(L, nargs + 1, nresults);
+}
 
 /**
  * @brief Call a method of an object in protected mode, passing the object as
@@ -113,12 +241,18 @@ void luaC_mcall(lua_State *L, const char *method, int nargs, int nresults);
  *
  * @return The pcall status code.
  */
-int luaC_pmcall(
+static inline int luaC_pmcall(
     lua_State  *L,
     const char *method,
     int         nargs,
     int         nresults,
-    int         msgh);
+    int         msgh) {
+    msgh = lua_absindex(L, msgh);
+    lua_getfield(L, -nargs - 1, method);  // get the method
+    lua_pushvalue(L, -nargs - 2);         // push a copy of the object
+    lua_rotate(L, -nargs - 2, 2);         // rotate args to top
+    return lua_pcall(L, nargs + 1, nresults, msgh);
+}
 
 /**
  * @brief Checks if the value at the given index is an instance of a class.
