@@ -1,6 +1,6 @@
-#include "tests.h"
+#include "doctest.h"
 extern "C" {
-
+#include "tests.h"
 int func_for_derived(lua_State *L) {
     lua_pushstring(L, "Aha! ");
     lua_insert(L, 1);

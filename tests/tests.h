@@ -1,5 +1,3 @@
-#include "doctest.h"
-extern "C" {
 #include <lauxlib.h>
 #include <luaclasslib.h>
 #include <lualib.h>
@@ -8,11 +6,10 @@ extern "C" {
 #include <stdlib.h>
 #include <string.h>
 
-inline int foo(lua_State *L) {
+static inline int foo(lua_State *L) {
     int n = luaL_checknumber(L, 2);
     lua_getfield(L, 1, "x");
     int x = luaL_checknumber(L, 3);
     lua_pushnumber(L, n * x);
     return 1;
-}
 }
