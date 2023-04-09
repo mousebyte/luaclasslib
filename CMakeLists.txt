@@ -59,7 +59,7 @@ if(LUACLASS_MAIN_PROJECT)
             COMPONENT ${projectname_target}Export)
 endif()
 
-add_executable(tests tests/main.cpp tests/cclass.cpp tests/userdataclass.cpp tests/methodinjection.cpp)
+add_executable(tests tests/main.cpp tests/basicfunctions.cpp tests/cclass.cpp tests/userdataclass.cpp tests/methodinjection.cpp)
 target_compile_features(tests PRIVATE cxx_std_17)
 target_link_libraries(tests luaclass)
 
