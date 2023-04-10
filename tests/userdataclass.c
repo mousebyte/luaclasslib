@@ -44,18 +44,20 @@ static int BasicClass_sum(lua_State *L) {
     return 1;
 }
 
+static luaL_Reg BasicClass_methods[] = {
+    {"new",  BasicClass_init},
+    {"setx", BasicClass_setx},
+    {"sum",  BasicClass_sum },
+    {NULL,   NULL           }
+};
+
 static luaC_Class BasicClass = {
     .name      = "BasicClass",
     .parent    = "Base",
     .user_ctor = 1,
     .alloc     = BasicClass_alloc,
     .gc        = BasicClass_gc,
-    .methods   = {
-                  {"new", BasicClass_init},
-                  {"setx", BasicClass_setx},
-                  {"sum", BasicClass_sum},
-                  {NULL, NULL}}
-};
+    .methods   = BasicClass_methods};
 
 #define FILECLASS_DATA_FIELDS \
     FILE *file;               \
@@ -115,19 +117,21 @@ static int FileClass_readline(lua_State *L) {
     return 1;
 }
 
+static luaL_Reg FileClass_methods[] = {
+    {"foo",      foo               },
+    {"new",      FileClass_init    },
+    {"filename", FileClass_filename},
+    {"readline", FileClass_readline},
+    {NULL,       NULL              }
+};
+
 static luaC_Class FileClass = {
     .name      = "FileClass",
     .parent    = NULL,
     .user_ctor = 1,
     .alloc     = FileClass_alloc,
     .gc        = FileClass_gc,
-    .methods   = {
-                  {"foo", foo},
-                  {"new", FileClass_init},
-                  {"filename", FileClass_filename},
-                  {"readline", FileClass_readline},
-                  {NULL, NULL}}
-};
+    .methods   = FileClass_methods};
 
 typedef struct DFileClass_Data {
     FILECLASS_DATA_FIELDS
@@ -179,15 +183,17 @@ static int DFileClass_getint(lua_State *L) {
     return 1;
 }
 
+static luaL_Reg DFileClass_methods[] = {
+    {"new",    DFileClass_init  },
+    {"setint", DFileClass_setint},
+    {"getint", DFileClass_getint},
+    {NULL,     NULL             }
+};
+
 static luaC_Class DFileClass = {
     .name      = "DFileClass",
     .parent    = "FileClass",
     .user_ctor = 1,
     .alloc     = DFileClass_alloc,
     .gc        = DFileClass_gc,
-    .methods   = {
-                  {"new", DFileClass_init},
-                  {"setint", DFileClass_setint},
-                  {"getint", DFileClass_getint},
-                  {NULL, NULL}}
-};
+    .methods   = DFileClass_methods};

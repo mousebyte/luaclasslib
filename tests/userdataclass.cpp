@@ -9,7 +9,7 @@ TEST_CASE("User Data Classes") {
     luaL_openlibs(L);
 
     SUBCASE("Basic User Data Class") {
-        luaC_newuclass(L, &FileClass);
+        luaC_registeruclass(L, &FileClass);
         REQUIRE(luaC_isclass(L, -1));
         lua_pop(L, 1);
 
@@ -43,7 +43,7 @@ TEST_CASE("User Data Classes") {
             REQUIRE(luaC_registerclass(L, -1));
             lua_pop(L, 1);
 
-            luaC_newuclass(L, &BasicClass);
+            luaC_registeruclass(L, &BasicClass);
             REQUIRE(luaC_isclass(L, -1));
 
             REQUIRE(lua_getfield(L, -1, "var") == LUA_TSTRING);
@@ -72,11 +72,11 @@ TEST_CASE("User Data Classes") {
         }
 
         SUBCASE("From User Data Class") {
-            luaC_newuclass(L, &FileClass);
+            luaC_registeruclass(L, &FileClass);
             REQUIRE(luaC_isclass(L, -1));
             lua_pop(L, 1);
 
-            luaC_newuclass(L, &DFileClass);
+            luaC_registeruclass(L, &DFileClass);
             REQUIRE(luaC_isclass(L, -1));
             lua_pop(L, 1);
 

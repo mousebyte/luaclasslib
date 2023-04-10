@@ -37,7 +37,7 @@ typedef void (*luaC_Destructor)(void *p);
     /** The class garbage collector */   \
     luaC_Destructor  gc;                 \
     /** The class methods */             \
-    luaL_Reg         methods[];
+    luaL_Reg        *methods;
 
 /// Contains information about a user data class.
 typedef struct {
@@ -327,17 +327,6 @@ int luaC_getclass(lua_State *L, const char *name);
 luaC_Class *luaC_getuclass(lua_State *L, int index);
 
 /**
- * @brief Adds the class at the given stack index to the moonlib
- * registry, along with its parents, if not present already.
- *
- * @param L The Lua state.
- * @param index The stack index of the class.
- *
- * @return 1 if the class was successfully registered, and 0 otherwise.
- */
-int luaC_registerclass(lua_State *L, int index);
-
-/**
  * @brief Construct an instance of a class.
  *
  * @param L The Lua state.
@@ -410,20 +399,67 @@ int luaC_getparentfield(lua_State *L, int index, int depth, const char *name);
 void luaC_super(lua_State *L, const char *name, int nresults);
 
 /**
- * @brief Creates and registers a new class.
+ * @brief Adds the class at the given stack index to the class
+ * registry, along with its parents, if not present already.
+ *
+ * @param L The Lua state.
+ * @param index The stack index of the class.
+ *
+ * @return 1 if the class was successfully registered, and 0 otherwise.
+ */
+int luaC_registerclass(lua_State *L, int index);
+
+/**
+ * @brief Creates and registers the class defined by the luaC_Class at the
+ * specified stack index.
+ *
+ * @param L The Lua state.
+ * @param index The stack index of the luaC_Class.
+ *
+ * @return 1 if the class was successfully registered, and 0 otherwise.
+ */
+int luaC_registeruclass_fromstack(lua_State *L, int idx);
+
+/**
+ * @brief Helper method for registering a luaC_Class as a light userdata.
+ *
+ * @param L The Lua state.
+ * @param c The class to register.
+ *
+ * @return 1 if the class was successfully registered, and 0 otherwise;
+ */
+static inline int luaC_registeruclass(lua_State *L, luaC_Class *c) {
+    lua_pushlightuserdata(L, c);
+    return luaC_registeruclass_fromstack(L, -1);
+}
+
+/**
+ * @brief Helper method for creating and registering a simple luaC_Class as a
+ * full userdata. Useful for when you're using stock classes and don't want to
+ * define your luaC_Class with static linkage.
  *
  * @param L The Lua state.
  * @param name The class name.
  * @param parent The parent class name. Must be in the registry.
  * @param methods The class methods.
- * @param uclass The uclass, if creating a user data class.
- * @param userCtor Whether to enable object construction by calling the class
- * table.
  *
  * @return 1 if the class was successfully created and registered, and 0
  * otherwise.
  */
-int luaC_newuclass(lua_State *L, luaC_Class *c);
+static inline int luaC_newclass(
+    lua_State  *L,
+    const char *name,
+    const char *parent,
+    luaL_Reg   *methods) {
+    luaC_Class *cls = (luaC_Class *)lua_newuserdatauv(L, sizeof(luaC_Class), 0);
+    cls->name       = name;
+    cls->parent     = parent;
+    cls->user_ctor  = 1;
+    cls->alloc      = NULL;
+    cls->gc         = NULL;
+    cls->methods    = methods;
+    return luaC_registeruclass_fromstack(L, -1);
+}
 
 /**
  * @brief Loads the Lua class library user functions into the global namespace.
@@ -438,20 +474,6 @@ void luaopen_class(lua_State *L);
  * @param L The Lua state.
  */
 #define luaC_superinit(L) luaC_super((L), "__init", 0);
-
-/**
- * @brief Creates and registers a new Lua class.
- *
- * @param L The Lua state.
- * @param name The class name.
- * @param parent The parent class name. Must be in the registry.
- * @param methods The class methods.
- *
- * @return 1 if the class was successfully created and registered, and 0
- * otherwise.
- */
-#define luaC_newclass(L, name, parent, methods) \
-    luaC_newuclass((L), (name), (parent), (methods), NULL, 1);
 
 /**
  * @brief Replaces the index method of a class with a closure of the given C

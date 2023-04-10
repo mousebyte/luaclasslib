@@ -306,9 +306,11 @@ static int default_udata_gc(lua_State *L) {
     return 0;
 }
 
-int luaC_newuclass(lua_State *L, luaC_Class *c) {
-    if (luaC_getregfield(L, c->name) != LUA_TNIL) return 0;
+int luaC_registeruclass_fromstack(lua_State *L, int idx) {
+    luaC_Class *c = lua_touserdata(L, idx);
+    if (!c || luaC_getregfield(L, c->name) != LUA_TNIL) return 0;
     lua_pop(L, 1);
+    int uclass = lua_absindex(L, idx);
 
     lua_newtable(L);                  // base table
     luaL_setfuncs(L, c->methods, 0);  // load in methods
@@ -354,7 +356,7 @@ int luaC_newuclass(lua_State *L, luaC_Class *c) {
         lua_setfield(L, base, "__gc");  // set base __gc
 
         lua_pushvalue(L, class);
-        lua_pushlightuserdata(L, c);
+        lua_pushvalue(L, uclass);
         luaC_setreg(L);  // register uclass
     } else {
         lua_pushvalue(L, base);
@@ -396,6 +398,7 @@ int luaC_newuclass(lua_State *L, luaC_Class *c) {
     lua_pushvalue(L, class);
     luaC_setregfield(L, c->name);  // register class
     lua_remove(L, base);           // remove base from stack
+    lua_remove(L, uclass);         // remove uclass from stack
     return 1;
 }
 
