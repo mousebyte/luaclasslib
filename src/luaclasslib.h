@@ -27,16 +27,16 @@ typedef void (*luaC_Destructor)(void *p);
 #define LUAC_CLASS_HEADER                \
     /** The name of the class. */        \
     const char      *name;               \
-    /** The name of the parent */        \
+    /** The name of the parent. */       \
     const char      *parent;             \
     /** Whether to allow construction */ \
-    /** by calling the class object */   \
+    /** by calling the class object. */  \
     int              user_ctor;          \
-    /** The class allocator */           \
+    /** The class allocator. */          \
     luaC_Constructor alloc;              \
-    /** The class garbage collector */   \
+    /** The class garbage collector. */  \
     luaC_Destructor  gc;                 \
-    /** The class methods */             \
+    /** The class methods. */            \
     luaL_Reg        *methods;
 
 /// Contains information about a user data class.
@@ -70,7 +70,7 @@ static inline int luaC_uvrawget(lua_State *L, int idx, int uv) {
  * @brief Does the equivalent of `t[k] = v`, where `t` is the table stored in
  * the given user value of the userdata at the given index, `v` is the value on
  * top of the stack, and `k` is the value just below the top. The access is raw
- * (does not use the `__index` * metavalue).
+ * (does not use the `__index` metavalue).
  *
  * @param L The Lua state.
  * @param idx The index of the userdata.
@@ -92,7 +92,7 @@ static inline int luaC_uvrawset(lua_State *L, int idx, int uv) {
  * @brief Pushes onto the stack the value `t[k]` where `t` is the table stored
  * in the given user value of the userdata at the given index, and `k` is the
  * pointer `p` represented as a light userdata. The access is raw (does not use
- * the `__index` * metavalue).
+ * the `__index` metavalue).
  *
  * @param L The Lua state.
  * @param idx The index of the userdata.
@@ -113,7 +113,7 @@ static inline int luaC_uvrawgetp(lua_State *L, int idx, int uv, const void *p) {
  * @brief Does the equivalent of `t[k] = v`, where `t` is the table stored in
  * the given user value of the userdata at the given index, `v` is the value on
  * top of the stack, and `k` is the pointer `p` represented as a light userdata.
- * The access is raw (does not use the `__index` * metavalue).
+ * The access is raw (does not use the `__index` metavalue).
  *
  *
  * @param L The Lua state.
