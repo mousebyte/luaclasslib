@@ -24,13 +24,20 @@ typedef void (*luaC_Constructor)(lua_State *L);
 typedef void (*luaC_Destructor)(void *p);
 
 /// Header for luaC_Class objects.
-#define LUAC_CLASS_HEADER              \
-    /** The name of the class. */      \
-    const char      *name;             \
-    /** The class allocator */         \
-    luaC_Constructor alloc;            \
-    /** The class garbage collector */ \
-    luaC_Destructor  gc;
+#define LUAC_CLASS_HEADER                \
+    /** The name of the class. */        \
+    const char      *name;               \
+    /** The name of the parent */        \
+    const char      *parent;             \
+    /** Whether to allow construction */ \
+    /** by calling the class object */   \
+    int              user_ctor;          \
+    /** The class allocator */           \
+    luaC_Constructor alloc;              \
+    /** The class garbage collector */   \
+    luaC_Destructor  gc;                 \
+    /** The class methods */             \
+    luaL_Reg         methods[];
 
 /// Contains information about a user data class.
 typedef struct {
@@ -416,13 +423,7 @@ void luaC_super(lua_State *L, const char *name, int nresults);
  * @return 1 if the class was successfully created and registered, and 0
  * otherwise.
  */
-int luaC_newuclass(
-    lua_State      *L,
-    const char     *name,
-    const char     *parent,
-    const luaL_Reg *methods,
-    luaC_Class     *uclass,
-    int             userCtor);
+int luaC_newuclass(lua_State *L, luaC_Class *c);
 
 /**
  * @brief Loads the Lua class library user functions into the global namespace.

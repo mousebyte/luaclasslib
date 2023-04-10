@@ -20,8 +20,6 @@ static void BasicClass_gc(void *p) {
     }
 }
 
-static luaC_Class BasicClass = {"BasicClass", BasicClass_alloc, BasicClass_gc};
-
 static int BasicClass_init(lua_State *L) {
     luaC_superinit(L);
     return 0;
@@ -46,11 +44,17 @@ static int BasicClass_sum(lua_State *L) {
     return 1;
 }
 
-static luaL_Reg BasicClass_funcs[] = {
-    {"new",  BasicClass_init},
-    {"setx", BasicClass_setx},
-    {"sum",  BasicClass_sum },
-    {NULL,   NULL           }
+static luaC_Class BasicClass = {
+    .name      = "BasicClass",
+    .parent    = "Base",
+    .user_ctor = 1,
+    .alloc     = BasicClass_alloc,
+    .gc        = BasicClass_gc,
+    .methods   = {
+                  {"new", BasicClass_init},
+                  {"setx", BasicClass_setx},
+                  {"sum", BasicClass_sum},
+                  {NULL, NULL}}
 };
 
 #define FILECLASS_DATA_FIELDS \
@@ -88,8 +92,6 @@ static void FileClass_gc(void *p) {
     }
 }
 
-static luaC_Class FileClass = {"FileClass", FileClass_alloc, FileClass_gc};
-
 static int FileClass_init(lua_State *L) {
     lua_pushvalue(L, 2);
     lua_setfield(L, 1, "x");
@@ -113,12 +115,18 @@ static int FileClass_readline(lua_State *L) {
     return 1;
 }
 
-static luaL_Reg FileClass_funcs[] = {
-    {"foo",      foo               },
-    {"new",      FileClass_init    },
-    {"filename", FileClass_filename},
-    {"readline", FileClass_readline},
-    {NULL,       NULL              }
+static luaC_Class FileClass = {
+    .name      = "FileClass",
+    .parent    = NULL,
+    .user_ctor = 1,
+    .alloc     = FileClass_alloc,
+    .gc        = FileClass_gc,
+    .methods   = {
+                  {"foo", foo},
+                  {"new", FileClass_init},
+                  {"filename", FileClass_filename},
+                  {"readline", FileClass_readline},
+                  {NULL, NULL}}
 };
 
 typedef struct DFileClass_Data {
@@ -147,8 +155,6 @@ static void DFileClass_gc(void *p) {
     }
 }
 
-static luaC_Class DFileClass = {"DFileClass", DFileClass_alloc, DFileClass_gc};
-
 static int DFileClass_init(lua_State *L) {
     luaC_superinit(L);
     return 0;
@@ -173,9 +179,15 @@ static int DFileClass_getint(lua_State *L) {
     return 1;
 }
 
-static luaL_Reg DFileClass_funcs[] = {
-    {"new",    DFileClass_init  },
-    {"setint", DFileClass_setint},
-    {"getint", DFileClass_getint},
-    {NULL,     NULL             }
+static luaC_Class DFileClass = {
+    .name      = "DFileClass",
+    .parent    = "FileClass",
+    .user_ctor = 1,
+    .alloc     = DFileClass_alloc,
+    .gc        = DFileClass_gc,
+    .methods   = {
+                  {"new", DFileClass_init},
+                  {"setint", DFileClass_setint},
+                  {"getint", DFileClass_getint},
+                  {NULL, NULL}}
 };

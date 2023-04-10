@@ -9,7 +9,7 @@ TEST_CASE("C Classes") {
     luaL_openlibs(L);
 
     SUBCASE("Basic C Class") {
-        luaC_newclass(L, "CClass", NULL, CClass_funcs);
+        luaC_newuclass(L, &CClass);
         REQUIRE(luaC_isclass(L, -1));
         lua_pop(L, 1);
 
@@ -29,7 +29,7 @@ TEST_CASE("C Classes") {
         REQUIRE(luaC_registerclass(L, -1));
         lua_pop(L, 1);
 
-        luaC_newclass(L, "DCClass", "Base", DCClass_funcs);
+        luaC_newuclass(L, &DCClass);
         REQUIRE(luaC_isclass(L, -1));
 
         REQUIRE(lua_getfield(L, -1, "var") == LUA_TSTRING);

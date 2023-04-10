@@ -306,20 +306,14 @@ static int default_udata_gc(lua_State *L) {
     return 0;
 }
 
-int luaC_newuclass(
-    lua_State      *L,
-    const char     *name,
-    const char     *parent,
-    const luaL_Reg *methods,
-    luaC_Class     *uclass,
-    int             userCtor) {
-    if (luaC_getregfield(L, name) != LUA_TNIL) return 0;
+int luaC_newuclass(lua_State *L, luaC_Class *c) {
+    if (luaC_getregfield(L, c->name) != LUA_TNIL) return 0;
     lua_pop(L, 1);
 
-    lua_newtable(L);               // base table
-    luaL_setfuncs(L, methods, 0);  // load in methods
-    lua_newtable(L);               // class table
-    lua_newtable(L);               // class metatable
+    lua_newtable(L);                  // base table
+    luaL_setfuncs(L, c->methods, 0);  // load in methods
+    lua_newtable(L);                  // class table
+    lua_newtable(L);                  // class metatable
     int class_mt       = lua_gettop(L);
     int class          = class_mt - 1;
     int base           = class - 1;
@@ -344,13 +338,13 @@ int luaC_newuclass(
     lua_setfield(L, class, "__init");  // set class __init
     lua_pushvalue(L, base);
     lua_setfield(L, class, "__base");  // set class __base
-    lua_pushstring(L, name);
+    lua_pushstring(L, c->name);
     lua_setfield(L, class, "__name");  // set class __name
 
     lua_pushvalue(L, class);
     lua_setfield(L, base, "__class");  // set base __class
 
-    if (uclass) {
+    if (c->alloc) {
         lua_pushvalue(L, base);
         lua_pushcclosure(L, default_udata_index, 1);
         lua_setfield(L, base, "__index");  // set base __index
@@ -360,7 +354,7 @@ int luaC_newuclass(
         lua_setfield(L, base, "__gc");  // set base __gc
 
         lua_pushvalue(L, class);
-        lua_pushlightuserdata(L, uclass);
+        lua_pushlightuserdata(L, c);
         luaC_setreg(L);  // register uclass
     } else {
         lua_pushvalue(L, base);
@@ -368,17 +362,17 @@ int luaC_newuclass(
     }
 
     // handle constructor
-    if (userCtor) {
+    if (c->user_ctor) {
         lua_pushcfunction(L, default_class_call);
         lua_setfield(L, class_mt, "__call");  // set meta __call
     }
 
     // handle inheritance
-    if (parent == NULL) {                      // no parent
+    if (c->parent == NULL) {                   // no parent
         lua_pushvalue(L, base);                // push base
         lua_setfield(L, class_mt, "__index");  // set meta __index to base
-    } else if (luaC_getregfield(L, parent) == LUA_TTABLE) {  // else get parent
-        lua_pushvalue(L, base);                              // push base
+    } else if (luaC_getregfield(L, c->parent) == LUA_TTABLE) {  // get parent
+        lua_pushvalue(L, base);                                 // push base
         lua_pushcclosure(L, default_class_index, 1);  // wrap it in a closure
         lua_setfield(L, class_mt, "__index");         // set meta __index
         lua_getfield(L, -1, "__base");                // get parent __base
@@ -391,7 +385,7 @@ int luaC_newuclass(
 
     lua_setmetatable(L, class);  // set class metatable
 
-    if (lua_getfield(L, -1, "__parent") != LUA_TNIL) {
+    if (lua_getfield(L, class, "__parent") != LUA_TNIL) {
         if (lua_getfield(L, -1, "__inherited") != LUA_TNIL) {
             lua_insert(L, -2);        // put inherited behind parent
             lua_pushvalue(L, class);  // push our (derived) class
@@ -400,8 +394,8 @@ int luaC_newuclass(
     } else lua_pop(L, 1);             // else pop nil
 
     lua_pushvalue(L, class);
-    luaC_setregfield(L, name);  // register class
-    lua_remove(L, base);        // remove base from stack
+    luaC_setregfield(L, c->name);  // register class
+    lua_remove(L, base);           // remove base from stack
     return 1;
 }
 

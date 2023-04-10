@@ -5,10 +5,13 @@ static int CClass_init(lua_State *L) {
     return 0;
 }
 
-static const luaL_Reg CClass_funcs[] = {
-    {"foo", foo        },
-    {"new", CClass_init},
-    {NULL,  NULL       }
+static luaC_Class CClass = {
+    .name      = "CClass",
+    .parent    = NULL,
+    .user_ctor = 1,
+    .alloc     = NULL,
+    .gc        = NULL,
+    .methods   = {{"foo", foo}, {"new", CClass_init}, {NULL, NULL}}
 };
 
 static int DCClass_init(lua_State *L) {
@@ -17,8 +20,11 @@ static int DCClass_init(lua_State *L) {
     return 0;
 }
 
-static const luaL_Reg DCClass_funcs[] = {
-    {"foo", foo         },
-    {"new", DCClass_init},
-    {NULL,  NULL        }
+static luaC_Class DCClass = {
+    .name      = "DCClass",
+    .parent    = "Base",
+    .user_ctor = 1,
+    .alloc     = NULL,
+    .gc        = NULL,
+    .methods   = {{"foo", foo}, {"new", DCClass_init}, {NULL, NULL}}
 };
