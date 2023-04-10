@@ -51,43 +51,45 @@ static int classlib_uvset(lua_State *L) {
 }
 
 int luaC_isobject(lua_State *L, int index) {
-    int top = lua_gettop(L);
-    int ret = lua_getmetatable(L, index) &&
-              (lua_getfield(L, -1, "__class") == LUA_TTABLE) &&
-              (lua_getfield(L, -1, "__base") == LUA_TTABLE) &&
-              lua_rawequal(L, -1, -3);
+    int top = lua_gettop(L), ret = 0;
+    if (lua_getmetatable(L, index)) {  // check for metatable
+        lua_pushstring(L, "__class");
+        if (lua_rawget(L, -2) == LUA_TTABLE) {  // check for __class table
+            lua_pushstring(L, "__base");
+            // check for __base table in class equal to metatable
+            ret = lua_rawget(L, -2) == LUA_TTABLE && lua_rawequal(L, -1, -3);
+        }
+    }
     lua_settop(L, top);
     return ret;
 }
 
 int luaC_isclass(lua_State *L, int index) {
-    int top = lua_gettop(L);
-    lua_pushvalue(L, index);
-    int ret = (lua_getfield(L, -1, "__base") == LUA_TTABLE) &&
-              (lua_getfield(L, -1, "__class") == LUA_TTABLE) &&
-              lua_rawequal(L, -1, -3);
+    index   = lua_absindex(L, index);
+    int top = lua_gettop(L), ret = 0;
+    lua_pushstring(L, "__base");
+    if (lua_rawget(L, index) == LUA_TTABLE) {  // check for __base table
+        lua_pushstring(L, "__class");
+        // check for __class table in base equal to argument
+        ret = lua_rawget(L, -2) == LUA_TTABLE && lua_rawequal(L, -1, index);
+    }
     lua_settop(L, top);
     return ret;
 }
 
 int luaC_isinstance(lua_State *L, int index, const char *name) {
+    int top = lua_gettop(L), ret = 0;
     if (lua_getfield(L, index, "__class") == LUA_TTABLE) {
         while (lua_getfield(L, -1, "__name") == LUA_TSTRING) {
-            if (strcmp(name, lua_tostring(L, -1)) != 0) {
-                lua_pop(L, 1);  // pop name
-                if (lua_getfield(L, -1, "__parent") == LUA_TNIL) {
-                    lua_pop(L, 1);  // pop nil
-                    break;
-                } else lua_remove(L, -2);  // remove previous class
-            } else {
-                lua_pop(L, 2);  // pop name and class
-                return 1;
-            }
+            ret = strcmp(name, lua_tostring(L, -1)) == 0;
+            lua_pop(L, 1);  // pop name
+            // break if we found a matching class or run out of parents
+            if (ret || lua_getfield(L, -1, "__parent") == LUA_TNIL) break;
+            lua_remove(L, -2);  // parent found, remove previous class
         }
-        lua_pop(L, 1);  // pop name
     }
-    lua_pop(L, 1);  // pop class
-    return 0;
+    lua_settop(L, top);
+    return ret;
 }
 
 void *luaC_checkuclass(lua_State *L, int arg, const char *name) {
@@ -113,25 +115,18 @@ luaC_Class *luaC_getuclass(lua_State *L, int index) {
 
 int luaC_registerclass(lua_State *L, int index) {
     if (!luaC_isclass(L, index)) return 0;
-    lua_pushvalue(L, index);                                // push the class
+    int top = lua_gettop(L), ret = 0;
+    lua_pushvalue(L, index);                                // push class
     while (lua_getfield(L, -1, "__name") == LUA_TSTRING) {  // get name
-        const char *name = lua_tostring(L, -1);
-        if (luaC_getregfield(L, name) == LUA_TNIL) {  // class not registered
-            lua_pop(L, 1);
-            lua_pushvalue(L, -2);       // push class
-            luaC_setregfield(L, name);  // register class
-            lua_pop(L, 1);              // pop name
-            if (lua_getfield(L, -1, "__parent") == LUA_TNIL) {
-                lua_pop(L, 2);  // pop nil and class
-                return 1;
-            } else lua_remove(L, -2);  // parent found, remove previous class
-        } else {
-            lua_pop(L, 2);  // class registered, pop name and class
-            return 1;
+        lua_pushvalue(L, -2);                               // push class
+        luaC_setreg(L);                                     // register class
+        if (lua_getfield(L, -1, "__parent") == LUA_TNIL) {
+            ret = 1;  // no more parents, operation successful
+            break;
         }
     }
-    lua_pop(L, 2);
-    return 0;
+    lua_settop(L, top);
+    return ret;
 }
 
 // default class __call
