@@ -380,6 +380,11 @@ int register_c_class(lua_State *L, int idx) {
     return 1;
 }
 
+static inline int class_has_alloc(lua_State *L, int idx) {
+    luaC_Class *c = luaC_getuclass(L, idx);
+    return c && c->alloc;
+}
+
 int luaC_register(lua_State *L, int index) {
     if (lua_isuserdata(L, index)) return register_c_class(L, index);
     if (!luaC_isclass(L, index)) return 0;
@@ -391,7 +396,9 @@ int luaC_register(lua_State *L, int index) {
         if (lua_getfield(L, -1, "__parent") == LUA_TNIL) {
             ret = 1;  // no more parents, operation successful
             break;
-        }
+        } else if (class_has_alloc(L, -1))
+            return luaL_error(
+                L, "Standard class cannot have userdata class base.");
     }
     lua_settop(L, top);
     return ret;
