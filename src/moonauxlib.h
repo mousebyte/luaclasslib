@@ -37,7 +37,7 @@ static inline int moonL_print(lua_State *L, int index) {
     lua_getfield(L, -1, "p");
     lua_insert(L, -3);
     lua_pop(L, 1);
-    return lua_pcall(L, 1, LUA_MULTRET, 0);
+    return lua_pcall(L, 1, 0, 0);
 }
 
 #endif
