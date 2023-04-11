@@ -82,6 +82,7 @@ static inline int luaC_uvrawset(lua_State *L, int idx, int uv) {
     if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
         lua_insert(L, -3);  // put uv before key and value
         lua_rawset(L, -3);  // set the value
+        lua_pop(L, 1);      // pop the uv
         return 1;
     }
     lua_pop(L, 3);  // otherwise pop uv, key, and value
@@ -126,6 +127,7 @@ static inline int luaC_uvrawsetp(lua_State *L, int idx, int uv, const void *p) {
     if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
         lua_insert(L, -2);      // put uv before value
         lua_rawsetp(L, -2, p);  // set the value
+        lua_pop(L, 1);          // pop the uv
         return 1;
     }
     lua_pop(L, 2);  // otherwise pop uv and value
@@ -168,6 +170,7 @@ static inline int luaC_uvset(lua_State *L, int idx, int uv) {
     if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
         lua_insert(L, -3);    // put uv before key and value
         lua_settable(L, -3);  // set the value
+        lua_pop(L, 1);        // pop the uv
         return 1;
     }
     lua_pop(L, 3);  // otherwise pop uv, key, and value
