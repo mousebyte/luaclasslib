@@ -400,8 +400,12 @@ int luaC_register(lua_State *L, int index) {
 }
 
 void luaC_unregister(lua_State *L, const char *name) {
-    lua_pushnil(L);
-    luaC_setregfield(L, name);
+    if (luaC_getregfield(L, name) == LUA_TTABLE) {
+        lua_pushnil(L);
+        luaC_setreg(L);  // remove C class if present
+        lua_pushnil(L);
+        luaC_setregfield(L, name);  // remove class table
+    } else lua_pop(L, 1);
 }
 
 int luaC_newclass(
