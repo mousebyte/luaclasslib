@@ -1,6 +1,8 @@
 #include "tests.hpp"
 extern "C" {
 
+#include "classes/simple.h"
+
 static int func_for_derived(lua_State *L) {
     lua_pushstring(L, "Aha! ");
     lua_insert(L, 1);
@@ -9,30 +11,55 @@ static int func_for_derived(lua_State *L) {
 }
 }
 
-TEST_CASE("Basic Functionality") {
-    LCL_TEST_BEGIN
+TEST_SUITE("Basic Functionality") {
+    TEST_CASE("Class Registry") {
+        LCL_TEST_BEGIN;
 
-    SUBCASE("Registration") {
-        moonL_dofile(L, "Derived.moon");
-        LCL_CHECKSTACK(1);
-        CHECK(lua_type(L, -1) == LUA_TTABLE);
-        CHECK(luaC_isclass(L, -1));
-        CHECK(luaC_register(L, -1));
-        lua_pop(L, 1);
+        SUBCASE("Registration") {
+            moonL_dofile(L, "Derived.moon");
+            LCL_CHECKSTACK(1);
+            CHECK(lua_type(L, -1) == LUA_TTABLE);
+            CHECK(luaC_isclass(L, -1));
+            CHECK(luaC_register(L, -1));
+            lua_pop(L, 1);
 
-        CHECK(luaC_getclass(L, "Base") == LUA_TTABLE);
-        LCL_CHECKSTACK(1);
-        CHECK(luaC_isclass(L, -1));
-        lua_pop(L, 1);
+            CHECK(luaC_getclass(L, "Base") == LUA_TTABLE);
+            LCL_CHECKSTACK(1);
+            CHECK(luaC_isclass(L, -1));
+            lua_pop(L, 1);
 
-        CHECK(luaC_getclass(L, "Derived") == LUA_TTABLE);
-        LCL_CHECKSTACK(1);
-        CHECK(luaC_isclass(L, -1));
-        CHECK(lua_getfield(L, -1, "var") == LUA_TSTRING);
-        CHECK(String(lua_tostring(L, -1)) == "Eek!");
+            CHECK(luaC_getclass(L, "Derived") == LUA_TTABLE);
+            LCL_CHECKSTACK(1);
+            CHECK(luaC_isclass(L, -1));
+            CHECK(lua_getfield(L, -1, "var") == LUA_TSTRING);
+            CHECK(String(lua_tostring(L, -1)) == "Eek!");
+        }
+
+        SUBCASE("Unregistration") {
+            REQUIRE(luaC_newclass(
+                L, "SimpleBase", NULL, simple_base_class_methods));
+            LCL_CHECKSTACK(1);
+            lua_pop(L, 1);
+
+            REQUIRE(luaC_getclass(L, "SimpleBase") == LUA_TTABLE);
+            LCL_CHECKSTACK(1);
+            REQUIRE(luaC_getuclass(L, -1) != NULL);
+
+            luaC_unregister(L, "SimpleBase");
+
+            REQUIRE(luaC_getclass(L, "Base") == LUA_TNIL);
+            LCL_CHECKSTACK(2);
+            lua_pop(L, 1);
+
+            REQUIRE(luaC_getuclass(L, -1) == NULL);
+        }
+
+        LCL_TEST_END
     }
 
-    SUBCASE("Construction") {
+    TEST_CASE("Class Construction") {
+        LCL_TEST_BEGIN
+
         moonL_dofile(L, "Derived.moon");
         LCL_CHECKSTACK(1);
         REQUIRE(luaC_register(L, -1));
@@ -75,7 +102,8 @@ TEST_CASE("Basic Functionality") {
             REQUIRE(
                 String(lua_tostring(L, -1)) == "Aha! n is now 37.1, squeak!");
         }
+        LCL_TEST_END
     }
 
-    LCL_TEST_END
+    TEST_CASE("User Value Accessors") { }
 }
