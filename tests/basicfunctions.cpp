@@ -9,6 +9,26 @@ static int func_for_derived(lua_State *L) {
     lua_concat(L, 2);
     return 1;
 }
+
+static int uservalue_index(lua_State *L) {
+    lua_pushstring(L, "nothing here!");
+    return 1;
+}
+
+static int uservalue_newindex(lua_State *L) {
+    switch (lua_type(L, 3)) {
+        case LUA_TNUMBER:
+            lua_pushvalue(L, 3);
+            lua_arith(L, LUA_OPADD);
+            break;
+        case LUA_TSTRING:
+            lua_pushstring(L, ", squeak!");
+            lua_concat(L, 2);
+            break;
+    }
+    lua_rawset(L, 1);
+    return 0;
+}
 }
 
 TEST_SUITE("Basic Functionality") {
@@ -105,5 +125,75 @@ TEST_SUITE("Basic Functionality") {
         LCL_TEST_END
     }
 
-    TEST_CASE("User Value Accessors") { }
+    TEST_CASE("User Value Accessors") {
+        LCL_TEST_BEGIN
+
+        int  i = 3;
+        int *p = (int *)lua_newuserdatauv(L, sizeof(int), 1);
+        lua_newtable(L);  // user value
+        lua_newtable(L);  // metatable for user value
+        lua_pushcfunction(L, uservalue_index);
+        lua_setfield(L, -2, "__index");
+        lua_pushcfunction(L, uservalue_newindex);
+        lua_setfield(L, -2, "__newindex");
+        lua_setmetatable(L, -2);
+        lua_setiuservalue(L, -2, 1);
+
+        lua_pushnumber(L, 50);
+        REQUIRE(luaC_setuvfield(L, -2, 1, "x"));
+        LCL_CHECKSTACK(1);
+        REQUIRE(luaC_getuvfield(L, -1, 1, "x") == LUA_TNUMBER);
+        LCL_CHECKSTACK(2);
+        REQUIRE(lua_tonumber(L, -1) == 100);
+        lua_pop(L, 1);
+
+        REQUIRE(luaC_getuvfield(L, -1, 1, "n") == LUA_TSTRING);
+        REQUIRE(luaC_uvget(L, -2, 1) == LUA_TSTRING);
+        LCL_CHECKSTACK(2);
+        REQUIRE(String(lua_tostring(L, -1)) == "nothing here!");
+        lua_pop(L, 1);
+
+        lua_pushstring(L, "str");
+        lua_pushstring(L, "hello");
+        REQUIRE(luaC_uvset(L, -3, 1));
+        LCL_CHECKSTACK(1);
+        lua_pushstring(L, "str");
+        REQUIRE(luaC_uvget(L, -2, 1) == LUA_TSTRING);
+        LCL_CHECKSTACK(2);
+        REQUIRE(String(lua_tostring(L, -1)) == "hello, squeak!");
+        lua_pop(L, 1);
+
+        lua_pushstring(L, "s");
+        REQUIRE(luaC_uvget(L, -2, 1) == LUA_TSTRING);
+        LCL_CHECKSTACK(2);
+        REQUIRE(String(lua_tostring(L, -1)) == "nothing here!");
+        lua_pop(L, 1);
+
+        lua_pushstring(L, "str");
+        lua_pushstring(L, "hello");
+        REQUIRE(luaC_uvrawset(L, -3, 1));
+        LCL_CHECKSTACK(1);
+        REQUIRE(luaC_getuvfield(L, -1, 1, "str") == LUA_TSTRING);
+        LCL_CHECKSTACK(2);
+        REQUIRE(String(lua_tostring(L, -1)) == "hello");
+        lua_pop(L, 1);
+
+        lua_pushstring(L, "g");
+        REQUIRE(luaC_uvrawget(L, -2, 1) == LUA_TNIL);
+        LCL_CHECKSTACK(2);
+        lua_pop(L, 1);
+
+        REQUIRE(luaC_uvrawgetp(L, -1, 1, &i) == LUA_TNIL);
+        LCL_CHECKSTACK(2);
+        lua_pop(L, 1);
+
+        lua_pushstring(L, "eek!");
+        REQUIRE(luaC_uvrawsetp(L, -2, 1, &i));
+        LCL_CHECKSTACK(1);
+        REQUIRE(luaC_uvrawgetp(L, -1, 1, &i) == LUA_TSTRING);
+        LCL_CHECKSTACK(2);
+        REQUIRE(String(lua_tostring(L, -1)) == "eek!");
+
+        LCL_TEST_END
+    }
 }
