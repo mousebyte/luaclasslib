@@ -25,7 +25,7 @@ target_link_libraries(luaclass ${LUA_LIBRARIES})
 set_target_properties(luaclass PROPERTIES EXPORT_NAME LuaClass)
 
 target_compile_options(luaclass PUBLIC 
-    -fno-strict-aliasing -Wall -Wextra -Wunused
+    -fno-strict-aliasing -Wall -Wextra -Wunused -Wno-unused-function
     $<$<CONFIG:Debug>:-g3 -ggdb3 -pedantic>
     $<$<CONFIG:Release>:-O3 -Wfatal-errors>)
 
@@ -59,7 +59,18 @@ if(LUACLASS_MAIN_PROJECT)
             COMPONENT ${projectname_target}Export)
 endif()
 
-add_executable(tests tests/main.cpp tests/basicfunctions.cpp tests/cclass.cpp tests/userdataclass.cpp tests/methodinjection.cpp)
+add_executable(tests
+    tests/classes/file.c
+    tests/classes/signal.c
+    tests/classes/blocking_signal.c
+    tests/classes/udata_derived.c
+    tests/classes/simple.c
+    tests/main.cpp
+    tests/basicfunctions.cpp
+    tests/cclass.cpp
+    tests/udataclass.cpp
+    tests/udataclass_inheritance.cpp
+    tests/methodinjection.cpp)
 target_compile_features(tests PRIVATE cxx_std_17)
 target_link_libraries(tests luaclass)
 
