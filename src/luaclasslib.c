@@ -106,8 +106,8 @@ luaC_Class *luaC_getuclass(lua_State *L, int index) {
     luaC_Class *ret = NULL;
     if (luaC_isclass(L, index)) {
         lua_pushvalue(L, index);
-        if (luaC_getreg(L) == LUA_TLIGHTUSERDATA)
-            ret = (luaC_Class *)lua_touserdata(L, -1);
+        luaC_getreg(L);
+        if (lua_isuserdata(L, -1)) ret = (luaC_Class *)lua_touserdata(L, -1);
         lua_pop(L, 1);
     }
     return ret;
@@ -117,12 +117,11 @@ luaC_Class *luaC_getuclass(lua_State *L, int index) {
 static int default_class_call(lua_State *L) {
     // create the object
     luaC_Class *class = luaC_getuclass(L, 1);
-    if (!class) lua_newtable(L);
-    else {
+    if (class && class->alloc) {
         class->alloc(L);
         lua_newtable(L);
         lua_setiuservalue(L, -2, 1);
-    }
+    } else lua_newtable(L);
     if (lua_getfield(L, 1, "__base") != LUA_TTABLE) return 0;
     lua_setmetatable(L, -2);            // set object metatable to class base
     lua_pushvalue(L, -1);               // push a copy of object for call
@@ -334,10 +333,6 @@ int register_c_class(lua_State *L, int idx) {
         lua_setfield(L, base, "__newindex");  // set base __newindex
         lua_pushcfunction(L, default_udata_gc);
         lua_setfield(L, base, "__gc");  // set base __gc
-
-        lua_pushvalue(L, class);
-        lua_pushvalue(L, uclass);
-        luaC_setreg(L);  // register uclass
     } else {
         lua_pushvalue(L, base);
         lua_setfield(L, base, "__index");  // set base __index to self
@@ -375,6 +370,9 @@ int register_c_class(lua_State *L, int idx) {
         } else lua_pop(L, 2);         // else pop nil and parent
     } else lua_pop(L, 1);             // else pop nil
 
+    lua_pushvalue(L, class);
+    lua_pushvalue(L, uclass);
+    luaC_setreg(L);  // register uclass
     lua_pushvalue(L, class);
     luaC_setregfield(L, c->name);  // register class
     lua_remove(L, base);           // remove base from stack
