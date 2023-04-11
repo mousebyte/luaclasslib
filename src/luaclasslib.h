@@ -1,4 +1,4 @@
-/// @file moonaux.h
+/// @file luaclasslib.h
 
 #ifndef LUACLASSLIB_H
 #define LUACLASSLIB_H
@@ -387,16 +387,17 @@ void luaC_defernewindex(lua_State *L);
 int luaC_getparentfield(lua_State *L, int index, int depth, const char *name);
 
 /**
- * @brief Calls a parent class method, passing all values on the stack as
- * arguments. Leaves the stack in its previous state. Should only be used in C
- * class methods, in which the first stack index is the object on which the
- * method was invoked.
+ * @brief Calls a parent class method, passing the given number of arguments
+ * from the top of the stack. Leaves the stack in its previous state. Should
+ * only be used in C class methods, in which the first stack index is the object
+ * on which the method was invoked.
  *
  * @param L The Lua state.
  * @param name The name of the method.
+ * @param nargs The number of arguments to pass.
  * @param nresults The number of results to return.
  */
-void luaC_super(lua_State *L, const char *name, int nresults);
+void luaC_super(lua_State *L, const char *name, int nargs, int nresults);
 
 /**
  * @brief Adds the class at the given stack index to the class
@@ -473,7 +474,7 @@ void luaopen_class(lua_State *L);
  *
  * @param L The Lua state.
  */
-#define luaC_superinit(L) luaC_super((L), "__init", 0);
+#define luaC_superinit(L) luaC_super((L), "__init", lua_gettop(L) - 1, 0);
 
 /**
  * @brief Replaces the index method of a class with a closure of the given C

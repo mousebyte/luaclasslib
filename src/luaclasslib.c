@@ -239,17 +239,14 @@ int luaC_getparentfield(lua_State *L, int index, int depth, const char *name) {
     return ret;
 }
 
-void luaC_super(lua_State *L, const char *name, int nresults) {
+void luaC_super(lua_State *L, const char *name, int nargs, int nresults) {
     if (luaC_getparentfield(L, 1, 1, name) != LUA_TFUNCTION) {
         lua_pop(L, 1);
         return;
     }
-
-    int nargs = lua_gettop(L) - 1;
-    luaL_checkstack(L, nargs, "Too many arguments for super invocation.");
-    for (int i = 1; i <= nargs; i++)  // push a copy of the whole stack
-        lua_pushvalue(L, i);
-    lua_call(L, nargs, nresults);
+    lua_pushvalue(L, 1);           // push obj
+    lua_rotate(L, -nargs - 2, 2);  // put method and obj before args
+    lua_call(L, nargs + 1, nresults);
 }
 
 // default class __init
