@@ -113,22 +113,6 @@ luaC_Class *luaC_getuclass(lua_State *L, int index) {
     return ret;
 }
 
-int luaC_registerclass(lua_State *L, int index) {
-    if (!luaC_isclass(L, index)) return 0;
-    int top = lua_gettop(L), ret = 0;
-    lua_pushvalue(L, index);                                // push class
-    while (lua_getfield(L, -1, "__name") == LUA_TSTRING) {  // get name
-        lua_pushvalue(L, -2);                               // push class
-        luaC_setreg(L);                                     // register class
-        if (lua_getfield(L, -1, "__parent") == LUA_TNIL) {
-            ret = 1;  // no more parents, operation successful
-            break;
-        }
-    }
-    lua_settop(L, top);
-    return ret;
-}
-
 // default class __call
 static int default_class_call(lua_State *L) {
     // create the object
@@ -248,7 +232,6 @@ void luaC_super(lua_State *L, const char *name, int nargs, int nresults) {
     lua_rotate(L, -nargs - 2, 2);  // put method and obj before args
     lua_call(L, nargs + 1, nresults);
 }
-
 // default class __init
 static int default_init(lua_State *L) {
     return 0;
@@ -303,7 +286,7 @@ static int default_udata_gc(lua_State *L) {
     return 0;
 }
 
-int luaC_registeruclass_fromstack(lua_State *L, int idx) {
+int register_c_class(lua_State *L, int idx) {
     luaC_Class *c = lua_touserdata(L, idx);
     if (!c || luaC_getregfield(L, c->name) != LUA_TNIL) return 0;
     lua_pop(L, 1);
@@ -397,6 +380,43 @@ int luaC_registeruclass_fromstack(lua_State *L, int idx) {
     lua_remove(L, base);           // remove base from stack
     lua_remove(L, uclass);         // remove uclass from stack
     return 1;
+}
+
+int luaC_register(lua_State *L, int index) {
+    if (lua_isuserdata(L, index)) return register_c_class(L, index);
+    if (!luaC_isclass(L, index)) return 0;
+    int top = lua_gettop(L), ret = 0;
+    lua_pushvalue(L, index);                                // push class
+    while (lua_getfield(L, -1, "__name") == LUA_TSTRING) {  // get name
+        lua_pushvalue(L, -2);                               // push class
+        luaC_setreg(L);                                     // register class
+        if (lua_getfield(L, -1, "__parent") == LUA_TNIL) {
+            ret = 1;  // no more parents, operation successful
+            break;
+        }
+    }
+    lua_settop(L, top);
+    return ret;
+}
+
+void luaC_unregister(lua_State *L, const char *name) {
+    lua_pushnil(L);
+    luaC_setregfield(L, name);
+}
+
+int luaC_newclass(
+    lua_State  *L,
+    const char *name,
+    const char *parent,
+    luaL_Reg   *methods) {
+    luaC_Class *cls = (luaC_Class *)lua_newuserdatauv(L, sizeof(luaC_Class), 0);
+    cls->name       = name;
+    cls->parent     = parent;
+    cls->user_ctor  = 1;
+    cls->alloc      = NULL;
+    cls->gc         = NULL;
+    cls->methods    = methods;
+    return luaC_register(L, -1);
 }
 
 void luaopen_class(lua_State *L) {

@@ -65,7 +65,7 @@ TEST_CASE("Method Injection") {
     LCL_CHECKSTACK(1);
     luaC_injectindex(L, -1, index_override);
     LCL_CHECKSTACK(1);
-    REQUIRE(luaC_registerclass(L, -1));
+    REQUIRE(luaC_register(L, -1));
     LCL_CHECKSTACK(1);
     lua_pop(L, 1);
 

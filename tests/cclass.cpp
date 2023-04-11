@@ -33,7 +33,7 @@ TEST_SUITE("Simple Classes") {
 
         moonL_dofile(L, "Base.moon");
         LCL_CHECKSTACK(1);
-        REQUIRE(luaC_registerclass(L, -1));
+        REQUIRE(luaC_register(L, -1));
         LCL_CHECKSTACK(1);
         lua_pop(L, 1);
 

@@ -17,7 +17,7 @@ TEST_CASE("Basic Functionality") {
         LCL_CHECKSTACK(1);
         CHECK(lua_type(L, -1) == LUA_TTABLE);
         CHECK(luaC_isclass(L, -1));
-        CHECK(luaC_registerclass(L, -1));
+        CHECK(luaC_register(L, -1));
         lua_pop(L, 1);
 
         CHECK(luaC_getclass(L, "Base") == LUA_TTABLE);
@@ -35,7 +35,7 @@ TEST_CASE("Basic Functionality") {
     SUBCASE("Construction") {
         moonL_dofile(L, "Derived.moon");
         LCL_CHECKSTACK(1);
-        REQUIRE(luaC_registerclass(L, -1));
+        REQUIRE(luaC_register(L, -1));
         lua_pop(L, 1);
 
         SUBCASE("Base") {

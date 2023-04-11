@@ -21,7 +21,8 @@ TEST_SUITE("User Data Classes") {
         LCL_TEST_BEGIN
 
         SUBCASE("File Class") {
-            luaC_registeruclass(L, &file_class);
+            lua_pushlightuserdata(L, &file_class);
+            luaC_register(L, -1);
             LCL_CHECKSTACK(1);
             REQUIRE(luaC_isclass(L, -1));
             lua_pop(L, 1);
@@ -45,7 +46,8 @@ TEST_SUITE("User Data Classes") {
         }
 
         SUBCASE("Signal Class") {
-            luaC_registeruclass(L, &signal_class);
+            lua_pushlightuserdata(L, &signal_class);
+            luaC_register(L, -1);
             LCL_CHECKSTACK(1);
             REQUIRE(luaC_isclass(L, -1));
             lua_pop(L, 1);

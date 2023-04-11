@@ -400,39 +400,24 @@ int luaC_getparentfield(lua_State *L, int index, int depth, const char *name);
 void luaC_super(lua_State *L, const char *name, int nargs, int nresults);
 
 /**
- * @brief Adds the class at the given stack index to the class
- * registry, along with its parents, if not present already.
+ * @brief Adds the class represented by the value at the given stack index to
+ * the class registry. If the value is a class table, all of its parents will be
+ * registered as well.
  *
  * @param L The Lua state.
  * @param index The stack index of the class.
  *
  * @return 1 if the class was successfully registered, and 0 otherwise.
  */
-int luaC_registerclass(lua_State *L, int index);
+int luaC_register(lua_State *L, int index);
 
 /**
- * @brief Creates and registers the class defined by the luaC_Class at the
- * specified stack index.
+ * @brief Removes the class with the given name from the class registry.
  *
  * @param L The Lua state.
- * @param index The stack index of the luaC_Class.
- *
- * @return 1 if the class was successfully registered, and 0 otherwise.
+ * @param name The name of the class to unregister.
  */
-int luaC_registeruclass_fromstack(lua_State *L, int idx);
-
-/**
- * @brief Helper method for registering a luaC_Class as a light userdata.
- *
- * @param L The Lua state.
- * @param c The class to register.
- *
- * @return 1 if the class was successfully registered, and 0 otherwise;
- */
-static inline int luaC_registeruclass(lua_State *L, luaC_Class *c) {
-    lua_pushlightuserdata(L, c);
-    return luaC_registeruclass_fromstack(L, -1);
-}
+void luaC_unregister(lua_State *L, const char *name);
 
 /**
  * @brief Helper method for creating and registering a simple luaC_Class as a
@@ -447,20 +432,11 @@ static inline int luaC_registeruclass(lua_State *L, luaC_Class *c) {
  * @return 1 if the class was successfully created and registered, and 0
  * otherwise.
  */
-static inline int luaC_newclass(
+int luaC_newclass(
     lua_State  *L,
     const char *name,
     const char *parent,
-    luaL_Reg   *methods) {
-    luaC_Class *cls = (luaC_Class *)lua_newuserdatauv(L, sizeof(luaC_Class), 0);
-    cls->name       = name;
-    cls->parent     = parent;
-    cls->user_ctor  = 1;
-    cls->alloc      = NULL;
-    cls->gc         = NULL;
-    cls->methods    = methods;
-    return luaC_registeruclass_fromstack(L, -1);
-}
+    luaL_Reg   *methods);
 
 /**
  * @brief Loads the Lua class library user functions into the global namespace.

@@ -23,12 +23,14 @@ TEST_SUITE("User Data Classes") {
         doctest::description("userdata class extended by userdata class")) {
         LCL_TEST_BEGIN
 
-        luaC_registeruclass(L, &signal_class);
+        lua_pushlightuserdata(L, &signal_class);
+        luaC_register(L, -1);
         LCL_CHECKSTACK(1);
         REQUIRE(luaC_isclass(L, -1));
         lua_pop(L, 1);
 
-        luaC_registeruclass(L, &blocking_signal_class);
+        lua_pushlightuserdata(L, &blocking_signal_class);
+        luaC_register(L, -1);
         LCL_CHECKSTACK(1);
         REQUIRE(luaC_isclass(L, -1));
         lua_pop(L, 1);
@@ -78,11 +80,12 @@ TEST_SUITE("User Data Classes") {
         LCL_TEST_BEGIN
 
         moonL_dofile(L, "Base.moon");
-        REQUIRE(luaC_registerclass(L, -1));
+        REQUIRE(luaC_register(L, -1));
         LCL_CHECKSTACK(1);
         lua_pop(L, 1);
 
-        luaC_registeruclass(L, &udata_derived_class);
+        lua_pushlightuserdata(L, &udata_derived_class);
+        luaC_register(L, -1);
         LCL_CHECKSTACK(1);
         REQUIRE(luaC_isclass(L, -1));
         lua_pop(L, 1);
