@@ -19,8 +19,8 @@ Introduction
 ------------
 
 LuaClassLib is a small C library providing Moonscript-compatible class support to C applications.
-It consists of two main components: luaclasslib.h, which provides class support functions independently of Moonscript,
-and moonauxlib.h, which requires Moonscript to be available.
+It consists of two main components: ``luaclasslib.h``, which provides class support functions independently of Moonscript,
+and ``moonauxlib.h``, which requires Moonscript to be available.
 
 Usage
 -----
