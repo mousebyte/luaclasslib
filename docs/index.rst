@@ -3,30 +3,29 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+***************************************
 Welcome to LuaClassLib's documentation!
-=======================================
+***************************************
 
 .. toctree::
    :maxdepth: 4
-   :hidden:
-   :caption: Contents:
+   :caption: Contents
 
    self
-   Reference <reference>
-   genindex
+   reference
 
 Introduction
-------------
+============
 
 LuaClassLib is a small C library providing Moonscript-compatible class support to C applications.
 It consists of two main components: ``luaclasslib.h``, which provides class support functions independently of Moonscript,
 and ``moonauxlib.h``, which requires Moonscript to be available.
 
 Usage
------
+=====
 
 Installation
-^^^^^^^^^^^^
+------------
 
 Currently, LuaClassLib can only be installed from source.
 For Linux systems with Lua installed:
@@ -39,7 +38,7 @@ For Linux systems with Lua installed:
    $ make && sudo make install
 
 Examples
-^^^^^^^^
+--------
 
 To create a Lua class from a set of C functions, first put them in a
 `luaL_Reg <http://www.lua.org/manual/5.4/manual.html#luaL_Reg>`_. In the case

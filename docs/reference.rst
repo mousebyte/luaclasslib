@@ -1,12 +1,15 @@
+*********
 Reference
-=========
+*********
+
+.. contents:: Table of Contents
 
 LuaClassLib
------------
+===========
 Contents of the header file ``luaclasslib.h``.
 
 Class Registration
-^^^^^^^^^^^^^^^^^^
+------------------
 Functions supporting the creation and registration of Lua classes.
 
 .. doxygenstruct:: luaC_Class
@@ -32,7 +35,7 @@ Functions supporting the creation and registration of Lua classes.
    :project: LuaClassLib
 
 Utility
-^^^^^^^
+-------
 Utility functions for Lua classes and objects.
 
 .. doxygenfunction:: luaC_construct
@@ -60,7 +63,7 @@ Utility functions for Lua classes and objects.
    :project: LuaClassLib
 
 Introspection
-^^^^^^^^^^^^^
+-------------
 Functions providing introspection into Lua classes and objects.
 
 .. doxygenfunction:: luaC_isclass
@@ -76,7 +79,7 @@ Functions providing introspection into Lua classes and objects.
    :project: LuaClassLib
 
 Method Injection
-^^^^^^^^^^^^^^^^
+----------------
 Functions for overriding class methods.
 
 .. doxygenfunction:: luaC_injectmethod
@@ -95,7 +98,7 @@ Functions for overriding class methods.
    :project: LuaClassLib
 
 User Value Access
-^^^^^^^^^^^^^^^^^
+-----------------
 Functions allowing access to tables stored in the user values of a userdata.
 
 .. doxygenfunction:: luaC_uvget
