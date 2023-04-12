@@ -7,7 +7,7 @@ Welcome to LuaClassLib's documentation!
 =======================================
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 4
    :hidden:
    :caption: Contents:
 
