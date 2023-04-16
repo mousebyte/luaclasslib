@@ -25,7 +25,7 @@ jobs:
       - name: Install Doxygen
         run: sudo apt-get update -y && sudo apt-get install -y doxygen
       - name: Install Python Dependencies
-        run: pip install breathe && pip install sphinx-rtd-theme
+        run: pip install breathe && pip install furo
       - name: Run Sphinx
         run: cd docs && make html
       - uses: actions/upload-pages-artifact@v1.0.8

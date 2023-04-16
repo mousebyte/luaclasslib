@@ -2,8 +2,6 @@
 Reference
 *********
 
-.. contents:: Table of Contents
-
 LuaClassLib
 ===========
 Contents of the header file ``luaclasslib.h``.
