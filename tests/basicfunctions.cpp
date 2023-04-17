@@ -128,8 +128,8 @@ TEST_SUITE("Basic Functionality") {
     TEST_CASE("User Value Accessors") {
         LCL_TEST_BEGIN
 
-        int  i = 3;
-        int *p = (int *)lua_newuserdatauv(L, sizeof(int), 1);
+        int i = 3;
+        lua_newuserdatauv(L, sizeof(int), 1);
         lua_newtable(L);  // user value
         lua_newtable(L);  // metatable for user value
         lua_pushcfunction(L, uservalue_index);

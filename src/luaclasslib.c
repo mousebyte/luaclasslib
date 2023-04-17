@@ -2,6 +2,9 @@
 #include <luaclasslib.h>
 #include <string.h>
 
+// to suppress warnings
+#define UNUSED(...) (void)(__VA_ARGS__)
+
 #define CLASSLIB_REGISTRY_KEY "luaclass.lib"
 
 static void luaC_setreg(lua_State *L) {
@@ -234,6 +237,7 @@ void luaC_super(lua_State *L, const char *name, int nargs, int nresults) {
 
 // default class __init
 static int default_init(lua_State *L) {
+    UNUSED(L);
     return 0;
 }
 
