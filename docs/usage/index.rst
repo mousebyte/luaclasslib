@@ -22,32 +22,17 @@ Basic Usage
 
 Consider the following Moonscript class:
 
-.. literalinclude:: Example.moon
+.. literalinclude:: ../examples/basic/MyClass.moon
    :language: moonscript
 
 Loading and running the file leaves a Moonscript class object on the stack, which
 can then be registered with the library using `luaC_register`.
 
-.. sourcecode:: c
-
-   lua_State *L = luaL_newstate();
-   moonL_dofile(L, "Example.moon");
-   luaC_register(L, -1);
-
-   // leaves a copy of the class on the stack
-   // which can be modified or removed
-   assert(luaC_isclass(L, -1));
-   lua_pop(L, 1);
+.. literalinclude:: ../examples/basic/main.c
+   :lines: 7-17
 
 Once registered, a class can be constructed by name using `luaC_construct`. Its methods can also be called
 by name using `luaC_mcall` and `luaC_pmcall`.
 
-.. sourcecode:: c
-
-   lua_pushnumber(L, 6);
-   luaC_construct(L, 1, "Example"); // leaves an Example object on the stack
-   assert(luaC_isobject(L, -1));
-   assert(luaC_isinstance(L, -1, "Example"));
-
-   lua_pushnumber(L, 1);
-   luaC_mcall(L, "add", 1, 1); // return value: "There are now 7.0 mice!"
+.. literalinclude:: ../examples/basic/main.c
+   :lines: 19-26
