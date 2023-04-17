@@ -54,10 +54,22 @@ Utility functions for Lua classes and objects.
 .. doxygenfunction:: luaC_pmcall
    :project: LuaClassLib
 
-.. doxygenfunction:: luaC_getclass
+.. doxygenfunction:: luaC_pushclass
    :project: LuaClassLib
 
-.. doxygenfunction:: luaC_getuclass
+.. doxygenfunction:: luaC_uclass
+   :project: LuaClassLib
+
+.. doxygendefine:: luaC_getclass
+   :project: LuaClassLib
+
+.. doxygendefine:: luaC_getbase
+   :project: LuaClassLib
+
+.. doxygendefine:: luaC_getparent
+   :project: LuaClassLib
+
+.. doxygendefine:: luaC_getname
    :project: LuaClassLib
 
 Introspection
