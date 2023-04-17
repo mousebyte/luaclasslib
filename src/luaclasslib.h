@@ -318,18 +318,18 @@ void *luaC_checkuclass(lua_State *L, int arg, const char *name);
  *
  * @return The type of the pushed value.
  */
-int luaC_getclass(lua_State *L, const char *name);
+int luaC_pushclass(lua_State *L, const char *name);
 
 /**
- * @brief Gets a pointer to the user data class associated with the class at the
- * given stack index.
+ * @brief Returns a pointer to the user data class associated with the class at
+ * the given stack index.
  *
  * @param L The Lua state.
  * @param index The stack index of the class.
  *
  * @return A pointer to the user data class, or NULL if none was found.
  */
-luaC_Class *luaC_getuclass(lua_State *L, int index);
+luaC_Class *luaC_uclass(lua_State *L, int index);
 
 /**
  * @brief Construct an instance of a class.
@@ -483,11 +483,50 @@ void luaopen_class(lua_State *L);
     luaC_injectmethod((L), (i), "__newindex", (f))
 
 /**
- * @brief Pushes the class of the object at the given index onto the stack.
+ * @brief Pushes onto the stack the class table of the object at the given stack
+ * index.
  *
  * @param L The Lua state.
  * @param index The index of the object on the stack.
+ *
+ * @return 1 if the class was fetched successfully, and 0 otherwise.
  */
-#define luaC_pushclass(L, index) lua_getfield((L), (index), "__class")
+#define luaC_getclass(L, index) \
+    (lua_getfield((L), (index), "__class") == LUA_TTABLE)
+
+/**
+ * @brief Pushes onto the stack the base table of the class at the given stack
+ * index.
+ *
+ * @param L The Lua state.
+ * @param index The index of the class on the stack.
+ *
+ * @return 1 if the base was fetched successfully, and 0 otherwise.
+ */
+#define luaC_getbase(L, index) \
+    (lua_getfield((L), (index), "__base") == LUA_TTABLE)
+
+/**
+ * @brief Pushes onto the stack the parent class table of the class at the given
+ * stack index.
+ *
+ * @param L The Lua state.
+ * @param index The index of the class on the stack.
+ *
+ * @return 1 if the parent was fetched successfully, and 0 otherwise.
+ */
+#define luaC_getparent(L, index) \
+    (lua_getfield((L), (index), "__parent") == LUA_TTABLE)
+
+/**
+ * @brief Pushes onto the stack the name of the class at the given stack index.
+ *
+ * @param L The Lua state.
+ * @param index The index of the class on the stack.
+ *
+ * @return 1 if the parent was fetched successfully, and 0 otherwise.
+ */
+#define luaC_getname(L, index) \
+    (lua_getfield((L), (index), "__name") == LUA_TSTRING)
 
 #endif

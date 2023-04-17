@@ -43,12 +43,12 @@ TEST_SUITE("Basic Functionality") {
             CHECK(luaC_register(L, -1));
             lua_pop(L, 1);
 
-            CHECK(luaC_getclass(L, "Base") == LUA_TTABLE);
+            CHECK(luaC_pushclass(L, "Base") == LUA_TTABLE);
             LCL_CHECKSTACK(1);
             CHECK(luaC_isclass(L, -1));
             lua_pop(L, 1);
 
-            CHECK(luaC_getclass(L, "Derived") == LUA_TTABLE);
+            CHECK(luaC_pushclass(L, "Derived") == LUA_TTABLE);
             LCL_CHECKSTACK(1);
             CHECK(luaC_isclass(L, -1));
             CHECK(lua_getfield(L, -1, "var") == LUA_TSTRING);
@@ -61,17 +61,17 @@ TEST_SUITE("Basic Functionality") {
             LCL_CHECKSTACK(1);
             lua_pop(L, 1);
 
-            REQUIRE(luaC_getclass(L, "SimpleBase") == LUA_TTABLE);
+            REQUIRE(luaC_pushclass(L, "SimpleBase") == LUA_TTABLE);
             LCL_CHECKSTACK(1);
-            REQUIRE(luaC_getuclass(L, -1) != NULL);
+            REQUIRE(luaC_uclass(L, -1) != NULL);
 
             luaC_unregister(L, "SimpleBase");
 
-            REQUIRE(luaC_getclass(L, "Base") == LUA_TNIL);
+            REQUIRE(luaC_pushclass(L, "Base") == LUA_TNIL);
             LCL_CHECKSTACK(2);
             lua_pop(L, 1);
 
-            REQUIRE(luaC_getuclass(L, -1) == NULL);
+            REQUIRE(luaC_uclass(L, -1) == NULL);
         }
 
         LCL_TEST_END

@@ -79,12 +79,12 @@ int luaC_isclass(lua_State *L, int index) {
 
 int luaC_isinstance(lua_State *L, int index, const char *name) {
     int top = lua_gettop(L), ret = 0;
-    if (lua_getfield(L, index, "__class") == LUA_TTABLE) {
-        while (lua_getfield(L, -1, "__name") == LUA_TSTRING) {
+    if (luaC_getclass(L, index)) {
+        while (luaC_getname(L, -1)) {
             ret = strcmp(name, lua_tostring(L, -1)) == 0;
             lua_pop(L, 1);  // pop name
             // break if we found a matching class or run out of parents
-            if (ret || lua_getfield(L, -1, "__parent") == LUA_TNIL) break;
+            if (ret || !luaC_getparent(L, -1)) break;
             lua_remove(L, -2);  // parent found, remove previous class
         }
     }
@@ -98,11 +98,11 @@ void *luaC_checkuclass(lua_State *L, int arg, const char *name) {
     return lua_touserdata(L, arg);
 }
 
-int luaC_getclass(lua_State *L, const char *name) {
+int luaC_pushclass(lua_State *L, const char *name) {
     return luaC_getregfield(L, name);
 }
 
-luaC_Class *luaC_getuclass(lua_State *L, int index) {
+luaC_Class *luaC_uclass(lua_State *L, int index) {
     luaC_Class *ret = NULL;
     if (luaC_isclass(L, index)) {
         lua_pushvalue(L, index);
@@ -116,13 +116,13 @@ luaC_Class *luaC_getuclass(lua_State *L, int index) {
 // default class __call
 static int default_class_call(lua_State *L) {
     // create the object
-    luaC_Class *class = luaC_getuclass(L, 1);
+    luaC_Class *class = luaC_uclass(L, 1);
     if (class && class->alloc) {
         class->alloc(L);
         lua_newtable(L);
         lua_setiuservalue(L, -2, 1);
     } else lua_newtable(L);
-    if (lua_getfield(L, 1, "__base") != LUA_TTABLE) return 0;
+    if (!luaC_getbase(L, 1)) return 0;
     lua_setmetatable(L, -2);            // set object metatable to class base
     lua_pushvalue(L, -1);               // push a copy of object for call
     lua_rotate(L, 2, 2);                // rotate objects before other args
@@ -133,7 +133,7 @@ static int default_class_call(lua_State *L) {
 }
 
 int luaC_construct(lua_State *L, int nargs, const char *name) {
-    if (luaC_getclass(L, name) == LUA_TTABLE) {
+    if (luaC_pushclass(L, name) == LUA_TTABLE) {
         lua_pushcfunction(L, default_class_call);
         lua_insert(L, -nargs - 2);  // insert ctor before args
         lua_insert(L, -nargs - 1);  // insert class after ctor
@@ -190,7 +190,7 @@ int luaC_deferindex(lua_State *L) {
 void luaC_defernewindex(lua_State *L) {
     if (lua_type(L, lua_upvalueindex(1)) != LUA_TFUNCTION) {
         luaL_getmetafield(L, 1, "__class");
-        if (luaC_getuclass(L, -1)) lua_pushcfunction(L, classlib_uvset);
+        if (luaC_uclass(L, -1)) lua_pushcfunction(L, classlib_uvset);
         else lua_getglobal(L, "rawset");
         lua_remove(L, -2);
     } else lua_pushvalue(L, lua_upvalueindex(1));  // grab original __newindex
@@ -207,9 +207,9 @@ int luaC_getparentfield(lua_State *L, int index, int depth, const char *name) {
         return LUA_TNIL;
     }
 
-    luaC_pushclass(L, index);  // push its class
-    while (depth > 0) {        // walk the heirarchy
-        if (lua_getfield(L, -1, "__parent") == LUA_TNIL) {
+    luaC_getclass(L, index);  // push its class
+    while (depth > 0) {       // walk the heirarchy
+        if (!luaC_getparent(L, -1)) {
             lua_remove(L, -2);  // remove previous class
             return LUA_TNIL;
         }
@@ -231,6 +231,7 @@ void luaC_super(lua_State *L, const char *name, int nargs, int nresults) {
     lua_rotate(L, -nargs - 2, 2);  // put method and obj before args
     lua_call(L, nargs + 1, nresults);
 }
+
 // default class __init
 static int default_init(lua_State *L) {
     return 0;
@@ -267,12 +268,12 @@ static int index_invalid(lua_State *L) {
 }
 
 static int default_udata_gc(lua_State *L) {
-    if (lua_type(L, 1) == LUA_TUSERDATA && luaC_pushclass(L, 1) == LUA_TTABLE) {
+    if (lua_type(L, 1) == LUA_TUSERDATA && luaC_getclass(L, 1)) {
         // loop through the class and all its parents and call their finalizers
         do {
-            luaC_Class *class = luaC_getuclass(L, -1);
+            luaC_Class *class = luaC_uclass(L, -1);
             if (class && class->gc) class->gc(lua_touserdata(L, 1));
-        } while (lua_getfield(L, -1, "__parent") != LUA_TNIL);
+        } while (luaC_getparent(L, -1));
     }
 
     // clear the metatable
@@ -362,7 +363,7 @@ int register_c_class(lua_State *L, int idx) {
 
     lua_setmetatable(L, class);  // set class metatable
 
-    if (lua_getfield(L, class, "__parent") != LUA_TNIL) {
+    if (luaC_getparent(L, class)) {
         if (lua_getfield(L, -1, "__inherited") != LUA_TNIL) {
             lua_insert(L, -2);        // put inherited behind parent
             lua_pushvalue(L, class);  // push our (derived) class
@@ -384,16 +385,16 @@ int luaC_register(lua_State *L, int index) {
     if (lua_isuserdata(L, index)) return register_c_class(L, index);
     if (!luaC_isclass(L, index)) return 0;
     int top = lua_gettop(L), ret = 0;
-    lua_pushvalue(L, index);                                // push class
-    while (lua_getfield(L, -1, "__name") == LUA_TSTRING) {  // get name
-        lua_pushvalue(L, -2);                               // push class
-        luaC_setreg(L);                                     // register class
-        if (lua_getfield(L, -1, "__parent") == LUA_TNIL) {
+    lua_pushvalue(L, index);       // push class
+    while (luaC_getname(L, -1)) {  // get name
+        lua_pushvalue(L, -2);      // push class
+        luaC_setreg(L);            // register class
+        if (!luaC_getparent(L, -1)) {
             ret = 1;  // no more parents, operation successful
             break;
         }
-        luaC_Class *c = luaC_getuclass(L, -1);  // get parent user class
-        if (c && c->alloc)                      // ensure no alloc
+        luaC_Class *c = luaC_uclass(L, -1);  // get parent user class
+        if (c && c->alloc)                   // ensure no alloc
             return luaL_error(
                 L, "Standard class cannot have userdata class base.");
     }
