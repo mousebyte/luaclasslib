@@ -44,12 +44,22 @@ static int luaC_getregfield(lua_State *L, const char *key) {
 }
 
 static int classlib_uvget(lua_State *L) {
-    luaC_uvget(L, 1, lua_isnumber(L, 2) ? lua_tonumber(L, 2) : 1);
+    int uv = 1;
+    if (lua_gettop(L) == 3) {
+        uv = luaL_checknumber(L, 2);
+        lua_remove(L, 2);
+    }
+    luaC_uvget(L, 1, uv);
     return 1;
 }
 
 static int classlib_uvset(lua_State *L) {
-    luaC_uvset(L, 1, lua_isnumber(L, 2) ? lua_tonumber(L, 2) : 1);
+    int uv = 1;
+    if (lua_gettop(L) == 4) {
+        uv = luaL_checknumber(L, 2);
+        lua_remove(L, 2);
+    }
+    luaC_uvset(L, 1, uv);
     return 0;
 }
 
