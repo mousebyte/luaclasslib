@@ -36,7 +36,7 @@ html_theme_options = {
 
         "color-background-primary": "#eee8d5",
         "color-background-secondary": "#fdf6e3",
-        "color-background-hover": "#fdf6e3",
+        "color-background-hover": "#eee8d5",
         "color-background-hover--transparent": "#fdf6e300",
         "color-background-border": "#93a1a1",
         "color-background-item": "#eee8d5",
@@ -59,7 +59,7 @@ html_theme_options = {
 
         "color-background-primary": "#073642",
         "color-background-secondary": "#002b36",
-        "color-background-hover": "#002b36",
+        "color-background-hover": "#073642",
         "color-background-hover--transparent": "#002b3600",
         "color-background-border": "#586e75",
         "color-background-item": "#073642",
