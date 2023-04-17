@@ -80,6 +80,8 @@ pygments_dark_style = "solarized-dark"
 #html_theme = 'alabaster'
 html_static_path = ['_static']
 
+default_role = "any"
+
 breathe_projects = {
 	"LuaClassLib": "_build/xml/"
 }
