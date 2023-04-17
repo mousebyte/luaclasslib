@@ -49,7 +49,9 @@ html_theme_options = {
         "color-highlight-on-target": "#b58900ad",
 
         "color-highlighted-background": "#b58900ad",
-        "color-highlighted-text": "#586e75"
+        "color-highlighted-text": "#586e75",
+
+        "color-admonition-background": "#fdf6e3"
         },
     "dark_css_variables": {
         "color-foreground-primary": "#839496",
@@ -72,7 +74,9 @@ html_theme_options = {
         "color-highlight-on-target": "#b58900ad",
 
         "color-highlighted-background": "#b58900ad",
-        "color-highlighted-text": "#586e75"
+        "color-highlighted-text": "#586e75",
+
+        "color-admonition-background": "#002b36"
         } 
 }
 pygments_style = "solarized-light"
