@@ -98,6 +98,7 @@ static inline int luaC_uvrawset(lua_State *L, int idx, int uv) {
  * @param L The Lua state.
  * @param idx The index of the userdata.
  * @param uv The user value to access.
+ * @param p The pointer to use as a key.
  *
  * @return The type of the pushed value.
  */
@@ -120,6 +121,7 @@ static inline int luaC_uvrawgetp(lua_State *L, int idx, int uv, const void *p) {
  * @param L The Lua state.
  * @param idx The index of the userdata.
  * @param uv The user value to access.
+ * @param p The pointer to use as a key.
  *
  * @return 1 if the operation was successful, and 0 otherwise.
  */
