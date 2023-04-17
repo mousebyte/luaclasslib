@@ -24,7 +24,7 @@ static inline int moonL_loadstring(lua_State *L, const char *str) {
  * @brief Loads a Moonscript file as a Lua chunk.
  *
  * @param L The Lua state.
- * @param str The name of the file to load.
+ * @param name The name of the file to load.
  *
  * @return The Lua pcall status code.
  */
@@ -41,7 +41,7 @@ static inline int moonL_loadfile(lua_State *L, const char *name) {
  * @brief Loads a Moonscript file as a Lua chunk, then runs the returned chunk.
  *
  * @param L The Lua state.
- * @param str The name of the file to load.
+ * @param name The name of the file to load.
  *
  * @return The Lua pcall status code.
  */
