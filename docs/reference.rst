@@ -122,3 +122,27 @@ Functions allowing access to tables stored in the user values of a userdata.
 
 .. doxygenfunction:: luaC_uvrawsetp
    :project: LuaClassLib
+
+MoonAuxLib
+==========
+Contents of the header file ``moonauxlib.h``.
+
+Compiler API
+------------
+Functions from the `Moonscript Compiler API <https://moonscript.org/reference/api.html>`_.
+
+.. doxygenfunction:: moonL_loadstring
+   :project: LuaClassLib
+
+.. doxygenfunction:: moonL_loadfile
+   :project: LuaClassLib
+
+.. doxygenfunction:: moonL_dofile
+   :project: LuaClassLib
+
+Standard Library
+----------------
+Functions from the `Moonscript Standard Library <https://moonscript.org/reference/standard_lib.html>`_.
+
+.. doxygenfunction:: moonL_print
+   :project: LuaClassLib
