@@ -9,7 +9,7 @@ static inline int moonL_loadstring(lua_State *L, const char *str) {
     lua_getfield(L, -1, "loadstring");
     lua_remove(L, -2);
     lua_pushstring(L, str);
-    return lua_pcall(L, 1, LUA_MULTRET, 0);
+    return lua_pcall(L, 1, 1, 0);
 }
 
 static inline int moonL_loadfile(lua_State *L, const char *name) {
@@ -18,7 +18,7 @@ static inline int moonL_loadfile(lua_State *L, const char *name) {
     lua_getfield(L, -1, "loadfile");
     lua_remove(L, -2);
     lua_pushstring(L, name);
-    return lua_pcall(L, 1, LUA_MULTRET, 0);
+    return lua_pcall(L, 1, 1, 0);
 }
 
 static inline int moonL_dofile(lua_State *L, const char *name) {
@@ -27,7 +27,7 @@ static inline int moonL_dofile(lua_State *L, const char *name) {
     lua_getfield(L, -1, "dofile");
     lua_remove(L, -2);
     lua_pushstring(L, name);
-    return lua_pcall(L, 1, LUA_MULTRET, 0);
+    return lua_pcall(L, 1, 1, 0);
 }
 
 static inline int moonL_print(lua_State *L, int index) {
