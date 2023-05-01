@@ -29,10 +29,12 @@ Loading and running the file leaves a Moonscript class object on the stack, whic
 can then be registered with the library using `luaC_register`.
 
 .. literalinclude:: ../examples/basic/main.c
+   :language: LCL
    :lines: 7-17
 
 Once registered, a class can be constructed by name using `luaC_construct`. Its methods can also be called
 by name using `luaC_mcall` and `luaC_pmcall`.
 
 .. literalinclude:: ../examples/basic/main.c
+   :language: LCL
    :lines: 19-26

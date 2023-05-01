@@ -7,3 +7,4 @@ of simple classes (non-userdata), you can use the `luaC_newclass` helper method 
 define the `luaC_Class`.
 
 .. literalinclude:: ../examples/cclass/main.c
+   :language: LCL

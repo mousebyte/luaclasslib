@@ -12,6 +12,30 @@ project = 'LuaClassLib'
 copyright = '2023, Abigail Teague'
 author = 'Abigail Teague'
 
+import re
+from pygments.lexers import CLexer
+from pygments.token import Name, Keyword
+from sphinx.highlighting import lexers
+
+class LCLLexer(CLexer):
+    name = "LCL"
+
+    _luafunc = re.compile(r'(lua|moonL_)([a-zA-Z_]*)')
+    _luatype = ['lua_State', 'luaL_Reg', 'luaC_Class']
+
+    def get_tokens_unprocessed(self, text, stack=('root',)):
+        for index, token, value in CLexer.get_tokens_unprocessed(self, text, stack):
+            if token is Name and value in self._luatype:
+                yield index, Keyword.Type, value
+            elif token is Name and self._luafunc.search(value):
+                yield index, Name.Function, value
+            else:
+                yield index, token, value
+
+
+
+lexers["LCL"] = LCLLexer()
+
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 subprocess.call('doxygen Doxyfile.in', shell=True)
@@ -21,8 +45,6 @@ extensions = ['breathe']
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
-
-highlight_language = 'c'
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
