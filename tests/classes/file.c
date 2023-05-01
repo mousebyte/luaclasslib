@@ -7,10 +7,15 @@ typedef struct {
     char *name;
 } file_t;
 
+// allocator
 static void file_alloc(lua_State *L) {
+    // must have at least one user value
     lua_newuserdatauv(L, sizeof(file_t), 1);
 }
 
+// garbage collector. free any resources used by the object here.
+// note that we do not free the pointer itself; it is a userdata and
+// will be freed by the lua garbage collector.
 static void file_gc(void *p) {
     file_t *o = (file_t *)p;
     if (o->file) {
@@ -23,6 +28,8 @@ static void file_gc(void *p) {
     }
 }
 
+// init function. equivalent to the "new" function in
+// moonscript classes. performs the actual setup of the object.
 static int file_init(lua_State *L) {
     file_t     *o = (file_t *)luaC_checkuclass(L, 1, "File");
     size_t      len;
@@ -33,12 +40,15 @@ static int file_init(lua_State *L) {
     return 0;
 }
 
+// retrieves the filename. we could also have stored this as a
+// standard Lua value in the userdata's user value.
 static int file_filename(lua_State *L) {
     file_t *o = (file_t *)luaC_checkuclass(L, 1, "File");
     lua_pushstring(L, o->name);
     return 1;
 }
 
+// reads a line from the file.
 static int file_readline(lua_State *L) {
     file_t     *o = (file_t *)luaC_checkuclass(L, 1, "File");
     luaL_Buffer b;
