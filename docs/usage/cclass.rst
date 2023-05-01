@@ -6,5 +6,5 @@ To create a Lua class from a set of C functions, first put them in a
 of simple classes (non-userdata), you can use the `luaC_newclass` helper method to
 define the `luaC_Class`.
 
-.. literalinclude:: ../examples/cclass/main.c
+.. literalinclude:: cclass.c
    :language: LCL
