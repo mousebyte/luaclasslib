@@ -21,6 +21,7 @@ class LCLLexer(CLexer):
     name = "LCL"
 
     _luafunc = re.compile(r'(lua|moonL_)([a-zA-Z_]*)')
+    _luaconst = re.compile(r'LUA_([a-zA-Z_]*)')
     _luatype = ['lua_State', 'luaL_Reg', 'luaC_Class']
 
     def get_tokens_unprocessed(self, text, stack=('root',)):
@@ -29,6 +30,8 @@ class LCLLexer(CLexer):
                 yield index, Keyword.Type, value
             elif token is Name and self._luafunc.search(value):
                 yield index, Name.Function, value
+            elif token is Name and self._luaconst.search(value):
+                yield index, Keyword.Type, value #Keyword.Constant just looks like Name.Function
             else:
                 yield index, token, value
 
