@@ -425,6 +425,18 @@ int luaC_register(lua_State *L, int index);
 void luaC_unregister(lua_State *L, const char *name);
 
 /**
+ * @brief Adds a class to `package.loaded` under the module table with the
+ * specified name. If `module` is `NULL`, adds the class directly to
+ * `package.loaded`. The class must already be registered in the LuaClassLib
+ * registry.
+ *
+ * @param L The Lua state.
+ * @param name The class name.
+ * @param module The module to add the class under.
+ */
+void luaC_packageadd(lua_State *L, const char *name, const char *module);
+
+/**
  * @brief Helper method for creating and registering a simple luaC_Class as a
  * full userdata. Useful for when you're using stock classes and don't want to
  * define your luaC_Class with static linkage.

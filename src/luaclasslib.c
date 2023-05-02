@@ -423,6 +423,16 @@ void luaC_unregister(lua_State *L, const char *name) {
     } else lua_pop(L, 1);
 }
 
+void luaC_packageadd(lua_State *L, const char *name, const char *module) {
+    int top = lua_gettop(L);
+    lua_getglobal(L, "package");
+    lua_getfield(L, -1, "loaded");
+    if (module) luaL_getsubtable(L, -1, module);  // get module table
+    luaC_pushclass(L, name);
+    lua_setfield(L, -2, name);
+    lua_settop(L, top);
+}
+
 int luaC_newclass(
     lua_State  *L,
     const char *name,
