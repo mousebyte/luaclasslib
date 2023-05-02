@@ -54,6 +54,9 @@ Utility functions for Lua classes and objects.
 .. doxygenfunction:: luaC_pmcall
    :project: LuaClassLib
 
+.. doxygenfunction:: luaC_pushclass
+   :project: LuaClassLib
+
 .. doxygenfunction:: luaC_uclass
    :project: LuaClassLib
 
