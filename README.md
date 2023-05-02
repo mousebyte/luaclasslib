@@ -25,6 +25,6 @@ make && sudo make install
 
 **Next Steps**
 
-- [ ] Expand documentation with examples
+- [x] Expand documentation with examples
 - [ ] Add to package managers
 
