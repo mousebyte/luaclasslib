@@ -19,9 +19,10 @@ typedef void (*luaC_Constructor)(lua_State *L);
  * perform any necessary resource cleanup for the user data object represented
  * by `p`. Do not free p, that is handled by the Lua garbage collector.
  *
+ * @param L The Lua state.
  * @param p A pointer to the user data to destruct.
  */
-typedef void (*luaC_Destructor)(void *p);
+typedef void (*luaC_Destructor)(lua_State *L, void *p);
 
 /// Header for luaC_Class objects.
 #define LUAC_CLASS_HEADER                \

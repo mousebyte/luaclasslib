@@ -12,7 +12,7 @@ static void signal_alloc(lua_State *L) {
     reflist_init(&sig->slots);
 }
 
-static void signal_gc(void *p) {
+static void signal_gc(lua_State *L, void *p) {
     reflist_wipe(&((signal *)p)->slots);
 }
 

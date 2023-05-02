@@ -16,7 +16,7 @@ static void file_alloc(lua_State *L) {
 // garbage collector. free any resources used by the object here.
 // note that we do not free the pointer itself; it is a userdata and
 // will be freed by the lua garbage collector.
-static void file_gc(void *p) {
+static void file_gc(lua_State *L, void *p) {
     file_t *o = (file_t *)p;
     if (o->file) {
         fclose(o->file);

@@ -9,7 +9,7 @@ static void udata_derived_alloc(lua_State *L) {
     lua_newuserdatauv(L, sizeof(udata_derived), 1);
 }
 
-static void udata_derived_gc(void *p) {
+static void udata_derived_gc(lua_State *L, void *p) {
     udata_derived *o = (udata_derived *)p;
     if (o->handle) {
         free(o->handle);

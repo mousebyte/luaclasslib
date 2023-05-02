@@ -284,7 +284,7 @@ static int default_udata_gc(lua_State *L) {
         // loop through the class and all its parents and call their finalizers
         do {
             luaC_Class *class = luaC_uclass(L, -1);
-            if (class && class->gc) class->gc(lua_touserdata(L, 1));
+            if (class && class->gc) class->gc(L, lua_touserdata(L, 1));
         } while (luaC_getparent(L, -1));
     }
 
