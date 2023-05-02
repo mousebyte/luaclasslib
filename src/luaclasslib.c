@@ -202,11 +202,8 @@ int luaC_deferindex(lua_State *L) {
 
 void luaC_defernewindex(lua_State *L) {
     if (lua_type(L, lua_upvalueindex(1)) != LUA_TFUNCTION) {
-        luaL_getmetafield(L, 1, "__class");
-        luaC_Class *c = luaC_uclass(L, -1);
-        if (c && c->alloc) lua_pushcfunction(L, classlib_uvset);
+        if (lua_type(L, 1) != LUA_TTABLE) lua_pushcfunction(L, classlib_uvset);
         else lua_getglobal(L, "rawset");
-        lua_remove(L, -2);
     } else lua_pushvalue(L, lua_upvalueindex(1));  // grab original __newindex
     // push copies of all the args and call it
     lua_pushvalue(L, 1);
