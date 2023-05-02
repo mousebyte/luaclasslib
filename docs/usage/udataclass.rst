@@ -48,4 +48,4 @@ The class can now be constructed with a call to `luaC_construct`:
    luaC_construct(L, 1, "File");
 
 Since we set `luaC_Class::user_ctor` to ``1``, our class can be constructed from Lua code by calling the class object,
-assuming it is made accessible (e.g. by a call to `lua_register <http://www.lua.org/manual/5.4/manual.html#lua_register>`_).
+assuming it is made accessible (e.g. by a call to `luaC_packageadd`).
