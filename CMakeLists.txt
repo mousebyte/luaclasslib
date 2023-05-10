@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.25)
 
 project(luaclasslib
-    VERSION 1.0
+    VERSION 1.0.0
     LANGUAGES C CXX)
 
 set(LUACLASS_ENABLE_ASAN false CACHE BOOL "Enable address sanitizer for tests target.")
