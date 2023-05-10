@@ -30,7 +30,7 @@ For Linux systems with Lua installed:
 
 .. sourcecode:: console
    
-   $ git clone https://github.com/mousebyte/LuaClassLib.git
+   $ git clone --recurse-submodules https://github.com/mousebyte/LuaClassLib.git
    $ mkdir build && cd build
    $ cmake .. -DCMAKE_BUILD_TYPE=Release
    $ make && sudo make install

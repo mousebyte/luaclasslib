@@ -16,7 +16,7 @@ Full [documentation](https://mousebyte.github.io/LuaClassLib/) is available on G
 Example build process on Arch Linux:
 
 ```bash
-git clone https://github.com/mousebyte/LuaClassLib.git
+git clone --recurse-submodules https://github.com/mousebyte/LuaClassLib.git
 cd LuaClassLib
 mkdir build && cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release
