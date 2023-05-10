@@ -27,7 +27,7 @@ set_target_properties(luaclass PROPERTIES EXPORT_NAME LuaClass)
 target_compile_options(luaclass PUBLIC 
     -fno-strict-aliasing -Wall -Wextra -Wunused -Wno-unused-function
     $<$<CONFIG:Debug>:-g3 -ggdb3 -pedantic>
-    $<$<CONFIG:Release>:-O3 -Wfatal-errors>)
+    $<$<CONFIG:Release>:-O2 -Wfatal-errors>)
 
 if(LUACLASS_MAIN_PROJECT)
     include(GNUInstallDirs)
@@ -59,6 +59,9 @@ if(LUACLASS_MAIN_PROJECT)
             COMPONENT ${projectname_target}Export)
 endif()
 
+enable_testing()
+add_subdirectory(doctest)
+include(doctest/scripts/cmake/doctest.cmake)
 add_executable(tests
     tests/classes/file.c
     tests/classes/signal.c
@@ -72,7 +75,8 @@ add_executable(tests
     tests/udataclass_inheritance.cpp
     tests/methodinjection.cpp)
 target_compile_features(tests PRIVATE cxx_std_17)
-target_link_libraries(tests luaclass)
+target_link_libraries(tests luaclass doctest)
+doctest_discover_tests(tests)
 
 file(GLOB asset_files ${CMAKE_SOURCE_DIR}/tests/assets/*)
 add_custom_target(assets COMMAND ${CMAKE_COMMAND} -E copy_if_different

@@ -1,4 +1,4 @@
-#include "doctest.h"
+#include "doctest/doctest.h"
 extern "C" {
 #include <luaclasslib.h>
 #include <lualib.h>
