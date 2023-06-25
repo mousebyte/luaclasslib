@@ -311,6 +311,81 @@ static int default_udata_gc(lua_State *L) {
     return 0;
 }
 
+static int default_class_inherited(lua_State *L) {
+    // get derived class __call metamethod
+    lua_getmetatable(L, 2);
+    lua_pushstring(L, "__base");
+    lua_rawget(L, 2);
+    int base = lua_gettop(L), class_mt = base - 1;
+    lua_pushstring(L, "__call");
+    lua_rawget(L, class_mt);  // get derived constructor
+
+    // if there's an allocator in the heirarcy and the derived class
+    // __call metamethod is not a C function, then we have a Moonscript
+    // class derived from a userdata class
+    if (get_alloc(L, 1) && !lua_iscfunction(L, -1)) {
+        // check if the parent is a userdata class with its lua
+        // constructor disabled
+        if (luaL_getmetafield(L, 1, "__call") == LUA_TNIL)
+            return luaL_error(L, "Parent constructor is not accessible.");
+
+        lua_pop(L, 2);  // pop constructor and parent constructor
+
+        // set derived inheritance callback
+        lua_pushstring(L, "__inherited");  // key for rawset
+        lua_pushstring(L, "__inherited");  // key for rawget
+        lua_rawget(L, 2);                  // get existing callback from derived
+        lua_pushcclosure(L, default_class_inherited, 1);  // wrap it in closure
+        lua_rawset(L, 2);
+
+        // set new derived constructor
+        lua_pushstring(L, "__call");
+        lua_pushcfunction(L, default_class_call);
+        lua_rawset(L, class_mt);
+
+        // set derived class __index
+        lua_pushstring(L, "__index");
+        lua_pushvalue(L, base);  // copy of derived base for closure
+        lua_pushcclosure(L, default_class_index, 1);
+        lua_rawset(L, class_mt);
+
+        // set derived instance __index
+        lua_pushstring(L, "__index");
+        lua_pushvalue(L, base);  // copy of derived base for closure
+        lua_pushcclosure(L, default_udata_index, 1);
+        lua_rawset(L, base);
+
+        // set derived instance __newindex
+        lua_pushstring(L, "__newindex");
+        lua_pushcfunction(L, classlib_uvset);
+        lua_rawset(L, base);
+
+        // set __class metafield
+        // NOTE: we really shouldn't have to do this, it should be done by
+        // moonscript?
+        lua_pushstring(L, "__class");
+        lua_pushvalue(L, 2);
+        lua_rawset(L, base);
+
+        // set derived instance __gc
+        lua_pushstring(L, "__gc");
+        lua_pushcfunction(L, default_udata_gc);
+        lua_rawset(L, base);
+    }
+
+    lua_settop(L, 2);  // clean up
+
+    // call encapsulated __inherited method
+    lua_pushvalue(L, lua_upvalueindex(1));
+    if (lua_isfunction(L, -1)) {
+        lua_insert(L, 1);
+        lua_call(L, 2, LUA_MULTRET);
+        return lua_gettop(L);
+    }
+
+    return 0;
+}
+
 int register_c_class(lua_State *L, int idx) {
     luaC_Class *c = lua_touserdata(L, idx);
     if (!c || luaC_getregfield(L, c->name) != LUA_TNIL) return 0;
