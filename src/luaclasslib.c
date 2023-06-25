@@ -495,10 +495,6 @@ int luaC_register(lua_State *L, int index) {
             ret = 1;  // no more parents, operation successful
             break;
         }
-        luaC_Class *c = luaC_uclass(L, -1);  // get parent user class
-        if (c && c->alloc)                   // ensure no alloc
-            return luaL_error(
-                L, "Standard class cannot have userdata class base.");
     }
     lua_settop(L, top);
     return ret;
