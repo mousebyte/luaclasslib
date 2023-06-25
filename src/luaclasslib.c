@@ -422,6 +422,8 @@ int register_c_class(lua_State *L, int idx) {
     lua_setfield(L, class, "__base");  // set class __base
     lua_pushstring(L, c->name);
     lua_setfield(L, class, "__name");  // set class __name
+    lua_pushcfunction(L, default_class_inherited);
+    lua_setfield(L, class, "__inherited");  // set class __inherited
 
     lua_pushvalue(L, class);
     lua_setfield(L, base, "__class");  // set base __class
