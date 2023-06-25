@@ -126,12 +126,25 @@ luaC_Class *luaC_uclass(lua_State *L, int index) {
     return ret;
 }
 
+// gets the first allocator up the inheritance heirarchy
+static luaC_Constructor get_alloc(lua_State *L, int idx) {
+    int              top = lua_gettop(L);
+    luaC_Constructor ret = NULL;
+    lua_pushvalue(L, idx);
+    do {
+        luaC_Class *class = luaC_uclass(L, -1);
+        if (class && class->alloc) ret = class->alloc;
+    } while (!ret && luaC_getparent(L, -1));
+    lua_settop(L, top);
+    return ret;
+}
+
 // default class __call
 static int default_class_call(lua_State *L) {
     // create the object
-    luaC_Class *class = luaC_uclass(L, 1);
-    if (class && class->alloc) {
-        class->alloc(L);
+    luaC_Constructor alloc = get_alloc(L, 1);
+    if (alloc) {
+        alloc(L);
         lua_newtable(L);
         lua_setiuservalue(L, -2, 1);
     } else lua_newtable(L);
