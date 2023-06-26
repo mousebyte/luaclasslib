@@ -282,7 +282,8 @@ static int default_udata_index(lua_State *L) {
     // check upvalue (base) for key
     if (luaC_deferindex(L) == LUA_TNIL) {
         lua_pop(L, 1);
-        classlib_uvget(L);  // check user value for key
+        if (lua_istable(L, 1)) lua_rawget(L, 1);
+        else classlib_uvget(L);  // check user value for key
     }
     return 1;
 }
