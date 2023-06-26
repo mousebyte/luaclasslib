@@ -512,8 +512,7 @@ void luaC_unregister(lua_State *L, const char *name) {
 
 void luaC_packageadd(lua_State *L, const char *name, const char *module) {
     int top = lua_gettop(L);
-    lua_getglobal(L, "package");
-    lua_getfield(L, -1, "loaded");
+    lua_getfield(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
     if (module) luaL_getsubtable(L, -1, module);  // get module table
     luaC_pushclass(L, name);
     lua_setfield(L, -2, name);
