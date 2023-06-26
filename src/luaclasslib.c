@@ -510,6 +510,15 @@ void luaC_unregister(lua_State *L, const char *name) {
     } else lua_pop(L, 1);
 }
 
+void luaC_setinheritcb(lua_State *L, int idx, lua_CFunction cb) {
+    if (luaC_isclass(L, idx)) {
+        lua_pushstring(L, "__inherited");
+        lua_pushcfunction(L, cb);
+        lua_pushcclosure(L, default_class_inherited, 1);
+        lua_rawset(L, idx);
+    }
+}
+
 void luaC_packageadd(lua_State *L, const char *name, const char *module) {
     int top = lua_gettop(L);
     lua_getfield(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);

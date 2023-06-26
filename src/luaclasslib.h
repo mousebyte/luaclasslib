@@ -426,6 +426,17 @@ int luaC_register(lua_State *L, int index);
 void luaC_unregister(lua_State *L, const char *name);
 
 /**
+ * @brief Sets the __inherited callback on a class. When the class is
+ * derived from, the function wll be called with the parent class
+ * and derived class as its arguments.
+ *
+ * @param L The Lua state.
+ * @param index The index of the class.
+ * @param cb The callback function.
+ */
+void luaC_setinheritcb(lua_State *L, int index, lua_CFunction cb);
+
+/**
  * @brief Adds a class to `package.loaded` under the module table with the
  * specified name. If `module` is `NULL`, adds the class directly to
  * `package.loaded`. The class must already be registered in the LuaClassLib
