@@ -472,18 +472,16 @@ int register_c_class(lua_State *L, int idx) {
 int luaC_register(lua_State *L, int index) {
     if (lua_isuserdata(L, index)) return register_c_class(L, index);
     if (!luaC_isclass(L, index)) return 0;
-    int top = lua_gettop(L), ret = 0;
-    lua_pushvalue(L, index);       // push class
-    while (luaC_getname(L, -1)) {  // get name
-        lua_pushvalue(L, -2);      // push class
-        luaC_setreg(L);            // register class
-        if (!luaC_getparent(L, -1)) {
-            ret = 1;  // no more parents, operation successful
-            break;
-        }
-    }
+    int top = lua_gettop(L);
+    lua_pushvalue(L, index);  // push class
+    do {
+        if (luaC_getname(L, -1)) {  // get name
+            lua_pushvalue(L, -2);   // push class
+            luaC_setreg(L);         // register class
+        } else lua_pop(L, 1);       // anonymous class, skip
+    } while (luaC_getparent(L, -1));
     lua_settop(L, top);
-    return ret;
+    return 1;
 }
 
 void luaC_unregister(lua_State *L, const char *name) {
