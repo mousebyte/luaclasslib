@@ -64,29 +64,16 @@ static int classlib_uvset(lua_State *L) {
 }
 
 int luaC_isobject(lua_State *L, int index) {
-    int top = lua_gettop(L), ret = 0;
-    if (lua_getmetatable(L, index)) {  // check for metatable
-        lua_pushstring(L, "__class");
-        if (lua_rawget(L, -2) == LUA_TTABLE) {  // check for __class table
-            lua_pushstring(L, "__base");
-            // check for __base table in class equal to metatable
-            ret = lua_rawget(L, -2) == LUA_TTABLE && lua_rawequal(L, -1, -3);
-        }
-    }
-    lua_settop(L, top);
+    int ret = (lua_istable(L, index) || lua_isuserdata(L, index)) &&
+              lua_getfield(L, index, "__class") == LUA_TTABLE;
+    lua_pop(L, 1);
     return ret;
 }
 
 int luaC_isclass(lua_State *L, int index) {
-    index   = lua_absindex(L, index);
-    int top = lua_gettop(L), ret = 0;
-    lua_pushstring(L, "__base");
-    if (lua_rawget(L, index) == LUA_TTABLE) {  // check for __base table
-        lua_pushstring(L, "__class");
-        // check for __class table in base equal to argument
-        ret = lua_rawget(L, -2) == LUA_TTABLE && lua_rawequal(L, -1, index);
-    }
-    lua_settop(L, top);
+    int ret =
+        lua_istable(L, index) && lua_getfield(L, index, "__base") == LUA_TTABLE;
+    lua_pop(L, 1);
     return ret;
 }
 
