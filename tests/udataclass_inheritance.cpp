@@ -129,6 +129,8 @@ TEST_SUITE("User Data Classes") {
         LCL_CHECKSTACK(1);
         lua_pop(L, 1);
 
+        luaC_packageadd(L, "DerivedFromUdata", "LCL");
+
         lua_pushnumber(L, 3);
         lua_pushstring(L, "Derived.moon");
         luaC_construct(L, 2, "DerivedFromUdata");
@@ -145,6 +147,38 @@ TEST_SUITE("User Data Classes") {
         LCL_CHECKSTACK(2);
         REQUIRE(lua_type(L, -1) == LUA_TSTRING);
         REQUIRE(String(lua_tostring(L, -1)) == "Derived.moon");
+        lua_pop(L, 2);
+
+        moonL_dofile(L, "DerivedFromUdata2.moon");
+        REQUIRE(luaC_register(L, -1));
+        LCL_CHECKSTACK(1);
+        lua_pop(L, 1);
+
+        lua_pushnumber(L, 2);
+        lua_pushstring(L, "Derived.moon");
+        luaC_construct(L, 2, "DerivedFromUdata2");
+        LCL_CHECKSTACK(1);
+        REQUIRE(luaC_isobject(L, -1));
+        REQUIRE(luaC_isinstance(L, -1, "DerivedFromUdata2"));
+
+        lua_getfield(L, -1, "number");
+        LCL_CHECKSTACK(2);
+        REQUIRE(lua_tonumber(L, -1) == 2);
+        lua_pop(L, 1);
+
+        luaC_mcall(L, "filename", 0, 1);
+        LCL_CHECKSTACK(2);
+        REQUIRE(lua_type(L, -1) == LUA_TSTRING);
+        REQUIRE(String(lua_tostring(L, -1)) == "Derived.moon");
+        lua_pop(L, 1);
+
+        lua_pushnumber(L, 4);
+        luaC_mcall(L, "foo", 1, 0);
+        LCL_CHECKSTACK(1);
+
+        lua_getfield(L, -1, "number");
+        LCL_CHECKSTACK(2);
+        REQUIRE(lua_tonumber(L, -1) == 8);
         lua_pop(L, 1);
 
         LCL_TEST_END
