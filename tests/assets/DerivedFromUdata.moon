@@ -1,4 +1,4 @@
-File = require "File"
+import File from require "LCL"
 
 class DerivedFromUdata extends File
     new: (n, filename)=>

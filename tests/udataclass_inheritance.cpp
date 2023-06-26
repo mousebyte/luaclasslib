@@ -122,7 +122,7 @@ TEST_SUITE("User Data Classes") {
         REQUIRE(luaC_isclass(L, -1));
         lua_pop(L, 1);
 
-        luaC_packageadd(L, "File", NULL);
+        luaC_packageadd(L, "File", "LCL");
 
         moonL_dofile(L, "DerivedFromUdata.moon");
         REQUIRE(luaC_register(L, -1));
