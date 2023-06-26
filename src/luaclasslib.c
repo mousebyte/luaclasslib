@@ -324,7 +324,7 @@ static int default_class_inherited(lua_State *L) {
     // if there's an allocator in the heirarcy and the derived class
     // __call metamethod is not a C function, then we have a Moonscript
     // class derived from a userdata class
-    if (get_alloc(L, 1) && !lua_iscfunction(L, -1)) {
+    if (get_alloc(L, 1) && !lua_isnil(L, -1) && !lua_iscfunction(L, -1)) {
         // check if the parent is a userdata class with its lua
         // constructor disabled
         if (luaL_getmetafield(L, 1, "__call") == LUA_TNIL)
