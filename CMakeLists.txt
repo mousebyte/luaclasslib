@@ -6,6 +6,7 @@ project(luaclasslib
 
 set(LUACLASS_ENABLE_ASAN false CACHE BOOL "Enable address sanitizer for tests target.")
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
+set(DOCTEST_NO_INSTALL ON)
 
 ### main project
 set(LUACLASS_MAIN_PROJECT OFF)
