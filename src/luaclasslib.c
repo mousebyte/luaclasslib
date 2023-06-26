@@ -126,12 +126,25 @@ luaC_Class *luaC_uclass(lua_State *L, int index) {
     return ret;
 }
 
+// gets the first allocator up the inheritance heirarchy
+static luaC_Constructor get_alloc(lua_State *L, int idx) {
+    int              top = lua_gettop(L);
+    luaC_Constructor ret = NULL;
+    lua_pushvalue(L, idx);
+    do {
+        luaC_Class *class = luaC_uclass(L, -1);
+        if (class && class->alloc) ret = class->alloc;
+    } while (!ret && luaC_getparent(L, -1));
+    lua_settop(L, top);
+    return ret;
+}
+
 // default class __call
 static int default_class_call(lua_State *L) {
     // create the object
-    luaC_Class *class = luaC_uclass(L, 1);
-    if (class && class->alloc) {
-        class->alloc(L);
+    luaC_Constructor alloc = get_alloc(L, 1);
+    if (alloc) {
+        alloc(L);
         lua_newtable(L);
         lua_setiuservalue(L, -2, 1);
     } else lua_newtable(L);
@@ -269,7 +282,8 @@ static int default_udata_index(lua_State *L) {
     // check upvalue (base) for key
     if (luaC_deferindex(L) == LUA_TNIL) {
         lua_pop(L, 1);
-        classlib_uvget(L);  // check user value for key
+        if (lua_istable(L, 1)) lua_rawget(L, 1);
+        else classlib_uvget(L);  // check user value for key
     }
     return 1;
 }
@@ -295,6 +309,81 @@ static int default_udata_gc(lua_State *L) {
     lua_pushcfunction(L, index_invalid);
     lua_setfield(L, -2, "__newindex");
     lua_setmetatable(L, 1);
+    return 0;
+}
+
+static int default_class_inherited(lua_State *L) {
+    // get derived class __call metamethod
+    lua_getmetatable(L, 2);
+    lua_pushstring(L, "__base");
+    lua_rawget(L, 2);
+    int base = lua_gettop(L), class_mt = base - 1;
+    lua_pushstring(L, "__call");
+    lua_rawget(L, class_mt);  // get derived constructor
+
+    // if there's an allocator in the heirarcy and the derived class
+    // __call metamethod is not a C function, then we have a Moonscript
+    // class derived from a userdata class
+    if (get_alloc(L, 1) && !lua_isnil(L, -1) && !lua_iscfunction(L, -1)) {
+        // check if the parent is a userdata class with its lua
+        // constructor disabled
+        if (luaL_getmetafield(L, 1, "__call") == LUA_TNIL)
+            return luaL_error(L, "Parent constructor is not accessible.");
+
+        lua_pop(L, 2);  // pop constructor and parent constructor
+
+        // set derived inheritance callback
+        lua_pushstring(L, "__inherited");  // key for rawset
+        lua_pushstring(L, "__inherited");  // key for rawget
+        lua_rawget(L, 2);                  // get existing callback from derived
+        lua_pushcclosure(L, default_class_inherited, 1);  // wrap it in closure
+        lua_rawset(L, 2);
+
+        // set new derived constructor
+        lua_pushstring(L, "__call");
+        lua_pushcfunction(L, default_class_call);
+        lua_rawset(L, class_mt);
+
+        // set derived class __index
+        lua_pushstring(L, "__index");
+        lua_pushvalue(L, base);  // copy of derived base for closure
+        lua_pushcclosure(L, default_class_index, 1);
+        lua_rawset(L, class_mt);
+
+        // set derived instance __index
+        lua_pushstring(L, "__index");
+        lua_pushvalue(L, base);  // copy of derived base for closure
+        lua_pushcclosure(L, default_udata_index, 1);
+        lua_rawset(L, base);
+
+        // set derived instance __newindex
+        lua_pushstring(L, "__newindex");
+        lua_pushcfunction(L, classlib_uvset);
+        lua_rawset(L, base);
+
+        // set __class metafield
+        // NOTE: we really shouldn't have to do this, it should be done by
+        // moonscript?
+        lua_pushstring(L, "__class");
+        lua_pushvalue(L, 2);
+        lua_rawset(L, base);
+
+        // set derived instance __gc
+        lua_pushstring(L, "__gc");
+        lua_pushcfunction(L, default_udata_gc);
+        lua_rawset(L, base);
+    }
+
+    lua_settop(L, 2);  // clean up
+
+    // call encapsulated __inherited method
+    lua_pushvalue(L, lua_upvalueindex(1));
+    if (lua_isfunction(L, -1)) {
+        lua_insert(L, 1);
+        lua_call(L, 2, LUA_MULTRET);
+        return lua_gettop(L);
+    }
+
     return 0;
 }
 
@@ -334,6 +423,8 @@ int register_c_class(lua_State *L, int idx) {
     lua_setfield(L, class, "__base");  // set class __base
     lua_pushstring(L, c->name);
     lua_setfield(L, class, "__name");  // set class __name
+    lua_pushcfunction(L, default_class_inherited);
+    lua_setfield(L, class, "__inherited");  // set class __inherited
 
     lua_pushvalue(L, class);
     lua_setfield(L, base, "__class");  // set base __class
@@ -405,10 +496,6 @@ int luaC_register(lua_State *L, int index) {
             ret = 1;  // no more parents, operation successful
             break;
         }
-        luaC_Class *c = luaC_uclass(L, -1);  // get parent user class
-        if (c && c->alloc)                   // ensure no alloc
-            return luaL_error(
-                L, "Standard class cannot have userdata class base.");
     }
     lua_settop(L, top);
     return ret;
@@ -423,10 +510,18 @@ void luaC_unregister(lua_State *L, const char *name) {
     } else lua_pop(L, 1);
 }
 
+void luaC_setinheritcb(lua_State *L, int idx, lua_CFunction cb) {
+    if (luaC_isclass(L, idx)) {
+        lua_pushstring(L, "__inherited");
+        lua_pushcfunction(L, cb);
+        lua_pushcclosure(L, default_class_inherited, 1);
+        lua_rawset(L, idx);
+    }
+}
+
 void luaC_packageadd(lua_State *L, const char *name, const char *module) {
     int top = lua_gettop(L);
-    lua_getglobal(L, "package");
-    lua_getfield(L, -1, "loaded");
+    lua_getfield(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
     if (module) luaL_getsubtable(L, -1, module);  // get module table
     luaC_pushclass(L, name);
     lua_setfield(L, -2, name);

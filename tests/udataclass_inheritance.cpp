@@ -1,6 +1,7 @@
 #include "tests.hpp"
 extern "C" {
 #include "classes/blocking_signal.h"
+#include "classes/file.h"
 #include "classes/signal.h"
 #include "classes/udata_derived.h"
 
@@ -106,6 +107,45 @@ TEST_SUITE("User Data Classes") {
         LCL_CHECKSTACK(2);
         REQUIRE(lua_type(L, -1) == LUA_TSTRING);
         REQUIRE(String(lua_tostring(L, -1)) == "n is now 20.0, squeak!");
+
+        LCL_TEST_END
+    }
+
+    TEST_CASE(
+        "Derived User Data Classes 3" *
+        doctest::description("userdata class extended by moonscript class")) {
+        LCL_TEST_BEGIN
+
+        lua_pushlightuserdata(L, &file_class);
+        luaC_register(L, -1);
+        LCL_CHECKSTACK(1);
+        REQUIRE(luaC_isclass(L, -1));
+        lua_pop(L, 1);
+
+        luaC_packageadd(L, "File", "LCL");
+
+        moonL_dofile(L, "DerivedFromUdata.moon");
+        REQUIRE(luaC_register(L, -1));
+        LCL_CHECKSTACK(1);
+        lua_pop(L, 1);
+
+        lua_pushnumber(L, 3);
+        lua_pushstring(L, "Derived.moon");
+        luaC_construct(L, 2, "DerivedFromUdata");
+        LCL_CHECKSTACK(1);
+        REQUIRE(luaC_isobject(L, -1));
+        REQUIRE(luaC_isinstance(L, -1, "DerivedFromUdata"));
+
+        lua_getfield(L, -1, "number");
+        LCL_CHECKSTACK(2);
+        REQUIRE(lua_tonumber(L, -1) == 3);
+        lua_pop(L, 1);
+
+        luaC_mcall(L, "filename", 0, 1);
+        LCL_CHECKSTACK(2);
+        REQUIRE(lua_type(L, -1) == LUA_TSTRING);
+        REQUIRE(String(lua_tostring(L, -1)) == "Derived.moon");
+        lua_pop(L, 1);
 
         LCL_TEST_END
     }
