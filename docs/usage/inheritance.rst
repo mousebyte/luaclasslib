@@ -8,7 +8,7 @@ automatically. Some useful utility methods are provided for working with derived
 
 .. attention::
 
-   Userdata classes cannot inherit from classes definied in Moonscript. This is an edge case and is not planned to be
+   Classes defined in Moonscript cannot inherit from userdata classes. This is an edge case and is not planned to be
    supported in the future.
 
 * `luaC_getparent` will push a copy of a class's parent onto the stack.
