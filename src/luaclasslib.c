@@ -80,13 +80,11 @@ int luaC_isclass(lua_State *L, int index) {
 int luaC_isinstance(lua_State *L, int index, const char *name) {
     int top = lua_gettop(L), ret = 0;
     if (luaC_getclass(L, index)) {
-        while (luaC_getname(L, -1)) {
+        do {
+            luaC_getname(L, -1);
             ret = strcmp(name, lua_tostring(L, -1)) == 0;
             lua_pop(L, 1);  // pop name
-            // break if we found a matching class or run out of parents
-            if (ret || !luaC_getparent(L, -1)) break;
-            lua_remove(L, -2);  // parent found, remove previous class
-        }
+        } while (!ret && luaC_getparent(L, -1));
     }
     lua_settop(L, top);
     return ret;
