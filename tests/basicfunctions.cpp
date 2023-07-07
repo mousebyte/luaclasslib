@@ -39,6 +39,7 @@ TEST_SUITE("Basic Functionality") {
             moonL_dofile(L, "Derived.moon");
             LCL_CHECKSTACK(1);
             CHECK(lua_type(L, -1) == LUA_TTABLE);
+            CHECK(String(luaC_typename(L, -1)) == "class");
             CHECK(luaC_isclass(L, -1));
             CHECK(luaC_register(L, -1));
             lua_pop(L, 1);
@@ -91,6 +92,7 @@ TEST_SUITE("Basic Functionality") {
             LCL_CHECKSTACK(1);
             REQUIRE(luaC_isobject(L, -1));
             REQUIRE(luaC_isinstance(L, -1, "Base"));
+            CHECK(String(luaC_typename(L, -1)) == "Base");
 
             REQUIRE(lua_getfield(L, -1, "str") == LUA_TSTRING);
             REQUIRE(String(lua_tostring(L, -1)) == "Hello, squeak!");

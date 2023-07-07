@@ -553,4 +553,37 @@ void luaopen_class(lua_State *L);
 #define luaC_getname(L, index) \
     (lua_getfield((L), (index), "__name") == LUA_TSTRING)
 
+/**
+ * @brief Improved typename function.
+ *
+ * @param L The Lua state.
+ * @param idx The index of the object on the stack.
+ *
+ * @return If the object belongs to a class, returns the classname. Otherwise,
+ * returns the regular typename.
+ */
+static inline const char *luaC_typename(lua_State *L, int idx) {
+    int         top  = lua_gettop(L);
+    int         type = lua_type(L, idx);
+    const char *name;
+
+    switch (type) {
+        case LUA_TTABLE:
+            if (luaC_getbase(L, idx)) {
+                name = "class";
+                break;
+            } else lua_pop(L, 1);
+        case LUA_TUSERDATA:
+            if (luaC_getclass(L, idx) && luaC_getname(L, -1)) {
+                name = lua_tostring(L, -1);
+                break;
+            }
+        default:
+            name = lua_typename(L, type);
+    }
+
+    lua_settop(L, top);
+    return name;
+}
+
 #endif

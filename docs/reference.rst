@@ -78,6 +78,9 @@ Utility functions for Lua classes and objects.
 .. doxygendefine:: luaC_getname
    :project: LuaClassLib
 
+.. doxygenfunction:: luaC_typename
+   :project: LuaClassLib
+
 Introspection
 -------------
 Functions providing introspection into Lua classes and objects.
