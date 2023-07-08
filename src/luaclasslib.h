@@ -226,6 +226,30 @@ luaC_setuvfield(lua_State *L, int idx, int uv, const char *k) {
 }
 
 /**
+ * @brief Improved rawget. Works with user data classes.
+ *
+ * @param L The Lua state.
+ * @param idx The index of the object on the stack.
+ *
+ * @return The type of the value pushed onto the stack.
+ */
+static inline int luaC_rawget(lua_State *L, int idx) {
+    if (lua_istable(L, idx)) return lua_rawget(L, idx);
+    return luaC_uvrawget(L, idx, 1);
+}
+
+/**
+ * @brief Improved rawset. Works with user data classes.
+ *
+ * @param L The Lua state.
+ * @param idx The index of the object on the stack.
+ */
+static inline void luaC_rawset(lua_State *L, int idx) {
+    if (lua_istable(L, idx)) lua_rawset(L, idx);
+    else luaC_uvrawset(L, idx, 1);
+}
+
+/**
  * @brief Call a method of an object, passing the object as the first argument.
  *
  * @param L The Lua state.
@@ -473,6 +497,15 @@ int luaC_newclass(
  * @param L The Lua state.
  */
 void luaopen_class(lua_State *L);
+
+/**
+ * @brief Overrides the `rawget`, `rawset`, and `type` functions with additional
+ * functionality.
+ * @see @rstref{luaC_rawget}, @rstref{luaC_rawset}, and @rstref{luaC_typename}
+ *
+ * @param L The Lua state.
+ */
+void luaC_overrideglobals(lua_State *L);
 
 /**
  * @brief Calls the init function of the parent class.

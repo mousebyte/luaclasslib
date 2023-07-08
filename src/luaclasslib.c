@@ -63,6 +63,22 @@ static int classlib_uvset(lua_State *L) {
     return 0;
 }
 
+static int classlib_rawget(lua_State *L) {
+    luaC_rawget(L, 1);
+    return 1;
+}
+
+static int classlib_rawset(lua_State *L) {
+    luaC_rawset(L, 1);
+    return 0;
+}
+
+static int classlib_type(lua_State *L) {
+    luaL_checkany(L, 1);
+    lua_pushstring(L, luaC_typename(L, 1));
+    return 1;
+}
+
 int luaC_isobject(lua_State *L, int index) {
     int ret = (lua_istable(L, index) || lua_isuserdata(L, index)) &&
               lua_getfield(L, index, "__class") == LUA_TTABLE;
@@ -529,4 +545,13 @@ int luaC_newclass(
 void luaopen_class(lua_State *L) {
     lua_register(L, "uvget", classlib_uvget);
     lua_register(L, "uvset", classlib_uvset);
+}
+
+void luaC_overrideglobals(lua_State *L) {
+    lua_pushcfunction(L, classlib_rawget);
+    lua_setglobal(L, "rawget");
+    lua_pushcfunction(L, classlib_rawset);
+    lua_setglobal(L, "rawset");
+    lua_pushcfunction(L, classlib_type);
+    lua_setglobal(L, "type");
 }
