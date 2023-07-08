@@ -80,16 +80,20 @@ static int classlib_type(lua_State *L) {
 }
 
 int luaC_isobject(lua_State *L, int index) {
-    int ret = (lua_istable(L, index) || lua_isuserdata(L, index)) &&
-              lua_getfield(L, index, "__class") == LUA_TTABLE;
-    lua_pop(L, 1);
+    int ret = 0;
+    if (lua_istable(L, index) || lua_isuserdata(L, index)) {
+        ret = lua_getfield(L, index, "__class") == LUA_TTABLE;
+        lua_pop(L, 1);
+    }
     return ret;
 }
 
 int luaC_isclass(lua_State *L, int index) {
-    int ret =
-        lua_istable(L, index) && lua_getfield(L, index, "__base") == LUA_TTABLE;
-    lua_pop(L, 1);
+    int ret = 0;
+    if (lua_istable(L, index)) {
+        ret = lua_getfield(L, index, "__base") == LUA_TTABLE;
+        lua_pop(L, 1);
+    }
     return ret;
 }
 
