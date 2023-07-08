@@ -220,8 +220,7 @@ int luaC_deferindex(lua_State *L) {
 
 void luaC_defernewindex(lua_State *L) {
     if (lua_type(L, lua_upvalueindex(1)) != LUA_TFUNCTION) {
-        if (lua_type(L, 1) != LUA_TTABLE) lua_pushcfunction(L, classlib_uvset);
-        else lua_getglobal(L, "rawset");
+        lua_pushcfunction(L, classlib_rawset);
     } else lua_pushvalue(L, lua_upvalueindex(1));  // grab original __newindex
     // push copies of all the args and call it
     lua_pushvalue(L, 1);
@@ -287,8 +286,7 @@ static int default_udata_index(lua_State *L) {
     // check upvalue (base) for key
     if (luaC_deferindex(L) == LUA_TNIL) {
         lua_pop(L, 1);
-        if (lua_istable(L, 1)) lua_rawget(L, 1);
-        else classlib_uvget(L);  // check user value for key
+        luaC_rawget(L, 1);
     }
     return 1;
 }
@@ -363,7 +361,7 @@ static int default_class_inherited(lua_State *L) {
 
         // set derived instance __newindex
         lua_pushstring(L, "__newindex");
-        lua_pushcfunction(L, classlib_uvset);
+        lua_pushcfunction(L, classlib_rawset);
         lua_rawset(L, base);
 
         // set __class metafield
@@ -438,7 +436,7 @@ int register_c_class(lua_State *L, int idx) {
         lua_pushvalue(L, base);
         lua_pushcclosure(L, default_udata_index, 1);
         lua_setfield(L, base, "__index");  // set base __index
-        lua_pushcfunction(L, classlib_uvset);
+        lua_pushcfunction(L, classlib_rawset);
         lua_setfield(L, base, "__newindex");  // set base __newindex
         lua_pushcfunction(L, default_udata_gc);
         lua_setfield(L, base, "__gc");  // set base __gc
