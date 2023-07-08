@@ -58,6 +58,8 @@ typedef struct {
  * @return The type of the pushed value.
  */
 static inline int luaC_uvrawget(lua_State *L, int idx, int uv) {
+    if (!lua_isuserdata(L, idx))
+        return luaL_error(L, "Object at index %d is not a userdata.", idx);
     int ret = LUA_TNIL;
     if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
         lua_insert(L, -2);        // put uv behind key
@@ -80,6 +82,8 @@ static inline int luaC_uvrawget(lua_State *L, int idx, int uv) {
  * @return 1 if the operation was successful, and 0 otherwise.
  */
 static inline int luaC_uvrawset(lua_State *L, int idx, int uv) {
+    if (!lua_isuserdata(L, idx))
+        return luaL_error(L, "Object at index %d is not a userdata.", idx);
     if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
         lua_insert(L, -3);  // put uv before key and value
         lua_rawset(L, -3);  // set the value
@@ -104,6 +108,8 @@ static inline int luaC_uvrawset(lua_State *L, int idx, int uv) {
  * @return The type of the pushed value.
  */
 static inline int luaC_uvrawgetp(lua_State *L, int idx, int uv, const void *p) {
+    if (!lua_isuserdata(L, idx))
+        return luaL_error(L, "Object at index %d is not a userdata.", idx);
     int ret = LUA_TNIL;
     if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
         ret = lua_rawgetp(L, -1, p);  // get the value
@@ -127,6 +133,8 @@ static inline int luaC_uvrawgetp(lua_State *L, int idx, int uv, const void *p) {
  * @return 1 if the operation was successful, and 0 otherwise.
  */
 static inline int luaC_uvrawsetp(lua_State *L, int idx, int uv, const void *p) {
+    if (!lua_isuserdata(L, idx))
+        return luaL_error(L, "Object at index %d is not a userdata.", idx);
     if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
         lua_insert(L, -2);      // put uv before value
         lua_rawsetp(L, -2, p);  // set the value
@@ -149,6 +157,8 @@ static inline int luaC_uvrawsetp(lua_State *L, int idx, int uv, const void *p) {
  * @return The type of the pushed value.
  */
 static inline int luaC_uvget(lua_State *L, int idx, int uv) {
+    if (!lua_isuserdata(L, idx))
+        return luaL_error(L, "Object at index %d is not a userdata.", idx);
     int ret = LUA_TNIL;
     if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
         lua_insert(L, -2);          // put uv behind key
@@ -170,6 +180,8 @@ static inline int luaC_uvget(lua_State *L, int idx, int uv) {
  * @return 1 if the operation was successful, and 0 otherwise.
  */
 static inline int luaC_uvset(lua_State *L, int idx, int uv) {
+    if (!lua_isuserdata(L, idx))
+        return luaL_error(L, "Object at index %d is not a userdata.", idx);
     if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
         lua_insert(L, -3);    // put uv before key and value
         lua_settable(L, -3);  // set the value
@@ -193,6 +205,8 @@ static inline int luaC_uvset(lua_State *L, int idx, int uv) {
  */
 static inline int
 luaC_getuvfield(lua_State *L, int idx, int uv, const char *k) {
+    if (!lua_isuserdata(L, idx))
+        return luaL_error(L, "Object at index %d is not a userdata.", idx);
     int ret = LUA_TNIL;
     if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
         ret = lua_getfield(L, -1, k);  // get value if uv is table
@@ -215,6 +229,8 @@ luaC_getuvfield(lua_State *L, int idx, int uv, const char *k) {
  */
 static inline int
 luaC_setuvfield(lua_State *L, int idx, int uv, const char *k) {
+    if (!lua_isuserdata(L, idx))
+        return luaL_error(L, "Object at index %d is not a userdata.", idx);
     if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
         lua_insert(L, -2);       // put uv behind value
         lua_setfield(L, -2, k);  // set the value
