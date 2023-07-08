@@ -81,6 +81,12 @@ Utility functions for Lua classes and objects.
 .. doxygenfunction:: luaC_typename
    :project: LuaClassLib
 
+.. doxygenfunction:: luaC_rawget
+   :project: LuaClassLib
+
+.. doxygenfunction:: luaC_rawset
+   :project: LuaClassLib
+
 Introspection
 -------------
 Functions providing introspection into Lua classes and objects.
@@ -161,9 +167,74 @@ Functions from the `Moonscript Compiler API <https://moonscript.org/reference/ap
 .. doxygenfunction:: moonL_dofile
    :project: LuaClassLib
 
-Standard Library
-----------------
+Moonscript Library
+------------------
 Functions from the `Moonscript Standard Library <https://moonscript.org/reference/standard_lib.html>`_.
 
 .. doxygenfunction:: moonL_print
    :project: LuaClassLib
+
+Lua Library
+===========
+Functions provided by LCL to Lua code.
+
+.. doxygenfunction:: luaC_overrideglobals
+   :project: LuaClassLib
+
+.. lua:function:: uvget(obj[, uv], idx)
+
+   Gets the value of ``t[idx]``, where ``t`` is the table stored
+   in the user value ``uv`` of ``obj``. If no user value is specified, uses the
+   first user value. Uses the ``__index`` metamethod.
+
+   :param obj: The object.
+   :param uv: ``[optional]`` The user value to access.
+   :param idx: The index to get.
+
+.. lua:function:: uvset(obj[, uv], idx, value)
+
+   Sets the value of ``t[idx]`` to ``value``, where ``t`` is the table stored
+   in the user value ``uv`` of ``obj``. If no user value is specified, uses the
+   first user value. Uses the ``__newindex`` metamethod.
+
+   :param obj: The object.
+   :param uv: ``[optional]`` The user value to access.
+   :param idx: The index to set.
+   :param value: The value.
+
+.. lua:function:: rawget(obj, idx)
+
+   If ``obj`` is a table, gets the value of ``obj[idx]``. If ``obj`` is a
+   userdata, gets the value of ``t[idx]``, where ``t`` is the table stored in the
+   first user value of ``obj``. Does not use the ``__index`` metamethod.
+
+   Replaces the default version of this function when
+   `luaC_overrideglobals` is called.
+
+   :param obj: The object.
+   :param idx: The index to get.
+
+.. lua:function:: rawset(obj, idx, value)
+
+   If ``obj`` is a table, sets the value of ``obj[idx]`` to ``value``. If ``obj``
+   is a userdata, sets the value of ``t[idx]`` to ``value``, where ``t`` is the table
+   stored in the first user value of ``obj``. Does not use the ``__newindex``
+   metamethod.
+   
+   Replaces the default version of this function when
+   `luaC_overrideglobals` is called.
+
+   :param obj: The object.
+   :param idx: The index to set.
+   :param value: The value.
+
+.. lua:function:: type(obj)
+
+   If ``obj`` is an instance of a named class, returns the name of the
+   class it belongs to. If ``obj`` is a class, returns "class". Otherwise, returns
+   the standard Lua typename.
+   
+   Replaces the default version of this function when
+   `luaC_overrideglobals` is called.
+
+   :param obj: The object.

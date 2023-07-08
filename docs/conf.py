@@ -43,7 +43,7 @@ lexers["LCL"] = LCLLexer()
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 subprocess.call('doxygen Doxyfile.in', shell=True)
 
-extensions = ['breathe']
+extensions = ['breathe', 'sphinxcontrib.luadomain']
 
 
 templates_path = ['_templates']
