@@ -9,11 +9,17 @@ Extends the Lua C API to provide Moonscript-compatible class support, with or wi
 - Call methods on objects
 - Inject (override) class methods
 
-Full [documentation](https://mousebyte.github.io/LuaClassLib/) is available on Github Pages.
+Full [documentation](https://mousebyte.github.io/luaclasslib/) is available on Github Pages.
 
-## Building
+## Installation
 
-Example build process on Arch Linux:
+LCL is available on the Arch User Repository:
+
+```bash
+yay -S luaclasslib
+```
+
+You can also build from source:
 
 ```bash
 git clone --recurse-submodules https://github.com/mousebyte/LuaClassLib.git
@@ -26,5 +32,6 @@ make && sudo make install
 **Next Steps**
 
 - [x] Expand documentation with examples
-- [ ] Add to package managers
+- [x] Add to AUR
+- [ ] Add to other package managers
 

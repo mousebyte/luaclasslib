@@ -25,8 +25,13 @@ and ``moonauxlib.h``, which requires Moonscript to be available.
 Installation
 ============
 
-Currently, LuaClassLib can only be installed from source.
-For Linux systems with Lua installed:
+LCL is available on the Arch User Repository:
+
+.. sourcecode:: console
+
+   $ yay -S luaclasslib
+
+Otherwise, the library can be built from source. For Linux systems with Lua installed:
 
 .. sourcecode:: console
    
