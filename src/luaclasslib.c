@@ -591,12 +591,10 @@ void luaC_setinheritcb(lua_State *L, int idx, lua_CFunction cb) {
 int luaC_newclass(
     lua_State  *L,
     const char *name,
-    const char *module,
     const char *parent,
     luaL_Reg   *methods) {
     luaC_Class *cls = (luaC_Class *)lua_newuserdatauv(L, sizeof(luaC_Class), 0);
     cls->name       = name;
-    cls->module     = module;
     cls->parent     = parent;
     cls->user_ctor  = 1;
     cls->alloc      = NULL;

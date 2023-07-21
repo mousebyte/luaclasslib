@@ -495,7 +495,6 @@ void luaC_setinheritcb(lua_State *L, int index, lua_CFunction cb);
 int luaC_newclass(
     lua_State  *L,
     const char *name,
-    const char *module,
     const char *parent,
     luaL_Reg   *methods);
 
