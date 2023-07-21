@@ -79,6 +79,12 @@ static int classlib_type(lua_State *L) {
     return 1;
 }
 
+static int classlib_register(lua_State *L) {
+    luaL_argcheck(L, luaC_isclass(L, 1), 1, "expected class");
+    luaC_register(L, 1);
+    return 1;
+}
+
 int luaC_isobject(lua_State *L, int index) {
     int ret = 0;
     if (lua_istable(L, index) || lua_isuserdata(L, index)) {
