@@ -16,7 +16,7 @@ endif()
 
 include(FindLua)
 
-add_library(luaclass src/luaclasslib.c)
+add_library(luaclass SHARED src/luaclasslib.c)
 add_library(LuaClass::LuaClass ALIAS luaclass)
 target_include_directories(luaclass PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
