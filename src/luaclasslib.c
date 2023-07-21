@@ -435,7 +435,7 @@ static int default_class_inherited(lua_State *L) {
     return 0;
 }
 
-int luaC_register(lua_State *L, int idx) {
+int luaC_classfromptr(lua_State *L, int idx) {
     int         uclass = lua_absindex(L, idx);
     luaC_Class *c      = lua_touserdata(L, uclass);
     if (!c || !c->name) return 0;

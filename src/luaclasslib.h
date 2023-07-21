@@ -446,15 +446,15 @@ int luaC_getparentfield(lua_State *L, int index, int depth, const char *name);
 void luaC_super(lua_State *L, const char *name, int nargs, int nresults);
 
 /**
- * @brief Adds the class represented by the user data at the given stack index
- * to the class registry. The class will also be added to *package.loaded*.
+ * @brief Obtains the Lua class table associated with the `luaC_Class` at the
+ * given stack index. If the class table does not exist, it will be created.
  *
  * @param L The Lua state.
  * @param index The stack index of the class.
  *
  * @return 1 if the class was successfully registered, and 0 otherwise.
  */
-int luaC_register(lua_State *L, int index);
+int luaC_classfromptr(lua_State *L, int index);
 
 /**
  * @brief Removes the class with the given name from the class registry.
