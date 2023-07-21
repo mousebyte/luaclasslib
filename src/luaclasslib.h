@@ -25,22 +25,19 @@ typedef void (*luaC_Constructor)(lua_State *L);
 typedef void (*luaC_Destructor)(lua_State *L, void *p);
 
 /// Header for luaC_Class objects.
-#define LUAC_CLASS_HEADER                    \
-    /** The name of the class. */            \
-    const char      *name;                   \
-    /** The module to place the class in. */ \
-    const char      *module;                 \
-    /** The fully qualified (with module) */ \
-    /** name of the parent. */               \
-    const char      *parent;                 \
-    /** Whether to allow construction */     \
-    /** by calling the class object. */      \
-    int              user_ctor;              \
-    /** The class allocator. */              \
-    luaC_Constructor alloc;                  \
-    /** The class garbage collector. */      \
-    luaC_Destructor  gc;                     \
-    /** The class methods. */                \
+#define LUAC_CLASS_HEADER                \
+    /** The name of the class. */        \
+    const char      *name;               \
+    /** The name of the parent. */       \
+    const char      *parent;             \
+    /** Whether to allow construction */ \
+    /** by calling the class object. */  \
+    int              user_ctor;          \
+    /** The class allocator. */          \
+    luaC_Constructor alloc;              \
+    /** The class garbage collector. */  \
+    luaC_Destructor  gc;                 \
+    /** The class methods. */            \
     luaL_Reg        *methods;
 
 /// Contains information about a user data class.
