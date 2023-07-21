@@ -355,7 +355,7 @@ void *luaC_checkuclass(lua_State *L, int arg, const char *name);
  * @brief Pushes onto the stack the class registered under the given *name*.
  *
  * @param L The Lua state.
- * @param name The class name.
+ * @param name The fully qualified (with module prefix) class name.
  *
  * @return The type of the pushed value.
  */
@@ -446,16 +446,14 @@ int luaC_getparentfield(lua_State *L, int index, int depth, const char *name);
 void luaC_super(lua_State *L, const char *name, int nargs, int nresults);
 
 /**
- * @brief Adds the class represented by the value at the given stack index to
- * the class registry. If the value is a class table, all of its parents will be
- * registered as well.
+ * @brief Obtains the Lua class table associated with the `luaC_Class` at the
+ * top of the stack. If the class table does not exist, it will be created.
  *
  * @param L The Lua state.
- * @param index The stack index of the class.
  *
  * @return 1 if the class was successfully registered, and 0 otherwise.
  */
-int luaC_register(lua_State *L, int index);
+int luaC_classfromptr(lua_State *L);
 
 /**
  * @brief Removes the class with the given name from the class registry.
@@ -477,25 +475,14 @@ void luaC_unregister(lua_State *L, const char *name);
 void luaC_setinheritcb(lua_State *L, int index, lua_CFunction cb);
 
 /**
- * @brief Adds a class to `package.loaded` under the module table with the
- * specified name. If `module` is `NULL`, adds the class directly to
- * `package.loaded`. The class must already be registered in the LuaClassLib
- * registry.
- *
- * @param L The Lua state.
- * @param name The class name.
- * @param module The module to add the class under.
- */
-void luaC_packageadd(lua_State *L, const char *name, const char *module);
-
-/**
  * @brief Helper method for creating and registering a simple luaC_Class as a
  * full userdata. Useful for when you're using stock classes and don't want to
  * define your luaC_Class with static linkage.
  *
  * @param L The Lua state.
  * @param name The class name.
- * @param parent The parent class name. Must be in the registry.
+ * @param module The module to add the class to. Can be null.
+ * @param parent The parent class name. Must be in the registry. Can be null.
  * @param methods The class methods.
  *
  * @return 1 if the class was successfully created and registered, and 0

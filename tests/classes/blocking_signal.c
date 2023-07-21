@@ -45,7 +45,7 @@ static luaL_Reg blocking_signal_methods[] = {
 
 luaC_Class blocking_signal_class = {
     .name      = "BlockingSignal",
-    .parent    = "Signal",
+    .parent    = "lcltests.Signal",
     .user_ctor = 0,
     .alloc     = blocking_signal_alloc,
     .gc        = NULL,

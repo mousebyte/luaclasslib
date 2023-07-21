@@ -79,12 +79,6 @@ static int classlib_type(lua_State *L) {
     return 1;
 }
 
-static int classlib_register(lua_State *L) {
-    luaL_argcheck(L, luaC_isclass(L, 1), 1, "expected class");
-    luaC_register(L, 1);
-    return 1;
-}
-
 int luaC_isobject(lua_State *L, int index) {
     int ret = 0;
     if (lua_istable(L, index) || lua_isuserdata(L, index)) {
@@ -123,7 +117,53 @@ void *luaC_checkuclass(lua_State *L, int arg, const char *name) {
 }
 
 int luaC_pushclass(lua_State *L, const char *name) {
-    return luaC_getregfield(L, name);
+    // check the registry first
+    if (luaC_getregfield(L, name) == LUA_TTABLE) return LUA_TTABLE;
+    else lua_pop(L, 1);
+
+    // otherwise, try to `require` the module
+    lua_pushfstring(L, "return require('%s')", name);
+    luaL_loadstring(L, lua_tostring(L, -1));
+    lua_remove(L, -2);
+
+    if (lua_pcall(L, 0, 1, 0) != LUA_OK) {
+        lua_pop(L, 1);
+        const char *pos = strrchr(name, '.');
+
+        if (!pos || strlen(pos + 1) == 0) {
+            lua_pushnil(L);
+            return LUA_TNIL;
+        }
+
+        // try to `require` module table and get class as field
+        lua_pushstring(L, "return require('");
+        lua_pushlstring(L, name, pos - name);
+        lua_pushstring(L, "')");
+        lua_concat(L, 3);
+        luaL_loadstring(L, lua_tostring(L, -1));
+        lua_remove(L, -2);
+
+        if (lua_pcall(L, 0, 1, 0) != LUA_OK) {
+            lua_pop(L, 1);
+            lua_pushnil(L);
+            return LUA_TNIL;
+        } else if (lua_istable(L, -1)) {
+            lua_getfield(L, -1, pos + 1);
+            lua_remove(L, -2);
+        }
+    }
+
+    if (!luaC_isclass(L, -1)) {
+        lua_pop(L, 1);
+        lua_pushnil(L);
+        return LUA_TNIL;
+    }
+
+    // add class to registry for quick access
+    lua_pushvalue(L, -1);
+    luaC_setregfield(L, name);
+
+    return LUA_TTABLE;
 }
 
 luaC_Class *luaC_uclass(lua_State *L, int index) {
@@ -396,11 +436,16 @@ static int default_class_inherited(lua_State *L) {
     return 0;
 }
 
-int register_c_class(lua_State *L, int idx) {
-    luaC_Class *c = lua_touserdata(L, idx);
-    if (!c || luaC_getregfield(L, c->name) != LUA_TNIL) return 0;
+int luaC_classfromptr(lua_State *L) {
+    int         uclass = lua_gettop(L);
+    luaC_Class *c      = lua_touserdata(L, uclass);
+    if (!c || !c->name) return 0;
+    lua_pushvalue(L, uclass);
+    if (luaC_getreg(L) != LUA_TNIL) {
+        lua_pop(L, 1);
+        return 1;
+    }
     lua_pop(L, 1);
-    int uclass = lua_absindex(L, idx);
 
     lua_newtable(L);                  // base table
     luaL_setfuncs(L, c->methods, 0);  // load in methods
@@ -461,15 +506,16 @@ int register_c_class(lua_State *L, int idx) {
     if (c->parent == NULL) {                   // no parent
         lua_pushvalue(L, base);                // push base
         lua_setfield(L, class_mt, "__index");  // set meta __index to base
-    } else if (luaC_getregfield(L, c->parent) == LUA_TTABLE) {  // get parent
-        lua_pushvalue(L, base);                                 // push base
+    } else if (luaC_pushclass(L, c->parent) == LUA_TTABLE) {  // get parent
+        lua_pushvalue(L, base);                               // push base
         lua_pushcclosure(L, default_class_index, 1);  // wrap it in a closure
         lua_setfield(L, class_mt, "__index");         // set meta __index
         lua_getfield(L, -1, "__base");                // get parent __base
         lua_setmetatable(L, base);  // set base metatable to parent base
         lua_setfield(L, class, "__parent");  // set class __parent to parent
     } else {                                 // else parent not registered
-        lua_pop(L, 3);                       // clean up and return
+        lua_pop(L, 4);                       // clean up and return
+        lua_remove(L, uclass);
         return 0;
     }
 
@@ -485,36 +531,44 @@ int register_c_class(lua_State *L, int idx) {
 
     lua_pushvalue(L, class);
     lua_pushvalue(L, uclass);
-    luaC_setreg(L);  // register uclass
+    luaC_setreg(L);  // reg[class] = uclass
+    lua_pushvalue(L, uclass);
     lua_pushvalue(L, class);
-    luaC_setregfield(L, c->name);  // register class
-    lua_remove(L, base);           // remove base from stack
-    lua_remove(L, uclass);         // remove uclass from stack
-    return 1;
-}
+    luaC_setreg(L);  // reg[uclass] = class
 
-int luaC_register(lua_State *L, int index) {
-    if (lua_isuserdata(L, index)) return register_c_class(L, index);
-    if (!luaC_isclass(L, index)) return 0;
-    int top = lua_gettop(L);
-    lua_pushvalue(L, index);  // push class
-    do {
-        if (luaC_getname(L, -1)) {  // get name
-            lua_pushvalue(L, -2);   // push class
-            luaC_setreg(L);         // register class
-        } else lua_pop(L, 1);       // anonymous class, skip
-    } while (luaC_getparent(L, -1));
-    lua_settop(L, top);
+    lua_remove(L, base);    // remove base from stack
+    lua_remove(L, uclass);  // remove uclass from stack
     return 1;
 }
 
 void luaC_unregister(lua_State *L, const char *name) {
-    if (luaC_getregfield(L, name) == LUA_TTABLE) {
+    if (luaC_pushclass(L, name) == LUA_TTABLE) {
+        lua_pushvalue(L, -1);
+        if (luaC_getreg(L) == LUA_TUSERDATA) {
+            lua_pushnil(L);
+            luaC_setreg(L);  // reg[uclass] = nil
+        }
         lua_pushnil(L);
-        luaC_setreg(L);  // remove C class if present
+        luaC_setreg(L);  // reg[class] = nil
         lua_pushnil(L);
-        luaC_setregfield(L, name);  // remove class table
-    } else lua_pop(L, 1);
+        luaC_setregfield(L, name);  // reg[module?.name] = nil
+        lua_getfield(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
+        lua_pushnil(L);
+        lua_setfield(L, -2, name);  // package.loaded[module?.name] = nil
+
+        // check for module table
+        const char *pos = strrchr(name, '.');
+        if (pos && strlen(pos + 1) > 0) {
+            lua_pushlstring(L, name, pos - name);
+            if (lua_gettable(L, -2) == LUA_TTABLE) {  // get module table
+                lua_pushnil(L);
+                // package.loaded.module[name] = nil
+                lua_setfield(L, -2, pos + 1);
+            }
+            lua_pop(L, 1);  // pop module table
+        }
+    }
+    lua_pop(L, 1);  // pop nil or package.loaded
 }
 
 void luaC_setinheritcb(lua_State *L, int idx, lua_CFunction cb) {
@@ -524,15 +578,6 @@ void luaC_setinheritcb(lua_State *L, int idx, lua_CFunction cb) {
         lua_pushcclosure(L, default_class_inherited, 1);
         lua_rawset(L, idx);
     }
-}
-
-void luaC_packageadd(lua_State *L, const char *name, const char *module) {
-    int top = lua_gettop(L);
-    lua_getfield(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
-    if (module) luaL_getsubtable(L, -1, module);  // get module table
-    luaC_pushclass(L, name);
-    lua_setfield(L, -2, name);
-    lua_settop(L, top);
 }
 
 int luaC_newclass(
@@ -547,17 +592,16 @@ int luaC_newclass(
     cls->alloc      = NULL;
     cls->gc         = NULL;
     cls->methods    = methods;
-    return luaC_register(L, -1);
+    return luaC_classfromptr(L);
 }
 
 int luaopen_lcl(lua_State *L) {
     static const luaL_Reg classlib_funcs[] = {
-        {"uvget",    classlib_uvget   },
-        {"uvset",    classlib_uvset   },
-        {"rawget",   classlib_rawget  },
-        {"rawset",   classlib_rawset  },
-        {"register", classlib_register},
-        {NULL,       NULL             }
+        {"uvget",  classlib_uvget },
+        {"uvset",  classlib_uvset },
+        {"rawget", classlib_rawget},
+        {"rawset", classlib_rawset},
+        {NULL,     NULL           }
     };
     luaL_newlib(L, classlib_funcs);
     return 1;

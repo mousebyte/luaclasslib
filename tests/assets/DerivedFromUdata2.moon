@@ -1,4 +1,4 @@
-import DerivedFromUdata from require "LCL"
+DerivedFromUdata = require "DerivedFromUdata"
 
 class DerivedFromUdata2 extends DerivedFromUdata
     new: (n, filename)=>

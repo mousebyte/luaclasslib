@@ -45,7 +45,7 @@ The class can now be constructed with a call to `luaC_construct`:
 .. sourcecode:: LCL
 
    lua_pushstring(L, "myfile.txt");
-   luaC_construct(L, 1, "File");
+   luaC_construct(L, 1, "lcltests.File");
 
 Since we set `luaC_Class::user_ctor` to ``1``, our class can be constructed from Lua code by calling the class object,
 assuming it is made accessible (e.g. by a call to `luaC_packageadd`).

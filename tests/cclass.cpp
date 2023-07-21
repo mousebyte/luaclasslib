@@ -10,10 +10,10 @@ TEST_SUITE("Simple Classes") {
         luaC_newclass(L, "SimpleBase", NULL, simple_base_class_methods);
         LCL_CHECKSTACK(1);
         REQUIRE(luaC_isclass(L, -1));
-        lua_pop(L, 1);
+        register_lcl_class(L);
 
         lua_pushnumber(L, 7);
-        luaC_construct(L, 1, "SimpleBase");
+        luaC_construct(L, 1, "lcltests.SimpleBase");
         LCL_CHECKSTACK(1);
         REQUIRE(luaC_isobject(L, -1));
         REQUIRE(luaC_isinstance(L, -1, "SimpleBase"));
@@ -31,23 +31,18 @@ TEST_SUITE("Simple Classes") {
         doctest::description("moonscript class extended by C class")) {
         LCL_TEST_BEGIN
 
-        moonL_dofile(L, "Base.moon");
-        LCL_CHECKSTACK(1);
-        REQUIRE(luaC_register(L, -1));
-        LCL_CHECKSTACK(1);
-        lua_pop(L, 1);
-
         luaC_newclass(L, "SimpleDerived", "Base", simple_derived_class_methods);
         LCL_CHECKSTACK(1);
         REQUIRE(luaC_isclass(L, -1));
 
         REQUIRE(lua_getfield(L, -1, "var") == LUA_TSTRING);
         REQUIRE(String(lua_tostring(L, -1)) == "Eek!");
-        lua_pop(L, 2);
+        lua_pop(L, 1);
+        register_lcl_class(L);
 
         lua_pushstring(L, "I have C functions!");
         lua_pushnumber(L, 12);
-        luaC_construct(L, 2, "SimpleDerived");
+        luaC_construct(L, 2, "lcltests.SimpleDerived");
         LCL_CHECKSTACK(1);
         REQUIRE(luaC_isobject(L, -1));
         REQUIRE(luaC_isinstance(L, -1, "SimpleDerived"));
@@ -76,17 +71,18 @@ TEST_SUITE("Simple Classes") {
         luaC_newclass(L, "SimpleBase", NULL, simple_base_class_methods);
         LCL_CHECKSTACK(1);
         REQUIRE(luaC_isclass(L, -1));
-        lua_pop(L, 1);
+        register_lcl_class(L);
 
         luaC_newclass(
-            L, "SimpleDerived", "SimpleBase", simple_derived_class_methods);
+            L, "SimpleDerived", "lcltests.SimpleBase",
+            simple_derived_class_methods);
         LCL_CHECKSTACK(1);
         REQUIRE(luaC_isclass(L, -1));
-        lua_pop(L, 1);
+        register_lcl_class(L);
 
         lua_pushnumber(L, 3);
         lua_pushnumber(L, 7);
-        luaC_construct(L, 2, "SimpleDerived");
+        luaC_construct(L, 2, "lcltests.SimpleDerived");
         LCL_CHECKSTACK(1);
         REQUIRE(luaC_isobject(L, -1));
         REQUIRE(luaC_isinstance(L, -1, "SimpleDerived"));
