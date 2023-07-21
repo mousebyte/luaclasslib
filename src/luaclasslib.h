@@ -447,14 +447,14 @@ void luaC_super(lua_State *L, const char *name, int nargs, int nresults);
 
 /**
  * @brief Obtains the Lua class table associated with the `luaC_Class` at the
- * given stack index. If the class table does not exist, it will be created.
+ * top of the stack. If the class table does not exist, it will be created.
  *
  * @param L The Lua state.
  * @param index The stack index of the class.
  *
  * @return 1 if the class was successfully registered, and 0 otherwise.
  */
-int luaC_classfromptr(lua_State *L, int index);
+int luaC_classfromptr(lua_State *L);
 
 /**
  * @brief Removes the class with the given name from the class registry.

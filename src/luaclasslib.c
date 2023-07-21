@@ -435,13 +435,13 @@ static int default_class_inherited(lua_State *L) {
     return 0;
 }
 
-int luaC_classfromptr(lua_State *L, int idx) {
-    int         uclass = lua_absindex(L, idx);
+int luaC_classfromptr(lua_State *L) {
+    int         uclass = lua_gettop(L);
     luaC_Class *c      = lua_touserdata(L, uclass);
     if (!c || !c->name) return 0;
     lua_pushvalue(L, uclass);
     if (luaC_getreg(L) != LUA_TNIL) {
-        lua_remove(L, idx);
+        lua_pop(L, 1);
         return 1;
     }
     lua_pop(L, 1);
@@ -584,7 +584,7 @@ int luaC_newclass(
     cls->alloc      = NULL;
     cls->gc         = NULL;
     cls->methods    = methods;
-    return luaC_register(L, -1);
+    return luaC_classfromptr(L);
 }
 
 int luaopen_lcl(lua_State *L) {
