@@ -18,12 +18,14 @@ static void luaC_setreg(lua_State *L) {
 
 static int luaC_getreg(lua_State *L) {
     int type = LUA_TNIL;
+
     if (lua_gettop(L) >= 1) {
         luaL_getsubtable(L, LUA_REGISTRYINDEX, CLASSLIB_REGISTRY_KEY);
         lua_insert(L, -2);
         type = lua_gettable(L, -2);
         lua_remove(L, -2);
     } else lua_pushnil(L);
+
     return type;
 }
 
@@ -45,10 +47,12 @@ static int luaC_getregfield(lua_State *L, const char *key) {
 
 static int classlib_uvget(lua_State *L) {
     int uv = 1;
+
     if (lua_gettop(L) == 3) {
         uv = luaL_checknumber(L, 2);
         lua_remove(L, 2);
     }
+
     luaC_uvget(L, 1, uv);
     return 1;
 }
@@ -79,33 +83,39 @@ static int classlib_type(lua_State *L) {
     return 1;
 }
 
-int luaC_isobject(lua_State *L, int index) {
+int luaC_isobject(lua_State *L, int idx) {
     int ret = 0;
-    if (lua_istable(L, index) || lua_isuserdata(L, index)) {
-        ret = lua_getfield(L, index, "__class") == LUA_TTABLE;
+
+    if (lua_istable(L, idx) || lua_isuserdata(L, idx)) {
+        ret = lua_getfield(L, idx, "__class") == LUA_TTABLE;
         lua_pop(L, 1);
     }
+
     return ret;
 }
 
-int luaC_isclass(lua_State *L, int index) {
+int luaC_isclass(lua_State *L, int idx) {
     int ret = 0;
-    if (lua_istable(L, index)) {
-        ret = lua_getfield(L, index, "__base") == LUA_TTABLE;
+
+    if (lua_istable(L, idx)) {
+        ret = lua_getfield(L, idx, "__base") == LUA_TTABLE;
         lua_pop(L, 1);
     }
+
     return ret;
 }
 
-int luaC_isinstance(lua_State *L, int index, const char *name) {
+int luaC_isinstance(lua_State *L, int idx, const char *name) {
     int top = lua_gettop(L), ret = 0;
-    if (luaC_getclass(L, index)) {
+
+    if (luaC_getclass(L, idx)) {
         do {
             luaC_getname(L, -1);
             ret = strcmp(name, lua_tostring(L, -1)) == 0;
             lua_pop(L, 1);  // pop name
         } while (!ret && luaC_getparent(L, -1));
     }
+
     lua_settop(L, top);
     return ret;
 }
@@ -166,14 +176,16 @@ int luaC_pushclass(lua_State *L, const char *name) {
     return LUA_TTABLE;
 }
 
-luaC_Class *luaC_uclass(lua_State *L, int index) {
+luaC_Class *luaC_uclass(lua_State *L, int idx) {
     luaC_Class *ret = NULL;
-    if (luaC_isclass(L, index)) {
-        lua_pushvalue(L, index);
+
+    if (luaC_isclass(L, idx)) {
+        lua_pushvalue(L, idx);
         luaC_getreg(L);
-        if (lua_isuserdata(L, -1)) ret = (luaC_Class *)lua_touserdata(L, -1);
+        if (lua_isuserdata(L, -1)) ret = lua_touserdata(L, -1);
         lua_pop(L, 1);
     }
+
     return ret;
 }
 
@@ -182,10 +194,12 @@ static luaC_Constructor get_alloc(lua_State *L, int idx) {
     int              top = lua_gettop(L);
     luaC_Constructor ret = NULL;
     lua_pushvalue(L, idx);
+
     do {
         luaC_Class *class = luaC_uclass(L, -1);
         if (class && class->alloc) ret = class->alloc;
     } while (!ret && luaC_getparent(L, -1));
+
     lua_settop(L, top);
     return ret;
 }
@@ -194,12 +208,15 @@ static luaC_Constructor get_alloc(lua_State *L, int idx) {
 static int default_class_call(lua_State *L) {
     // create the object
     luaC_Constructor alloc = get_alloc(L, 1);
+
     if (alloc) {
         alloc(L);
         lua_newtable(L);
         lua_setiuservalue(L, -2, 1);
     } else lua_newtable(L);
+
     if (!luaC_getbase(L, 1)) return 0;
+
     lua_setmetatable(L, -2);            // set object metatable to class base
     lua_pushvalue(L, -1);               // push a copy of object for call
     lua_rotate(L, 2, 2);                // rotate objects before other args
@@ -223,13 +240,14 @@ int luaC_construct(lua_State *L, int nargs, const char *name) {
 
 int luaC_injectmethod(
     lua_State    *L,
-    int           index,
+    int           idx,
     const char   *method,
     lua_CFunction f) {
-    index = lua_absindex(L, index);
-    if (f && luaC_isclass(L, index)) {
+    idx = lua_absindex(L, idx);
+
+    if (f && luaC_isclass(L, idx)) {
         lua_pushstring(L, "__base");
-        lua_rawget(L, index);       // grab base
+        lua_rawget(L, idx);         // grab base
         lua_pushstring(L, method);  // key for rawset
         lua_pushstring(L, method);  // key for rawget
         lua_rawget(L, -3);          // grab method from base
@@ -238,28 +256,33 @@ int luaC_injectmethod(
         lua_pop(L, 1);              // pop base
         return 1;
     }
+
     return 0;
 }
 
 int luaC_deferindex(lua_State *L) {
     lua_pushvalue(L, lua_upvalueindex(1));  // grab original __index
     int ret = LUA_TNIL;
+
     switch (lua_type(L, -1)) {
         case LUA_TTABLE:  // grab value from table
             lua_pushvalue(L, 2);
             ret = lua_gettable(L, -2);
             break;
+
         case LUA_TFUNCTION:  // grab value from function
             lua_pushvalue(L, 1);
             lua_pushvalue(L, 2);
             lua_call(L, 2, 1);
             ret = lua_type(L, -1);
             break;
+
         default:  // if it's anything else, push nil
             lua_pop(L, 1);
             lua_pushnil(L);
             break;
     }
+
     lua_remove(L, -2);  // remove original __index
     return ret;
 }
@@ -268,6 +291,7 @@ void luaC_defernewindex(lua_State *L) {
     if (lua_type(L, lua_upvalueindex(1)) != LUA_TFUNCTION) {
         lua_pushcfunction(L, classlib_rawset);
     } else lua_pushvalue(L, lua_upvalueindex(1));  // grab original __newindex
+
     // push copies of all the args and call it
     lua_pushvalue(L, 1);
     lua_pushvalue(L, 2);
@@ -275,18 +299,20 @@ void luaC_defernewindex(lua_State *L) {
     lua_call(L, 3, 0);
 }
 
-int luaC_getparentfield(lua_State *L, int index, int depth, const char *name) {
-    if (depth < 1 || !luaC_isobject(L, index)) {
+int luaC_getparentfield(lua_State *L, int idx, int depth, const char *name) {
+    if (depth < 1 || !luaC_isobject(L, idx)) {
         lua_pushnil(L);
         return LUA_TNIL;
     }
 
-    luaC_getclass(L, index);  // push its class
-    while (depth > 0) {       // walk the heirarchy
+    luaC_getclass(L, idx);  // push its class
+    while (depth > 0) {     // walk the heirarchy
+
         if (!luaC_getparent(L, -1)) {
             lua_remove(L, -2);  // remove previous class
             return LUA_TNIL;
         }
+
         depth--;
         lua_remove(L, -2);  // remove previous class
     }
@@ -301,6 +327,7 @@ void luaC_super(lua_State *L, const char *name, int nargs, int nresults) {
         lua_pop(L, 1);
         return;
     }
+
     lua_pushvalue(L, 1);           // push obj
     lua_rotate(L, -nargs - 2, 2);  // put method and obj before args
     lua_call(L, nargs + 1, nresults);
@@ -316,14 +343,17 @@ static int default_init(lua_State *L) {
 static int default_class_index(lua_State *L) {
     // check upvalue (base) for key
     lua_pushvalue(L, 2);
+
     if (lua_rawget(L, lua_upvalueindex(1)) == LUA_TNIL) {
         lua_pop(L, 1);
         lua_pushstring(L, "__parent");
+
         if (lua_rawget(L, 1) != LUA_TNIL) {  // get parent from arg 1 (self)
             lua_insert(L, -2);               // put parent behind key
             lua_gettable(L, -2);             // get value (or nil) from parent
         }
     }
+
     return 1;
 }
 
@@ -334,6 +364,7 @@ static int default_udata_index(lua_State *L) {
         lua_pop(L, 1);
         luaC_rawget(L, 1);
     }
+
     return 1;
 }
 
@@ -439,12 +470,16 @@ static int default_class_inherited(lua_State *L) {
 int luaC_classfromptr(lua_State *L) {
     int         uclass = lua_gettop(L);
     luaC_Class *c      = lua_touserdata(L, uclass);
+
     if (!c || !c->name) return 0;
+
     lua_pushvalue(L, uclass);
+
     if (luaC_getreg(L) != LUA_TNIL) {
         lua_pop(L, 1);
         return 1;
     }
+
     lua_pop(L, 1);
 
     lua_newtable(L);                  // base table
@@ -544,10 +579,12 @@ int luaC_classfromptr(lua_State *L) {
 void luaC_unregister(lua_State *L, const char *name) {
     if (luaC_pushclass(L, name) == LUA_TTABLE) {
         lua_pushvalue(L, -1);
+
         if (luaC_getreg(L) == LUA_TUSERDATA) {
             lua_pushnil(L);
             luaC_setreg(L);  // reg[uclass] = nil
         }
+
         lua_pushnil(L);
         luaC_setreg(L);  // reg[class] = nil
         lua_pushnil(L);
@@ -558,13 +595,16 @@ void luaC_unregister(lua_State *L, const char *name) {
 
         // check for module table
         const char *pos = strrchr(name, '.');
+
         if (pos && strlen(pos + 1) > 0) {
             lua_pushlstring(L, name, pos - name);
+
             if (lua_gettable(L, -2) == LUA_TTABLE) {  // get module table
                 lua_pushnil(L);
                 // package.loaded.module[name] = nil
                 lua_setfield(L, -2, pos + 1);
             }
+
             lua_pop(L, 1);  // pop module table
         }
     }
@@ -585,7 +625,7 @@ int luaC_newclass(
     const char *name,
     const char *parent,
     luaL_Reg   *methods) {
-    luaC_Class *cls = (luaC_Class *)lua_newuserdatauv(L, sizeof(luaC_Class), 0);
+    luaC_Class *cls = lua_newuserdatauv(L, sizeof(luaC_Class), 0);
     cls->name       = name;
     cls->parent     = parent;
     cls->user_ctor  = 1;

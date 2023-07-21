@@ -60,12 +60,15 @@ typedef struct {
 static inline int luaC_uvrawget(lua_State *L, int idx, int uv) {
     if (!lua_isuserdata(L, idx))
         return luaL_error(L, "Object at index %d is not a userdata.", idx);
+
     int ret = LUA_TNIL;
+
     if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
         lua_insert(L, -2);        // put uv behind key
         ret = lua_rawget(L, -2);  // get the value
     } else lua_pushnil(L);        // otherwise push nil
-    lua_remove(L, -2);            // remove the uv
+
+    lua_remove(L, -2);  // remove the uv
     return ret;
 }
 
@@ -84,12 +87,14 @@ static inline int luaC_uvrawget(lua_State *L, int idx, int uv) {
 static inline int luaC_uvrawset(lua_State *L, int idx, int uv) {
     if (!lua_isuserdata(L, idx))
         return luaL_error(L, "Object at index %d is not a userdata.", idx);
+
     if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
         lua_insert(L, -3);  // put uv before key and value
         lua_rawset(L, -3);  // set the value
         lua_pop(L, 1);      // pop the uv
         return 1;
     }
+
     lua_pop(L, 3);  // otherwise pop uv, key, and value
     return 0;
 }
@@ -110,11 +115,14 @@ static inline int luaC_uvrawset(lua_State *L, int idx, int uv) {
 static inline int luaC_uvrawgetp(lua_State *L, int idx, int uv, const void *p) {
     if (!lua_isuserdata(L, idx))
         return luaL_error(L, "Object at index %d is not a userdata.", idx);
+
     int ret = LUA_TNIL;
+
     if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
         ret = lua_rawgetp(L, -1, p);  // get the value
     } else lua_pushnil(L);            // otherwise push nil
-    lua_remove(L, -2);                // remove the uv
+
+    lua_remove(L, -2);  // remove the uv
     return ret;
 }
 
@@ -135,12 +143,14 @@ static inline int luaC_uvrawgetp(lua_State *L, int idx, int uv, const void *p) {
 static inline int luaC_uvrawsetp(lua_State *L, int idx, int uv, const void *p) {
     if (!lua_isuserdata(L, idx))
         return luaL_error(L, "Object at index %d is not a userdata.", idx);
+
     if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
         lua_insert(L, -2);      // put uv before value
         lua_rawsetp(L, -2, p);  // set the value
         lua_pop(L, 1);          // pop the uv
         return 1;
     }
+
     lua_pop(L, 2);  // otherwise pop uv and value
     return 0;
 }
@@ -159,12 +169,15 @@ static inline int luaC_uvrawsetp(lua_State *L, int idx, int uv, const void *p) {
 static inline int luaC_uvget(lua_State *L, int idx, int uv) {
     if (!lua_isuserdata(L, idx))
         return luaL_error(L, "Object at index %d is not a userdata.", idx);
+
     int ret = LUA_TNIL;
+
     if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
         lua_insert(L, -2);          // put uv behind key
         ret = lua_gettable(L, -2);  // get the value
     } else lua_pushnil(L);          // otherwise push nil
-    lua_remove(L, -2);              // remove the uv
+
+    lua_remove(L, -2);  // remove the uv
     return ret;
 }
 
@@ -182,12 +195,14 @@ static inline int luaC_uvget(lua_State *L, int idx, int uv) {
 static inline int luaC_uvset(lua_State *L, int idx, int uv) {
     if (!lua_isuserdata(L, idx))
         return luaL_error(L, "Object at index %d is not a userdata.", idx);
+
     if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
         lua_insert(L, -3);    // put uv before key and value
         lua_settable(L, -3);  // set the value
         lua_pop(L, 1);        // pop the uv
         return 1;
     }
+
     lua_pop(L, 3);  // otherwise pop uv, key, and value
     return 0;
 }
@@ -207,11 +222,14 @@ static inline int
 luaC_getuvfield(lua_State *L, int idx, int uv, const char *k) {
     if (!lua_isuserdata(L, idx))
         return luaL_error(L, "Object at index %d is not a userdata.", idx);
+
     int ret = LUA_TNIL;
+
     if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
         ret = lua_getfield(L, -1, k);  // get value if uv is table
     } else lua_pushnil(L);             // otherwise push nil
-    lua_remove(L, -2);                 // remove the uv
+
+    lua_remove(L, -2);  // remove the uv
     return ret;
 }
 
@@ -231,12 +249,14 @@ static inline int
 luaC_setuvfield(lua_State *L, int idx, int uv, const char *k) {
     if (!lua_isuserdata(L, idx))
         return luaL_error(L, "Object at index %d is not a userdata.", idx);
+
     if (lua_getiuservalue(L, idx, uv) == LUA_TTABLE) {
         lua_insert(L, -2);       // put uv behind value
         lua_setfield(L, -2, k);  // set the value
         lua_pop(L, 1);           // pop the uv
         return 1;
     }
+
     lua_pop(L, 2);  // otherwise pop uv and value
     return 0;
 }
@@ -311,21 +331,21 @@ static inline int luaC_pmcall(
  * @brief Checks if the value at the given index is an instance of a class.
  *
  * @param L The Lua state.
- * @param index The stack index to check.
+ * @param idx The stack index to check.
  *
  * @return 1 if the value is an instance of a class, and 0 otherwise.
  */
-int luaC_isobject(lua_State *L, int index);
+int luaC_isobject(lua_State *L, int idx);
 
 /**
  * @brief Checks if the value at the given index is a class.
  *
  * @param L The Lua state.
- * @param index The stack index to check.
+ * @param idx The stack index to check.
  *
  * @return 1 if the value is a class, and 0 otherwise.
  */
-int luaC_isclass(lua_State *L, int index);
+int luaC_isclass(lua_State *L, int idx);
 
 /**
  * @brief Checks if the value at the given index is an instance of the class
@@ -366,11 +386,11 @@ int luaC_pushclass(lua_State *L, const char *name);
  * the given stack index.
  *
  * @param L The Lua state.
- * @param index The stack index of the class.
+ * @param idx The stack index of the class.
  *
  * @return A pointer to the user data class, or NULL if none was found.
  */
-luaC_Class *luaC_uclass(lua_State *L, int index);
+luaC_Class *luaC_uclass(lua_State *L, int idx);
 
 /**
  * @brief Construct an instance of a class.
@@ -388,7 +408,7 @@ int luaC_construct(lua_State *L, int nargs, const char *name);
  * with the previous method as its only upvalue.
  *
  * @param L The Lua state.
- * @param index The index of the class object.
+ * @param idx The index of the class object.
  * @param method The method to replace.
  * @param f The C function to replace the method with.
  *
@@ -396,7 +416,7 @@ int luaC_construct(lua_State *L, int nargs, const char *name);
  */
 int luaC_injectmethod(
     lua_State    *L,
-    int           index,
+    int           idx,
     const char   *method,
     lua_CFunction f);
 
@@ -424,13 +444,13 @@ void luaC_defernewindex(lua_State *L);
  * object, pushes nil.
  *
  * @param L The Lua state.
- * @param index The index of the object in the stack.
+ * @param idx The index of the object in the stack.
  * @param depth The parent depth.
  * @param name The name of the field.
  *
  * @return The type of the value pushed onto the stack.
  */
-int luaC_getparentfield(lua_State *L, int index, int depth, const char *name);
+int luaC_getparentfield(lua_State *L, int idx, int depth, const char *name);
 
 /**
  * @brief Calls a parent class method, passing the given number of arguments
@@ -469,10 +489,10 @@ void luaC_unregister(lua_State *L, const char *name);
  * and derived class as its arguments.
  *
  * @param L The Lua state.
- * @param index The index of the class.
+ * @param idx The index of the class.
  * @param cb The callback function.
  */
-void luaC_setinheritcb(lua_State *L, int index, lua_CFunction cb);
+void luaC_setinheritcb(lua_State *L, int idx, lua_CFunction cb);
 
 /**
  * @brief Helper method for creating and registering a simple luaC_Class as a
@@ -547,47 +567,43 @@ void luaC_overrideglobals(lua_State *L);
  * index.
  *
  * @param L The Lua state.
- * @param index The index of the object on the stack.
+ * @param i The index of the object on the stack.
  *
  * @return 1 if the class was fetched successfully, and 0 otherwise.
  */
-#define luaC_getclass(L, index) \
-    (lua_getfield((L), (index), "__class") == LUA_TTABLE)
+#define luaC_getclass(L, i) (lua_getfield((L), (i), "__class") == LUA_TTABLE)
 
 /**
  * @brief Pushes onto the stack the base table of the class at the given stack
  * index.
  *
  * @param L The Lua state.
- * @param index The index of the class on the stack.
+ * @param i The index of the class on the stack.
  *
  * @return 1 if the base was fetched successfully, and 0 otherwise.
  */
-#define luaC_getbase(L, index) \
-    (lua_getfield((L), (index), "__base") == LUA_TTABLE)
+#define luaC_getbase(L, i) (lua_getfield((L), (i), "__base") == LUA_TTABLE)
 
 /**
  * @brief Pushes onto the stack the parent class table of the class at the given
  * stack index.
  *
  * @param L The Lua state.
- * @param index The index of the class on the stack.
+ * @param i The index of the class on the stack.
  *
  * @return 1 if the parent was fetched successfully, and 0 otherwise.
  */
-#define luaC_getparent(L, index) \
-    (lua_getfield((L), (index), "__parent") == LUA_TTABLE)
+#define luaC_getparent(L, i) (lua_getfield((L), (i), "__parent") == LUA_TTABLE)
 
 /**
  * @brief Pushes onto the stack the name of the class at the given stack index.
  *
  * @param L The Lua state.
- * @param index The index of the class on the stack.
+ * @param i The index of the class on the stack.
  *
  * @return 1 if the parent was fetched successfully, and 0 otherwise.
  */
-#define luaC_getname(L, index) \
-    (lua_getfield((L), (index), "__name") == LUA_TSTRING)
+#define luaC_getname(L, i) (lua_getfield((L), (i), "__name") == LUA_TSTRING)
 
 /**
  * @brief Improved typename function.
@@ -609,11 +625,13 @@ static inline const char *luaC_typename(lua_State *L, int idx) {
                 name = "class";
                 break;
             } else lua_pop(L, 1);
+
         case LUA_TUSERDATA:
             if (luaC_getclass(L, idx) && luaC_getname(L, -1)) {
                 name = lua_tostring(L, -1);
                 break;
             }
+
         default:
             name = lua_typename(L, type);
     }
