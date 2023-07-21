@@ -450,7 +450,6 @@ void luaC_super(lua_State *L, const char *name, int nargs, int nresults);
  * top of the stack. If the class table does not exist, it will be created.
  *
  * @param L The Lua state.
- * @param index The stack index of the class.
  *
  * @return 1 if the class was successfully registered, and 0 otherwise.
  */
