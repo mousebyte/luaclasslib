@@ -25,16 +25,16 @@ TEST_SUITE("User Data Classes") {
         LCL_TEST_BEGIN
 
         lua_pushlightuserdata(L, &signal_class);
-        luaC_register(L, -1);
+        luaC_classfromptr(L);
         LCL_CHECKSTACK(1);
         REQUIRE(luaC_isclass(L, -1));
-        lua_pop(L, 1);
+        register_lcl_class(L);
 
         lua_pushlightuserdata(L, &blocking_signal_class);
-        luaC_register(L, -1);
+        luaC_classfromptr(L);
         LCL_CHECKSTACK(1);
         REQUIRE(luaC_isclass(L, -1));
-        lua_pop(L, 1);
+        register_lcl_class(L);
 
         luaC_construct(L, 0, "lcltests.BlockingSignal");
         LCL_CHECKSTACK(1);
@@ -81,10 +81,10 @@ TEST_SUITE("User Data Classes") {
         LCL_TEST_BEGIN
 
         lua_pushlightuserdata(L, &udata_derived_class);
-        luaC_register(L, -1);
+        luaC_classfromptr(L);
         LCL_CHECKSTACK(1);
         REQUIRE(luaC_isclass(L, -1));
-        lua_pop(L, 1);
+        register_lcl_class(L);
 
         lua_pushnumber(L, 8);
         luaC_construct(L, 1, "lcltests.UdataDerived");
@@ -112,10 +112,10 @@ TEST_SUITE("User Data Classes") {
         LCL_TEST_BEGIN
 
         lua_pushlightuserdata(L, &file_class);
-        luaC_register(L, -1);
+        luaC_classfromptr(L);
         LCL_CHECKSTACK(1);
         REQUIRE(luaC_isclass(L, -1));
-        lua_pop(L, 1);
+        register_lcl_class(L);
 
         lua_pushnumber(L, 3);
         lua_pushstring(L, "Derived.moon");

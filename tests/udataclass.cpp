@@ -22,10 +22,10 @@ TEST_SUITE("User Data Classes") {
 
         SUBCASE("File Class") {
             lua_pushlightuserdata(L, &file_class);
-            luaC_register(L, -1);
+            luaC_classfromptr(L);
             LCL_CHECKSTACK(1);
             REQUIRE(luaC_isclass(L, -1));
-            lua_pop(L, 1);
+            register_lcl_class(L);
 
             lua_pushstring(L, "Derived.moon");
             luaC_construct(L, 1, "lcltests.File");
@@ -47,10 +47,10 @@ TEST_SUITE("User Data Classes") {
 
         SUBCASE("Signal Class") {
             lua_pushlightuserdata(L, &signal_class);
-            luaC_register(L, -1);
+            luaC_classfromptr(L);
             LCL_CHECKSTACK(1);
             REQUIRE(luaC_isclass(L, -1));
-            lua_pop(L, 1);
+            register_lcl_class(L);
 
             luaC_construct(L, 0, "lcltests.Signal");
             LCL_CHECKSTACK(1);

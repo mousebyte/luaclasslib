@@ -61,7 +61,6 @@ static luaL_Reg signal_methods[] = {
 
 luaC_Class signal_class = {
     .name      = "Signal",
-    .module    = "lcltests",
     .parent    = NULL,
     .user_ctor = 0,
     .alloc     = signal_alloc,

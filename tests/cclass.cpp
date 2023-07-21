@@ -7,11 +7,10 @@ TEST_SUITE("Simple Classes") {
     TEST_CASE("Simple Base Class") {
         LCL_TEST_BEGIN
 
-        luaC_newclass(
-            L, "SimpleBase", "lcltests", NULL, simple_base_class_methods);
+        luaC_newclass(L, "SimpleBase", NULL, simple_base_class_methods);
         LCL_CHECKSTACK(1);
         REQUIRE(luaC_isclass(L, -1));
-        lua_pop(L, 1);
+        register_lcl_class(L);
 
         lua_pushnumber(L, 7);
         luaC_construct(L, 1, "lcltests.SimpleBase");
@@ -32,15 +31,14 @@ TEST_SUITE("Simple Classes") {
         doctest::description("moonscript class extended by C class")) {
         LCL_TEST_BEGIN
 
-        luaC_newclass(
-            L, "SimpleDerived", "lcltests", "Base",
-            simple_derived_class_methods);
+        luaC_newclass(L, "SimpleDerived", "Base", simple_derived_class_methods);
         LCL_CHECKSTACK(1);
         REQUIRE(luaC_isclass(L, -1));
 
         REQUIRE(lua_getfield(L, -1, "var") == LUA_TSTRING);
         REQUIRE(String(lua_tostring(L, -1)) == "Eek!");
-        lua_pop(L, 2);
+        lua_pop(L, 1);
+        register_lcl_class(L);
 
         lua_pushstring(L, "I have C functions!");
         lua_pushnumber(L, 12);
@@ -70,18 +68,17 @@ TEST_SUITE("Simple Classes") {
         doctest::description("C class extended by C class")) {
         LCL_TEST_BEGIN
 
-        luaC_newclass(
-            L, "SimpleBase", "lcltests", NULL, simple_base_class_methods);
+        luaC_newclass(L, "SimpleBase", NULL, simple_base_class_methods);
         LCL_CHECKSTACK(1);
         REQUIRE(luaC_isclass(L, -1));
-        lua_pop(L, 1);
+        register_lcl_class(L);
 
         luaC_newclass(
-            L, "SimpleDerived", "lcltests", "lcltests.SimpleBase",
+            L, "SimpleDerived", "lcltests.SimpleBase",
             simple_derived_class_methods);
         LCL_CHECKSTACK(1);
         REQUIRE(luaC_isclass(L, -1));
-        lua_pop(L, 1);
+        register_lcl_class(L);
 
         lua_pushnumber(L, 3);
         lua_pushnumber(L, 7);

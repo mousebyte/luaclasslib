@@ -17,3 +17,13 @@ extern "C" {
 #define LCL_TEST_END lua_close(L);
 
 #define LCL_CHECKSTACK(n) CHECK(lua_gettop(L) == n)
+
+static inline void register_lcl_class(lua_State *L) {
+    lua_getfield(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
+    luaL_getsubtable(L, -1, "lcltests");
+    lua_remove(L, -2);
+    luaC_getname(L, -2);
+    lua_rotate(L, -3, -1);
+    lua_rawset(L, -3);
+    lua_pop(L, 1);
+}

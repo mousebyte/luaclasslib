@@ -51,9 +51,9 @@ TEST_SUITE("Basic Functionality") {
 
         SUBCASE("Unregistration") {
             REQUIRE(luaC_newclass(
-                L, "SimpleBase", "lcltests", NULL, simple_base_class_methods));
+                L, "SimpleBase", NULL, simple_base_class_methods));
             LCL_CHECKSTACK(1);
-            lua_pop(L, 1);
+            register_lcl_class(L);
 
             REQUIRE(luaC_pushclass(L, "lcltests.SimpleBase") == LUA_TTABLE);
             LCL_CHECKSTACK(1);
