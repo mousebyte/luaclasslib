@@ -30,7 +30,8 @@ typedef void (*luaC_Destructor)(lua_State *L, void *p);
     const char      *name;                   \
     /** The module to place the class in. */ \
     const char      *module;                 \
-    /** The name of the parent. */           \
+    /** The fully qualified (with module) */ \
+    /** name of the parent. */               \
     const char      *parent;                 \
     /** Whether to allow construction */     \
     /** by calling the class object. */      \
@@ -357,7 +358,7 @@ void *luaC_checkuclass(lua_State *L, int arg, const char *name);
  * @brief Pushes onto the stack the class registered under the given *name*.
  *
  * @param L The Lua state.
- * @param name The class name.
+ * @param name The fully qualified (with module prefix) class name.
  *
  * @return The type of the pushed value.
  */
@@ -448,9 +449,8 @@ int luaC_getparentfield(lua_State *L, int index, int depth, const char *name);
 void luaC_super(lua_State *L, const char *name, int nargs, int nresults);
 
 /**
- * @brief Adds the class represented by the value at the given stack index to
- * the class registry. If the value is a class table, all of its parents will be
- * registered as well.
+ * @brief Adds the class represented by the user data at the given stack index
+ * to the class registry. The class will also be added to *package.loaded*.
  *
  * @param L The Lua state.
  * @param index The stack index of the class.
@@ -497,7 +497,8 @@ void luaC_packageadd(lua_State *L, const char *name, const char *module);
  *
  * @param L The Lua state.
  * @param name The class name.
- * @param parent The parent class name. Must be in the registry.
+ * @param module The module to add the class to. Can be null.
+ * @param parent The parent class name. Must be in the registry. Can be null.
  * @param methods The class methods.
  *
  * @return 1 if the class was successfully created and registered, and 0
