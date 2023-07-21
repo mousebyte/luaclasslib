@@ -135,6 +135,7 @@ int luaC_pushclass(lua_State *L, const char *name) {
             return LUA_TNIL;
         }
 
+        // try to `require` module table and get class as field
         lua_pushstring(L, "return require('");
         lua_pushlstring(L, name, pos - name);
         lua_pushstring(L, "')");
