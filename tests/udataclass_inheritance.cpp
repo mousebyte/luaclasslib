@@ -36,7 +36,7 @@ TEST_SUITE("User Data Classes") {
         REQUIRE(luaC_isclass(L, -1));
         lua_pop(L, 1);
 
-        luaC_construct(L, 0, "BlockingSignal");
+        luaC_construct(L, 0, "lcltests.BlockingSignal");
         LCL_CHECKSTACK(1);
         REQUIRE(luaC_isobject(L, -1));
         REQUIRE(luaC_isinstance(L, -1, "BlockingSignal"));
@@ -80,11 +80,6 @@ TEST_SUITE("User Data Classes") {
         doctest::description("standard class extended by userdata class")) {
         LCL_TEST_BEGIN
 
-        moonL_dofile(L, "Base.moon");
-        REQUIRE(luaC_register(L, -1));
-        LCL_CHECKSTACK(1);
-        lua_pop(L, 1);
-
         lua_pushlightuserdata(L, &udata_derived_class);
         luaC_register(L, -1);
         LCL_CHECKSTACK(1);
@@ -92,7 +87,7 @@ TEST_SUITE("User Data Classes") {
         lua_pop(L, 1);
 
         lua_pushnumber(L, 8);
-        luaC_construct(L, 1, "UdataDerived");
+        luaC_construct(L, 1, "lcltests.UdataDerived");
         LCL_CHECKSTACK(1);
         REQUIRE(luaC_isobject(L, -1));
         REQUIRE(luaC_isinstance(L, -1, "UdataDerived"));
@@ -122,15 +117,6 @@ TEST_SUITE("User Data Classes") {
         REQUIRE(luaC_isclass(L, -1));
         lua_pop(L, 1);
 
-        luaC_packageadd(L, "File", "LCL");
-
-        moonL_dofile(L, "DerivedFromUdata.moon");
-        REQUIRE(luaC_register(L, -1));
-        LCL_CHECKSTACK(1);
-        lua_pop(L, 1);
-
-        luaC_packageadd(L, "DerivedFromUdata", "LCL");
-
         lua_pushnumber(L, 3);
         lua_pushstring(L, "Derived.moon");
         luaC_construct(L, 2, "DerivedFromUdata");
@@ -148,11 +134,6 @@ TEST_SUITE("User Data Classes") {
         REQUIRE(lua_type(L, -1) == LUA_TSTRING);
         REQUIRE(String(lua_tostring(L, -1)) == "Derived.moon");
         lua_pop(L, 2);
-
-        moonL_dofile(L, "DerivedFromUdata2.moon");
-        REQUIRE(luaC_register(L, -1));
-        LCL_CHECKSTACK(1);
-        lua_pop(L, 1);
 
         lua_pushnumber(L, 2);
         lua_pushstring(L, "Derived.moon");

@@ -47,7 +47,7 @@ static int set_n(lua_State *L) {
 TEST_CASE("Method Injection") {
     LCL_TEST_BEGIN
 
-    moonL_dofile(L, "Base.moon");
+    luaC_pushclass(L, "Base");
     LCL_CHECKSTACK(1);
     REQUIRE(lua_type(L, -1) == LUA_TTABLE);
     REQUIRE(luaC_isclass(L, -1));
@@ -64,8 +64,6 @@ TEST_CASE("Method Injection") {
     luaC_injectnewindex(L, -1, newindex_override);
     LCL_CHECKSTACK(1);
     luaC_injectindex(L, -1, index_override);
-    LCL_CHECKSTACK(1);
-    REQUIRE(luaC_register(L, -1));
     LCL_CHECKSTACK(1);
     lua_pop(L, 1);
 

@@ -1,4 +1,4 @@
-import File from require "LCL"
+import File from require "lcltests"
 
 class DerivedFromUdata extends File
     new: (n, filename)=>

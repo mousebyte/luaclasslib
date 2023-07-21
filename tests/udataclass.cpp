@@ -28,7 +28,7 @@ TEST_SUITE("User Data Classes") {
             lua_pop(L, 1);
 
             lua_pushstring(L, "Derived.moon");
-            luaC_construct(L, 1, "File");
+            luaC_construct(L, 1, "lcltests.File");
             LCL_CHECKSTACK(1);
             REQUIRE(luaC_isobject(L, -1));
             REQUIRE(luaC_isinstance(L, -1, "File"));
@@ -52,7 +52,7 @@ TEST_SUITE("User Data Classes") {
             REQUIRE(luaC_isclass(L, -1));
             lua_pop(L, 1);
 
-            luaC_construct(L, 0, "Signal");
+            luaC_construct(L, 0, "lcltests.Signal");
             LCL_CHECKSTACK(1);
             REQUIRE(luaC_isobject(L, -1));
             REQUIRE(luaC_isinstance(L, -1, "Signal"));

@@ -69,6 +69,7 @@ static luaL_Reg file_methods[] = {
 
 luaC_Class file_class = {
     .name      = "File",
+    .module    = "lcltests",
     .parent    = NULL,
     .user_ctor = 1,
     .alloc     = file_alloc,

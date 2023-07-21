@@ -36,16 +36,9 @@ TEST_SUITE("Basic Functionality") {
         LCL_TEST_BEGIN;
 
         SUBCASE("Registration") {
-            moonL_dofile(L, "Derived.moon");
-            LCL_CHECKSTACK(1);
-            CHECK(lua_type(L, -1) == LUA_TTABLE);
-            CHECK(String(luaC_typename(L, -1)) == "class");
-            CHECK(luaC_isclass(L, -1));
-            CHECK(luaC_register(L, -1));
-            lua_pop(L, 1);
-
             CHECK(luaC_pushclass(L, "Base") == LUA_TTABLE);
             LCL_CHECKSTACK(1);
+            CHECK(String(luaC_typename(L, -1)) == "class");
             CHECK(luaC_isclass(L, -1));
             lua_pop(L, 1);
 
@@ -58,49 +51,27 @@ TEST_SUITE("Basic Functionality") {
 
         SUBCASE("Unregistration") {
             REQUIRE(luaC_newclass(
-                L, "SimpleBase", NULL, simple_base_class_methods));
+                L, "SimpleBase", "lcltests", NULL, simple_base_class_methods));
             LCL_CHECKSTACK(1);
             lua_pop(L, 1);
 
-            REQUIRE(luaC_pushclass(L, "SimpleBase") == LUA_TTABLE);
+            REQUIRE(luaC_pushclass(L, "lcltests.SimpleBase") == LUA_TTABLE);
             LCL_CHECKSTACK(1);
             REQUIRE(luaC_uclass(L, -1) != NULL);
-
-            luaC_unregister(L, "SimpleBase");
-
-            REQUIRE(luaC_pushclass(L, "Base") == LUA_TNIL);
-            LCL_CHECKSTACK(2);
             lua_pop(L, 1);
 
-            REQUIRE(luaC_uclass(L, -1) == NULL);
-        }
+            luaC_unregister(L, "lcltests.SimpleBase");
 
-        SUBCASE("Registration from Lua") {
-            moonL_dofile(L, "RegistersItself.moon");
+            REQUIRE(luaC_pushclass(L, "lcltests.SimpleBase") == LUA_TNIL);
             LCL_CHECKSTACK(1);
-            CHECK(luaC_isclass(L, -1));
             lua_pop(L, 1);
-
-            luaC_construct(L, 0, "RegistersItself");
-            LCL_CHECKSTACK(1);
-            REQUIRE(luaC_isinstance(L, -1, "RegistersItself"));
-
-            luaC_mcall(L, "foo", 0, 1);
-            LCL_CHECKSTACK(2);
-            REQUIRE(lua_type(L, -1) == LUA_TSTRING);
-            REQUIRE(String(lua_tostring(L, -1)) == "I registered myself!");
         }
 
         LCL_TEST_END
     }
 
     TEST_CASE("Class Construction") {
-        LCL_TEST_BEGIN
-
-        moonL_dofile(L, "Derived.moon");
-        LCL_CHECKSTACK(1);
-        REQUIRE(luaC_register(L, -1));
-        lua_pop(L, 1);
+        LCL_TEST_BEGIN;
 
         SUBCASE("Base") {
             lua_pushstring(L, "Hello, squeak!");

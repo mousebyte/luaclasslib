@@ -48,6 +48,7 @@ static luaL_Reg udata_derived_methods[] = {
 
 luaC_Class udata_derived_class = {
     .name      = "UdataDerived",
+    .module    = "lcltests",
     .parent    = "Base",
     .user_ctor = 0,
     .alloc     = udata_derived_alloc,
