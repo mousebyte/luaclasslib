@@ -550,7 +550,7 @@ int luaC_newclass(
     return luaC_register(L, -1);
 }
 
-int luaopen_class(lua_State *L) {
+int luaopen_lcl(lua_State *L) {
     static const luaL_Reg classlib_funcs[] = {
         {"uvget",    classlib_uvget   },
         {"uvset",    classlib_uvset   },

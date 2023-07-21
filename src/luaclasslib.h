@@ -512,7 +512,7 @@ int luaC_newclass(
  *
  * @param L The Lua state.
  */
-int luaopen_class(lua_State *L);
+int luaopen_lcl(lua_State *L);
 
 /**
  * @brief Overrides the `rawget`, `rawset`, and `type` functions with additional
