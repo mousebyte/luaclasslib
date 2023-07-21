@@ -550,9 +550,17 @@ int luaC_newclass(
     return luaC_register(L, -1);
 }
 
-void luaopen_class(lua_State *L) {
-    lua_register(L, "uvget", classlib_uvget);
-    lua_register(L, "uvset", classlib_uvset);
+int luaopen_class(lua_State *L) {
+    static const luaL_Reg classlib_funcs[] = {
+        {"uvget",    classlib_uvget   },
+        {"uvset",    classlib_uvset   },
+        {"rawget",   classlib_rawget  },
+        {"rawset",   classlib_rawset  },
+        {"register", classlib_register},
+        {NULL,       NULL             }
+    };
+    luaL_newlib(L, classlib_funcs);
+    return 1;
 }
 
 void luaC_overrideglobals(lua_State *L) {

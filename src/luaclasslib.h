@@ -508,11 +508,11 @@ int luaC_newclass(
     luaL_Reg   *methods);
 
 /**
- * @brief Loads the Lua class library user functions into the global namespace.
+ * @brief Pushes the Lua class library onto the stack.
  *
  * @param L The Lua state.
  */
-void luaopen_class(lua_State *L);
+int luaopen_class(lua_State *L);
 
 /**
  * @brief Overrides the `rawget`, `rawset`, and `type` functions with additional
