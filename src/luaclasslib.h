@@ -506,6 +506,7 @@ void luaC_packageadd(lua_State *L, const char *name, const char *module);
 int luaC_newclass(
     lua_State  *L,
     const char *name,
+    const char *module,
     const char *parent,
     luaL_Reg   *methods);
 
