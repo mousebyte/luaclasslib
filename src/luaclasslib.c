@@ -541,23 +541,30 @@ int luaC_classfromptr(lua_State *L) {
 }
 
 void luaC_unregister(lua_State *L, const char *name) {
-    if (luaC_getregfield(L, name) == LUA_TTABLE) {
+    if (luaC_pushclass(L, name) == LUA_TTABLE) {
+        lua_pushvalue(L, -1);
+        if (luaC_getreg(L) == LUA_TUSERDATA) {
+            lua_pushnil(L);
+            luaC_setreg(L);  // reg[uclass] = nil
+        }
         lua_pushnil(L);
-        luaC_setreg(L);  // remove C class if present
+        luaC_setreg(L);  // reg[class] = nil
         lua_pushnil(L);
-        luaC_setregfield(L, name);  // remove class table
+        luaC_setregfield(L, name);  // reg[module?.name] = nil
         lua_getfield(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
         lua_pushnil(L);
-        lua_setfield(L, -2, name);  // remove from package.loaded
+        lua_setfield(L, -2, name);  // package.loaded[module?.name] = nil
 
         // check for module table
         const char *pos = strrchr(name, '.');
         if (pos && strlen(pos + 1) > 0) {
             lua_pushlstring(L, name, pos - name);
-            lua_gettable(L, -2);  // get module table
-            lua_pushnil(L);
-            lua_setfield(L, -2, pos + 1);  // remove from module table
-            lua_pop(L, 1);                 // pop module table
+            if (lua_gettable(L, -2) == LUA_TTABLE) {  // get module table
+                lua_pushnil(L);
+                // package.loaded.module[name] = nil
+                lua_setfield(L, -2, pos + 1);
+            }
+            lua_pop(L, 1);  // pop module table
         }
     }
     lua_pop(L, 1);  // pop nil or package.loaded
