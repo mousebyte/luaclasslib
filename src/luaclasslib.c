@@ -123,7 +123,45 @@ void *luaC_checkuclass(lua_State *L, int arg, const char *name) {
 }
 
 int luaC_pushclass(lua_State *L, const char *name) {
-    return luaC_getregfield(L, name);
+    // check the registry first
+    if (luaC_getregfield(L, name) == LUA_TTABLE) return 1;
+    else lua_pop(L, 1);
+
+    // otherwise, try to `require` the module
+    lua_pushfstring(L, "return require('%s')", name);
+    luaL_loadstring(L, lua_tostring(L, -1));
+    lua_remove(L, -2);
+
+    if (lua_pcall(L, 0, 1, 0) != LUA_OK) {
+        lua_pop(L, 1);
+        const char *pos = strrchr(name, '.');
+        if (!pos || strlen(pos + 1) == 0) return 0;
+        lua_pushstring(L, "return require('");
+        lua_pushlstring(L, name, pos - name);
+        lua_pushstring(L, "')");
+        lua_concat(L, 3);
+        luaL_loadstring(L, lua_tostring(L, -1));
+        lua_remove(L, -2);
+
+        if (lua_pcall(L, 0, 1, 0) != LUA_OK) {
+            lua_pop(L, 1);
+            return 0;
+        } else if (lua_istable(L, -1)) {
+            lua_getfield(L, -1, pos + 1);
+            lua_remove(L, -2);
+        }
+    }
+
+    if (!luaC_isclass(L, -1)) {
+        lua_pop(L, 1);
+        return 0;
+    }
+
+    // add class to registry for quick access
+    lua_pushvalue(L, -1);
+    luaC_setregfield(L, name);
+
+    return 1;
 }
 
 luaC_Class *luaC_uclass(lua_State *L, int index) {
