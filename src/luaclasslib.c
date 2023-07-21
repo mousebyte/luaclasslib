@@ -436,14 +436,15 @@ static int default_class_inherited(lua_State *L) {
 }
 
 int luaC_register(lua_State *L, int idx) {
-    luaC_Class *c = lua_touserdata(L, idx);
-    if (!c) return 0;
-    if (c->module) lua_pushfstring(L, "%s.%s", c->module, c->name);
-    else lua_pushstring(L, c->name);
-    if (luaC_getreg(L) != LUA_TNIL) return 1;
+    int         uclass = lua_absindex(L, idx);
+    luaC_Class *c      = lua_touserdata(L, uclass);
+    if (!c || !c->name) return 0;
+    lua_pushvalue(L, uclass);
+    if (luaC_getreg(L) != LUA_TNIL) {
+        lua_remove(L, idx);
+        return 1;
+    }
     lua_pop(L, 1);
-
-    int uclass = lua_absindex(L, idx);
 
     lua_newtable(L);                  // base table
     luaL_setfuncs(L, c->methods, 0);  // load in methods
@@ -529,11 +530,13 @@ int luaC_register(lua_State *L, int idx) {
 
     lua_pushvalue(L, class);
     lua_pushvalue(L, uclass);
-    luaC_setreg(L);  // register uclass
+    luaC_setreg(L);  // reg[class] = uclass
+    lua_pushvalue(L, uclass);
     lua_pushvalue(L, class);
-    luaC_setregfield(L, c->name);  // register class
-    lua_remove(L, base);           // remove base from stack
-    lua_remove(L, uclass);         // remove uclass from stack
+    luaC_setreg(L);  // reg[uclass] = class
+
+    lua_remove(L, base);    // remove base from stack
+    lua_remove(L, uclass);  // remove uclass from stack
     return 1;
 }
 
