@@ -441,7 +441,7 @@ static int default_class_inherited(lua_State *L) {
     return 0;
 }
 
-int register_c_class(lua_State *L, int idx) {
+int luaC_register(lua_State *L, int idx) {
     luaC_Class *c = lua_touserdata(L, idx);
     if (!c) return 0;
     if (c->module) lua_pushfstring(L, "%s.%s", c->module, c->name);
@@ -559,21 +559,6 @@ int register_c_class(lua_State *L, int idx) {
 
     lua_remove(L, base);    // remove base from stack
     lua_remove(L, uclass);  // remove uclass from stack
-    return 1;
-}
-
-int luaC_register(lua_State *L, int index) {
-    if (lua_isuserdata(L, index)) return register_c_class(L, index);
-    if (!luaC_isclass(L, index)) return 0;
-    int top = lua_gettop(L);
-    lua_pushvalue(L, index);  // push class
-    do {
-        if (luaC_getname(L, -1)) {  // get name
-            lua_pushvalue(L, -2);   // push class
-            luaC_setreg(L);         // register class
-        } else lua_pop(L, 1);       // anonymous class, skip
-    } while (luaC_getparent(L, -1));
-    lua_settop(L, top);
     return 1;
 }
 
