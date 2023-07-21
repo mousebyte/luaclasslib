@@ -519,6 +519,7 @@ int register_c_class(lua_State *L, int idx) {
         lua_setfield(L, class, "__parent");  // set class __parent to parent
     } else {                                 // else parent not registered
         lua_pop(L, 4);                       // clean up and return
+        lua_remove(L, uclass);
         return 0;
     }
 
