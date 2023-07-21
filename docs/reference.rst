@@ -23,9 +23,6 @@ Functions supporting the creation and registration of Lua classes.
 .. doxygenfunction:: luaC_setinheritcb
    :project: LuaClassLib
 
-.. doxygenfunction:: luaC_packageadd
-   :project: LuaClassLib
-
 .. doxygenfunction:: luaC_newclass
    :project: LuaClassLib
 
@@ -182,13 +179,6 @@ Functions provided by LCL to Lua code.
    :project: LuaClassLib
 
 .. lua:module:: lcl
-
-.. lua:function:: register(class)
-
-   Adds the given Moonscript class and all of its named parents to the class registry.
-
-   :param class: The class to register.
-   :return: The registered class.
 
 .. lua:function:: uvget(obj[, uv], idx)
 

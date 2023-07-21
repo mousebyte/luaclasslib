@@ -31,7 +31,7 @@ Put the methods in a `luaL_Reg <http://www.lua.org/manual/5.4/manual.html#luaL_R
 
 .. literalinclude:: ../../tests/classes/file.c
    :language: LCL
-   :lines: 63-76
+   :lines: 63-77
 
 To register the class, push the `luaC_Class` as a light userdata and call `luaC_register`.
 
@@ -45,7 +45,7 @@ The class can now be constructed with a call to `luaC_construct`:
 .. sourcecode:: LCL
 
    lua_pushstring(L, "myfile.txt");
-   luaC_construct(L, 1, "File");
+   luaC_construct(L, 1, "lcltests.File");
 
 Since we set `luaC_Class::user_ctor` to ``1``, our class can be constructed from Lua code by calling the class object,
 assuming it is made accessible (e.g. by a call to `luaC_packageadd`).
