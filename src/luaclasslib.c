@@ -524,10 +524,29 @@ int register_c_class(lua_State *L, int idx) {
     lua_pushvalue(L, class);
     lua_pushvalue(L, uclass);
     luaC_setreg(L);  // register uclass
-    lua_pushvalue(L, class);
-    luaC_setregfield(L, c->name);  // register class
-    lua_remove(L, base);           // remove base from stack
-    lua_remove(L, uclass);         // remove uclass from stack
+
+    lua_getfield(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
+    if (c->module) {
+        lua_pushfstring(L, "%s.%s", c->module, c->name);
+        lua_pushvalue(L, -1);
+        lua_pushvalue(L, class);
+        luaC_setreg(L);  // reg[module.name] = class
+        lua_pushvalue(L, class);
+        lua_settable(L, -3);  // package.loaded[module.name] = class
+        luaL_getsubtable(L, -1, c->module);
+        lua_pushvalue(L, class);
+        lua_setfield(L, -2, c->name);  // package.loaded.module[name] = class
+        lua_pop(L, 2);                 // pop module table and package.loaded
+    } else {
+        lua_pushvalue(L, class);
+        lua_setfield(L, -2, c->name);  // package.loaded[name] = class
+        lua_pushvalue(L, class);
+        luaC_setregfield(L, c->name);  // reg[name] = class
+        lua_pop(L, 1);                 // pop package.loaded
+    }
+
+    lua_remove(L, base);    // remove base from stack
+    lua_remove(L, uclass);  // remove uclass from stack
     return 1;
 }
 
