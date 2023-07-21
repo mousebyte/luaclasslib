@@ -181,6 +181,15 @@ Functions provided by LCL to Lua code.
 .. doxygenfunction:: luaC_overrideglobals
    :project: LuaClassLib
 
+.. lua:module:: lcl
+
+.. lua:function:: register(class)
+
+   Adds the given Moonscript class and all of its named parents to the class registry.
+
+   :param class: The class to register.
+   :return: The registered class.
+
 .. lua:function:: uvget(obj[, uv], idx)
 
    Gets the value of ``t[idx]``, where ``t`` is the table stored
