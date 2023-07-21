@@ -594,15 +594,6 @@ void luaC_setinheritcb(lua_State *L, int idx, lua_CFunction cb) {
     }
 }
 
-void luaC_packageadd(lua_State *L, const char *name, const char *module) {
-    int top = lua_gettop(L);
-    lua_getfield(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
-    if (module) luaL_getsubtable(L, -1, module);  // get module table
-    luaC_pushclass(L, name);
-    lua_setfield(L, -2, name);
-    lua_settop(L, top);
-}
-
 int luaC_newclass(
     lua_State  *L,
     const char *name,
