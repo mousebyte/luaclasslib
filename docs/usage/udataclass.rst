@@ -31,7 +31,7 @@ Put the methods in a `luaL_Reg <http://www.lua.org/manual/5.4/manual.html#luaL_R
 
 .. literalinclude:: ../../tests/classes/file.c
    :language: LCL
-   :lines: 63-77
+   :lines: 63-76
 
 To register the class, push the `luaC_Class` as a light userdata and call `luaC_register`.
 

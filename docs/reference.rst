@@ -14,7 +14,7 @@ Functions supporting the creation and registration of Lua classes.
    :project: LuaClassLib
    :members:
 
-.. doxygenfunction:: luaC_register
+.. doxygenfunction:: luaC_classfromptr
    :project: LuaClassLib
 
 .. doxygenfunction:: luaC_unregister

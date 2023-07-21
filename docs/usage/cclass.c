@@ -31,7 +31,6 @@ int main() {
     luaC_newclass(
         L,
         "MyClass",         // class name
-        NULL,              // module name
         NULL,              // parent name
         myclass_methods);  // methods
 
