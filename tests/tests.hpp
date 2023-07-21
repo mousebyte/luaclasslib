@@ -5,10 +5,12 @@ extern "C" {
 #include <moonauxlib.h>
 }
 
-#define LCL_TEST_BEGIN              \
-    using doctest::String;          \
-    lua_State *L = luaL_newstate(); \
-    luaL_openlibs(L);
+#define LCL_TEST_BEGIN                       \
+    using doctest::String;                   \
+    lua_State *L = luaL_newstate();          \
+    luaL_openlibs(L);                        \
+    luaL_requiref(L, "lcl", luaopen_lcl, 0); \
+    lua_pop(L, 1);
 
 #define LCL_TEST_END lua_close(L);
 

@@ -75,6 +75,22 @@ TEST_SUITE("Basic Functionality") {
             REQUIRE(luaC_uclass(L, -1) == NULL);
         }
 
+        SUBCASE("Registration from Lua") {
+            moonL_dofile(L, "RegistersItself.moon");
+            LCL_CHECKSTACK(1);
+            CHECK(luaC_isclass(L, -1));
+            lua_pop(L, 1);
+
+            luaC_construct(L, 0, "RegistersItself");
+            LCL_CHECKSTACK(1);
+            REQUIRE(luaC_isinstance(L, -1, "RegistersItself"));
+
+            luaC_mcall(L, "foo", 0, 1);
+            LCL_CHECKSTACK(2);
+            REQUIRE(lua_type(L, -1) == LUA_TSTRING);
+            REQUIRE(String(lua_tostring(L, -1)) == "I registered myself!");
+        }
+
         LCL_TEST_END
     }
 
