@@ -571,7 +571,21 @@ void luaC_unregister(lua_State *L, const char *name) {
         luaC_setreg(L);  // remove C class if present
         lua_pushnil(L);
         luaC_setregfield(L, name);  // remove class table
-    } else lua_pop(L, 1);
+        lua_getfield(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
+        lua_pushnil(L);
+        lua_setfield(L, -2, name);  // remove from package.loaded
+
+        // check for module table
+        const char *pos = strrchr(name, '.');
+        if (pos && strlen(pos + 1) > 0) {
+            lua_pushlstring(L, name, pos - name);
+            lua_gettable(L, -2);  // get module table
+            lua_pushnil(L);
+            lua_setfield(L, -2, pos + 1);  // remove from module table
+            lua_pop(L, 1);                 // pop module table
+        }
+    }
+    lua_pop(L, 1);  // pop nil or package.loaded
 }
 
 void luaC_setinheritcb(lua_State *L, int idx, lua_CFunction cb) {
