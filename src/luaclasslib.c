@@ -443,8 +443,12 @@ static int default_class_inherited(lua_State *L) {
 
 int register_c_class(lua_State *L, int idx) {
     luaC_Class *c = lua_touserdata(L, idx);
-    if (!c || luaC_getregfield(L, c->name) != LUA_TNIL) return 0;
+    if (!c) return 0;
+    if (c->module) lua_pushfstring(L, "%s.%s", c->module, c->name);
+    else lua_pushstring(L, c->name);
+    if (luaC_getreg(L) != LUA_TNIL) return 1;
     lua_pop(L, 1);
+
     int uclass = lua_absindex(L, idx);
 
     lua_newtable(L);                  // base table
@@ -506,15 +510,15 @@ int register_c_class(lua_State *L, int idx) {
     if (c->parent == NULL) {                   // no parent
         lua_pushvalue(L, base);                // push base
         lua_setfield(L, class_mt, "__index");  // set meta __index to base
-    } else if (luaC_getregfield(L, c->parent) == LUA_TTABLE) {  // get parent
-        lua_pushvalue(L, base);                                 // push base
+    } else if (luaC_pushclass(L, c->parent) == LUA_TTABLE) {  // get parent
+        lua_pushvalue(L, base);                               // push base
         lua_pushcclosure(L, default_class_index, 1);  // wrap it in a closure
         lua_setfield(L, class_mt, "__index");         // set meta __index
         lua_getfield(L, -1, "__base");                // get parent __base
         lua_setmetatable(L, base);  // set base metatable to parent base
         lua_setfield(L, class, "__parent");  // set class __parent to parent
     } else {                                 // else parent not registered
-        lua_pop(L, 3);                       // clean up and return
+        lua_pop(L, 4);                       // clean up and return
         return 0;
     }
 
