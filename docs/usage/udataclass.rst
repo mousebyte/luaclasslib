@@ -33,12 +33,22 @@ Put the methods in a `luaL_Reg <http://www.lua.org/manual/5.4/manual.html#luaL_R
    :language: LCL
    :lines: 63-76
 
-To register the class, push the `luaC_Class` as a light userdata and call `luaC_register`.
+To create the class object, push the `luaC_Class` as a light userdata and call `luaC_classfromptr`. The object can then either be
+manipulated directly, or added to the `package.loaded <http://www.lua.org/manual/5.4/manual.html#pdf-package.loaded>`_ table where it
+can be found by LCL.
 
 .. sourcecode:: LCL
 
+   // create a class
    lua_pushlightuserdata(L, &file_class);
-   luaC_register(L, -1);
+   luaC_classfromptr(L);
+
+   // put it in `package.loaded`
+   lua_getfield(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
+   lua_insert(L, -2);
+   lua_setfield(L, -2, "lcltests.File");
+   lua_pop(L, 1);
+
 
 The class can now be constructed with a call to `luaC_construct`:
 
@@ -47,5 +57,4 @@ The class can now be constructed with a call to `luaC_construct`:
    lua_pushstring(L, "myfile.txt");
    luaC_construct(L, 1, "lcltests.File");
 
-Since we set `luaC_Class::user_ctor` to ``1``, our class can be constructed from Lua code by calling the class object,
-assuming it is made accessible (e.g. by a call to `luaC_packageadd`).
+Since we set `luaC_Class::user_ctor` to ``1``, our class can be constructed from Lua code by calling the class object.

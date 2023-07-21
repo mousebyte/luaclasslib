@@ -14,5 +14,4 @@ methods are provided for working with inheritance in C code.
 * `luaC_getparent` will push a copy of a class's parent onto the stack.
 * `luaC_super` calls the parent method with the given name. Useful for overriding methods in derived classes.
 * `luaC_superinit` is a shorthand function to call the parent class's init method.
-* `luaC_packageadd` loads a class as a Lua module, allowing it to be imported with a require statement.
 * `luaC_setinheritcb` sets the inheritance callback of a class.

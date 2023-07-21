@@ -25,7 +25,7 @@ luaL_Reg myclass_methods[] = {
     {NULL,  NULL        }
 };
 
-int main() {
+int main(void) {
     lua_State *L = luaL_newstate();
 
     luaC_newclass(
@@ -34,7 +34,11 @@ int main() {
         NULL,              // parent name
         myclass_methods);  // methods
 
-    // leaves a copy of the class on the stack which can be modified or removed
+    // leaves a copy of the class on the stack which can be modified and/or
+    // loaded as a package
+    lua_getfield(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
+    lua_insert(L, -2);
+    lua_setfield(L, -2, "MyClass");
     lua_pop(L, 1);
 
     lua_pushnumber(L, 12);

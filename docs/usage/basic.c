@@ -9,8 +9,7 @@ int main() {
     // need to open Lua libraries before we use moonauxlib.h
     luaL_openlibs(L);
 
-    moonL_dofile(L, "../basic/MyClass.moon");
-    luaC_register(L, -1);
+    luaC_pushclass(L, "MyClass");
 
     // leaves a copy of the class on the stack which can be modified or removed
     assert(luaC_isclass(L, -1));
