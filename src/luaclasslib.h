@@ -38,7 +38,7 @@ typedef void (*luaC_Destructor)(lua_State *L, void *p);
     /** The class garbage collector. */  \
     luaC_Destructor  gc;                 \
     /** The class methods. */            \
-    luaL_Reg        *methods;
+    const luaL_Reg  *methods;
 
 /// Contains information about a user data class.
 typedef struct {
