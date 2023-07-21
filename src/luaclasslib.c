@@ -140,7 +140,7 @@ int luaC_pushclass(lua_State *L, const char *name) {
         lua_pop(L, 1);
         const char *pos = strrchr(name, '.');
 
-        if (!pos || strlen(pos + 1) == 0) {
+        if (!pos || strlen(pos) == 1) {
             lua_pushnil(L);
             return LUA_TNIL;
         }
