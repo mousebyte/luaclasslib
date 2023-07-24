@@ -36,10 +36,7 @@ int main(void) {
 
     // leaves a copy of the class on the stack which can be modified and/or
     // loaded as a package
-    lua_getfield(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
-    lua_insert(L, -2);
-    lua_setfield(L, -2, "MyClass");
-    lua_pop(L, 1);
+    luaC_setpackageloaded(L, "MyClass");
 
     lua_pushnumber(L, 12);
     luaC_construct(L, 1, "MyClass");
