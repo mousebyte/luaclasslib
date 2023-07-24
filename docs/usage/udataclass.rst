@@ -44,11 +44,7 @@ can be found by LCL.
    luaC_classfromptr(L);
 
    // put it in `package.loaded`
-   lua_getfield(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
-   lua_insert(L, -2);
-   lua_setfield(L, -2, "lcltests.File");
-   lua_pop(L, 1);
-
+   luaC_setpackageloaded(L, "lcltests.File");
 
 The class can now be constructed with a call to `luaC_construct`:
 

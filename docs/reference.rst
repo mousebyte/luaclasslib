@@ -84,6 +84,12 @@ Utility functions for Lua classes and objects.
 .. doxygenfunction:: luaC_rawset
    :project: LuaClassLib
 
+.. doxygenfunction:: luaC_getpackageloaded
+   :project: LuaClassLib
+
+.. doxygenfunction:: luaC_setpackageloaded
+   :project: LuaClassLib
+
 Introspection
 -------------
 Functions providing introspection into Lua classes and objects.

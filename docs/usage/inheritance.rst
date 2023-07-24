@@ -2,10 +2,8 @@ Handling inheritance
 ====================
 
 Inheritance in LCL is specified when registering a class, either with the ``parent`` parameter to `luaC_newclass`,
-or with the `luaC_Class::parent` member. The parent class must be registered in order for inheritance to work properly.
-When registering an existing class object, such as one loaded from Moonscript code, make sure any parent classes defined
-in LCL are already registered. Parent classes defined in Moonscript will be registered automatically. Some useful utility
-methods are provided for working with inheritance in C code.
+or with the `luaC_Class::parent` member. When specifying a parent class, you should use the full module path, as you
+would with a require statement in Lua. Some useful utility methods are provided for working with inheritance in C code.
 
 .. note::
 
