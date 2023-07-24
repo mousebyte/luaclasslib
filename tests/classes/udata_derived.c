@@ -18,21 +18,24 @@ static void udata_derived_gc(lua_State *L, void *p) {
 }
 
 static int udata_derived_init(lua_State *L) {
-    udata_derived *o = (udata_derived *)luaC_checkuclass(L, 1, "UdataDerived");
-    int           *i = (int *)malloc(sizeof(int));
-    *i               = luaL_checknumber(L, 2);
-    o->handle        = i;
+    udata_derived *o =
+        (udata_derived *)luaC_checkuclass(L, 1, "lcltests.UdataDerived");
+    int *i    = (int *)malloc(sizeof(int));
+    *i        = luaL_checknumber(L, 2);
+    o->handle = i;
     return 0;
 }
 
 static int udata_derived_get(lua_State *L) {
-    udata_derived *o = (udata_derived *)luaC_checkuclass(L, 1, "UdataDerived");
+    udata_derived *o =
+        (udata_derived *)luaC_checkuclass(L, 1, "lcltests.UdataDerived");
     lua_pushnumber(L, *((int *)o->handle));
     return 1;
 }
 
 static int udata_derived_squeak(lua_State *L) {
-    udata_derived *o = (udata_derived *)luaC_checkuclass(L, 1, "UdataDerived");
+    udata_derived *o =
+        (udata_derived *)luaC_checkuclass(L, 1, "lcltests.UdataDerived");
     lua_pushnumber(L, *((int *)o->handle));
     lua_arith(L, LUA_OPADD);
     luaC_super(L, "squeak", 1, 1);

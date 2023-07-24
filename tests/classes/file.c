@@ -31,7 +31,7 @@ static void file_gc(lua_State *L, void *p) {
 // init function. equivalent to the "new" function in
 // moonscript classes. performs the actual setup of the object.
 static int file_init(lua_State *L) {
-    file_t     *o = (file_t *)luaC_checkuclass(L, 1, "File");
+    file_t     *o = (file_t *)luaC_checkuclass(L, 1, "lcltests.File");
     size_t      len;
     const char *str = lua_tolstring(L, 2, &len);
     o->name         = (char *)malloc(len + 1);
@@ -43,14 +43,14 @@ static int file_init(lua_State *L) {
 // retrieves the filename. we could also have stored this as a
 // standard Lua value in the userdata's user value.
 static int file_filename(lua_State *L) {
-    file_t *o = (file_t *)luaC_checkuclass(L, 1, "File");
+    file_t *o = (file_t *)luaC_checkuclass(L, 1, "lcltests.File");
     lua_pushstring(L, o->name);
     return 1;
 }
 
 // reads a line from the file.
 static int file_readline(lua_State *L) {
-    file_t     *o = (file_t *)luaC_checkuclass(L, 1, "File");
+    file_t     *o = (file_t *)luaC_checkuclass(L, 1, "lcltests.File");
     luaL_Buffer b;
     luaL_buffinit(L, &b);
     int c;

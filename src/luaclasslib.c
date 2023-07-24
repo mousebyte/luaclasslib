@@ -106,13 +106,12 @@ int luaC_isclass(lua_State *L, int idx) {
 }
 
 int luaC_isinstance(lua_State *L, int idx, const char *name) {
-    int top = lua_gettop(L), ret = 0;
+    int top = lua_gettop(L), refidx = top + 2, ret = 0;
+    lua_pushvalue(L, idx);
 
-    if (luaC_getclass(L, idx)) {
+    if (luaC_pushclass(L, name) && luaC_getclass(L, -2)) {
         do {
-            luaC_getname(L, -1);
-            ret = strcmp(name, lua_tostring(L, -1)) == 0;
-            lua_pop(L, 1);  // pop name
+            ret = lua_rawequal(L, -1, refidx);
         } while (!ret && luaC_getparent(L, -1));
     }
 

@@ -16,7 +16,7 @@ TEST_SUITE("Simple Classes") {
         luaC_construct(L, 1, "lcltests.SimpleBase");
         LCL_CHECKSTACK(1);
         REQUIRE(luaC_isobject(L, -1));
-        REQUIRE(luaC_isinstance(L, -1, "SimpleBase"));
+        REQUIRE(luaC_isinstance(L, -1, "lcltests.SimpleBase"));
 
         lua_pushnumber(L, 3);
         luaC_mcall(L, "foo", 1, 1);
@@ -45,7 +45,7 @@ TEST_SUITE("Simple Classes") {
         luaC_construct(L, 2, "lcltests.SimpleDerived");
         LCL_CHECKSTACK(1);
         REQUIRE(luaC_isobject(L, -1));
-        REQUIRE(luaC_isinstance(L, -1, "SimpleDerived"));
+        REQUIRE(luaC_isinstance(L, -1, "lcltests.SimpleDerived"));
 
         lua_pushnumber(L, 3);
         luaC_mcall(L, "inc", 1, 0);
@@ -85,7 +85,7 @@ TEST_SUITE("Simple Classes") {
         luaC_construct(L, 2, "lcltests.SimpleDerived");
         LCL_CHECKSTACK(1);
         REQUIRE(luaC_isobject(L, -1));
-        REQUIRE(luaC_isinstance(L, -1, "SimpleDerived"));
+        REQUIRE(luaC_isinstance(L, -1, "lcltests.SimpleDerived"));
 
         lua_pushnumber(L, 10);
         luaC_mcall(L, "foo", 1, 1);

@@ -39,7 +39,7 @@ TEST_SUITE("User Data Classes") {
         luaC_construct(L, 0, "lcltests.BlockingSignal");
         LCL_CHECKSTACK(1);
         REQUIRE(luaC_isobject(L, -1));
-        REQUIRE(luaC_isinstance(L, -1, "BlockingSignal"));
+        REQUIRE(luaC_isinstance(L, -1, "lcltests.BlockingSignal"));
 
         lua_pushcfunction(L, slot1);
         luaC_mcall(L, "connect", 1, 0);
@@ -90,7 +90,7 @@ TEST_SUITE("User Data Classes") {
         luaC_construct(L, 1, "lcltests.UdataDerived");
         LCL_CHECKSTACK(1);
         REQUIRE(luaC_isobject(L, -1));
-        REQUIRE(luaC_isinstance(L, -1, "UdataDerived"));
+        REQUIRE(luaC_isinstance(L, -1, "lcltests.UdataDerived"));
 
         luaC_mcall(L, "get", 0, 1);
         LCL_CHECKSTACK(2);

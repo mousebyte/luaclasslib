@@ -31,7 +31,7 @@ TEST_SUITE("User Data Classes") {
             luaC_construct(L, 1, "lcltests.File");
             LCL_CHECKSTACK(1);
             REQUIRE(luaC_isobject(L, -1));
-            REQUIRE(luaC_isinstance(L, -1, "File"));
+            REQUIRE(luaC_isinstance(L, -1, "lcltests.File"));
 
             luaC_mcall(L, "filename", 0, 1);
             LCL_CHECKSTACK(2);
@@ -55,7 +55,7 @@ TEST_SUITE("User Data Classes") {
             luaC_construct(L, 0, "lcltests.Signal");
             LCL_CHECKSTACK(1);
             REQUIRE(luaC_isobject(L, -1));
-            REQUIRE(luaC_isinstance(L, -1, "Signal"));
+            REQUIRE(luaC_isinstance(L, -1, "lcltests.Signal"));
 
             lua_pushcfunction(L, slot1);
             luaC_mcall(L, "connect", 1, 0);

@@ -17,7 +17,7 @@ static void signal_gc(lua_State *L, void *p) {
 }
 
 static int signal_connect(lua_State *L) {
-    signal     *sig = (signal *)luaC_checkuclass(L, 1, "Signal");
+    signal     *sig = (signal *)luaC_checkuclass(L, 1, "lcltests.Signal");
     const void *ref = lua_topointer(L, 2);
     if (ref != NULL) {
         luaC_uvrawsetp(L, 1, 2, ref);
@@ -27,7 +27,7 @@ static int signal_connect(lua_State *L) {
 }
 
 static int signal_disconnect(lua_State *L) {
-    signal      *sig  = (signal *)luaC_checkuclass(L, 1, "Signal");
+    signal      *sig  = (signal *)luaC_checkuclass(L, 1, "lcltests.Signal");
     const void  *ref  = lua_topointer(L, 2);
     const void **elem = reflist_lookup(&sig->slots, &ref);
     if (elem != NULL) {
@@ -39,7 +39,7 @@ static int signal_disconnect(lua_State *L) {
 }
 
 static int signal_call(lua_State *L) {
-    signal *sig   = (signal *)luaC_checkuclass(L, 1, "Signal");
+    signal *sig   = (signal *)luaC_checkuclass(L, 1, "lcltests.Signal");
     int     nargs = lua_gettop(L) - 1;
     lua_getiuservalue(L, 1, 2);
     lua_insert(L, 2);
