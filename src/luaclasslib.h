@@ -286,6 +286,35 @@ static inline void luaC_rawset(lua_State *L, int idx) {
 }
 
 /**
+ * @brief Does the equivalent of `package.loaded[key] = v`, where `v` is the
+ * value at the top of the stack.
+ *
+ * @param L The Lua state.
+ * @param key The key to set.
+ */
+static inline void luaC_setpackageloaded(lua_State *L, const char *key) {
+    lua_getfield(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
+    lua_insert(L, -2);
+    lua_setfield(L, -2, key);
+    lua_pop(L, 1);
+}
+
+/**
+ * @brief Pushes onto the stack the value `package.loaded[key]`.
+ *
+ * @param L The Lua state.
+ * @param key The key to get.
+ *
+ * @return The type of the value pushed onto the stack.
+ */
+static inline int luaC_getpackageloaded(lua_State *L, const char *key) {
+    lua_getfield(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
+    int ret = lua_getfield(L, -1, key);
+    lua_remove(L, -2);
+    return ret;
+}
+
+/**
  * @brief Call a method of an object, passing the object as the first argument.
  *
  * @param L The Lua state.
